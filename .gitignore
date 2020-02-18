@@ -1,0 +1,22 @@
+Android/"Andoid Studio".lnk
+c++/
+IDEs/
+Java/Processing/"processing.exe - Shortcut".lnk
+Java/Processing/examples
+Java/Processing/libraries
+Java/Processing/modes
+Java/Processing/templates
+Java/Processing/tools
+Javascript/p5/*
+!Javascript/p5/projects/
+!Javascript/p5/Photo Manipulation/
+Python/*
+!Python/PythonScripts/
+R/*
+# Potential workaround to keep Rscripts
+!R/Scripts/
+# Then delete later
+R/Scripts/*
+# With the exception of this file
+!R/Scripts/dailEreadR.R
+"Github Desktop".lnk
