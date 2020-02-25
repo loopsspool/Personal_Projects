@@ -9,6 +9,11 @@ class PVector
     y = y_;
   }
   
+  float mag()
+  {
+    return sqrt(x*x + y*y);
+  }
+  
   void add(PVector v)
   {
     x = x + v.x;
@@ -21,5 +26,23 @@ class PVector
     y = y - v.y;
   }
   
+  void mult(float n)
+  {
+    x *= n;
+    y *= n;
+  }
+  
+  void div(float n)
+  {
+    x /= n;
+    y /= n;
+  }
+  
+  void normalize()
+  {
+    float m = mag();
+    if (m != 0)
+      div(m);
+  }
   
 }
