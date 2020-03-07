@@ -8,6 +8,8 @@ class mover
   
   float speed; // Dictates how fast moves tends towards mouse
   float top_speed;
+  
+  float col;
   int size;
   
   float x_off;
@@ -21,6 +23,8 @@ class mover
     top_speed = 15;
     
     speed = 0.5; // Dictates how fast moves tends towards mouse
+    
+    col = random(100);
     size = 60;
     
     x_off = 0.0;
@@ -87,13 +91,16 @@ class mover
   
   void display()
   {
-    fill(200);
+    noStroke();
+    // Incrementing for noise
+    col += 0.01;
+    fill(map(noise(col), 0, 1, 0, 360), 100, 100, 70);
     circle(location.x, location.y, size);
     
-    fill(0);
-    //Left eye
-    circle(location.x - size/4, location.y - (size/8 + 4), size/10);
-    // Right eye
-    circle(location.x + size/4, location.y - size/12, size/7);
+    //fill(0);
+    ////Left eye
+    //circle(location.x - size/4, location.y - (size/8 + 4), size/10);
+    //// Right eye
+    //circle(location.x + size/4, location.y - size/12, size/7);
   }
 }

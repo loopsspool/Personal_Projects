@@ -25,10 +25,10 @@ void setup()
 void draw()
 {
   // BACKGROUND
-  //push();
-  //fill(150, 20);
-  //rect(0, 0, width, height);
-  //pop();
+  push();
+  fill(150, 30);
+  rect(0, 0, width, height);
+  pop();
   
   for (int i = 0; i < movers.length; i++)
   {
