@@ -3,19 +3,28 @@ class mover
   PVector location;
   PVector velocity;
   PVector acceleration;
+  PVector mouse;
+  PVector dir;
   
+  float speed; // Dictates how fast moves tends towards mouse
   float top_speed;
-  int size = 60;
+  int size;
   
-  float x_off = 0.0;
-  float y_off = 100.0;
+  float x_off;
+  float y_off;
   
   mover()
   {
-    location = new PVector(width/2, height/2);
+    location = new PVector(random(width), random(height));
     velocity = new PVector(0.0, 0.0);
     acceleration = new PVector(0.0, 0.0);
-    top_speed = 5;
+    top_speed = 15;
+    
+    speed = 0.5; // Dictates how fast moves tends towards mouse
+    size = 60;
+    
+    x_off = 0.0;
+    y_off = 100.0;
   }
   
   void check_edges()
@@ -56,20 +65,21 @@ class mover
     }
   }
   
-  void update()
+  void update(float speed_multiplier)
   {
-    // ARROW KEY ACCELERATION
-    //arrow_key_accel();
-    x_off += 0.03;
-    y_off += 0.03;
+    PVector mouse = new PVector(mouseX, mouseY);
+    PVector dir = PVector.sub(mouse, location);  // Gives direction
     
-    // NOISE ACCELERATION
-    //acceleration.noise2D(x_off, y_off);
+    // Changes magnitude of acceleration based on proximity of mover to mouse
+      // To see effects better, increase top_speed
+    //speed = map (dir.mag(), 0, width + height, 1, 0);
     
-    // RANDOM ACCELERATION
-    acceleration.random2D();
-    // Scales random values since random2D returns unit vector
-    acceleration.mult(random(-2, 2));
+    dir.normalize();  // Makes it easy to scale (spped of acceleration)
+    dir.mult(speed * speed_multiplier);  // n comes from a float array generated in setup so it doesn't have to be calculated each loop
+    
+    acceleration = dir;
+    
+    
     velocity.add(acceleration);
     velocity.limit(top_speed);
     location.add(velocity);
