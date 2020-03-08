@@ -25,7 +25,6 @@ class mountain
     vertex_y_variation = 150;
   }
   
-   // TODO: Figure out why some ranges don't go to end of window
   void build_mountain()
   {
     // points.length - 3 so can set last points down so shape covers eveything below it
