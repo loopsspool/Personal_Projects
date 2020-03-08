@@ -11,9 +11,10 @@ void setup()
   
   // TODO: Set color gradient based on what mountain range it is
     // (farther back lighter, closer darker colors)
-  for (int i = 0; i < mountains.length; i++)
+  for (int i = 0; i < amount_of_mountains; i++)
   {
-    mountains[i] = new mountain((i + 1) * 100);
+    float mountain_y_start = map(i, 0, amount_of_mountains, 150, 7 * height/8);
+    mountains[i] = new mountain(mountain_y_start);
     mountains[i].build_mountain();
     mountains[i].display();
   }
