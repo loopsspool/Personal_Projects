@@ -26,7 +26,7 @@ void draw()
 {
   // BACKGROUND
   push();
-  fill(150, 30);
+  fill(0, 30);
   rect(0, 0, width, height);
   pop();
   

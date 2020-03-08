@@ -20,7 +20,7 @@ class mover
     location = new PVector(random(width), random(height));
     velocity = new PVector(0.0, 0.0);
     acceleration = new PVector(0.0, 0.0);
-    top_speed = 15;
+    top_speed = 12;
     
     speed = 0.5; // Dictates how fast moves tends towards mouse
     
