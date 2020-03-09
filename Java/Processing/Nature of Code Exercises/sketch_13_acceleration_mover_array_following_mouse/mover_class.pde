@@ -20,7 +20,7 @@ class mover
     location = new PVector(random(width), random(height));
     velocity = new PVector(0.0, 0.0);
     acceleration = new PVector(0.0, 0.0);
-    top_speed = 12;
+    top_speed = 15;
     
     speed = 0.5; // Dictates how fast moves tends towards mouse
     
@@ -94,13 +94,13 @@ class mover
     noStroke();
     // Incrementing for noise
     col += 0.01;
-    fill(map(noise(col), 0, 1, 0, 360), 100, 100, 70);
+    fill(map(noise(col), 0, 1, 0, 360), 100, 100);
     circle(location.x, location.y, size);
     
-    //fill(0);
-    ////Left eye
-    //circle(location.x - size/4, location.y - (size/8 + 4), size/10);
-    //// Right eye
-    //circle(location.x + size/4, location.y - size/12, size/7);
+    fill(0);
+    //Left eye
+    circle(location.x - size/4, location.y - (size/8 + 4), size/10);
+    // Right eye
+    circle(location.x + size/4, location.y - size/12, size/7);
   }
 }

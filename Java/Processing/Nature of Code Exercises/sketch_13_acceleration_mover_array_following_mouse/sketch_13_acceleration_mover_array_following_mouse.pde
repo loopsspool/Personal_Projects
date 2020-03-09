@@ -6,8 +6,10 @@ void setup()
   size(800, 800);
   colorMode(HSB, 360, 100, 100);
   
-  movers = new mover[20];
-  speeds = new float[20];
+  int amount = 40;
+  
+  movers = new mover[amount];
+  speeds = new float[amount];
   
   for (int i= 0; i < movers.length; i++)
   {
