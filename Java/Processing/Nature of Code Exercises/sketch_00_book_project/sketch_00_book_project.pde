@@ -16,7 +16,7 @@ void draw()
 {
   push();
   noStroke();
-  fill(214, 100, 10, 30);
+  fill(214, 80, 8, 70);
   rect(0, 0, width, height);
   pop();
   
