@@ -1,8 +1,12 @@
 rocket[] rockets;
 int amount_of_rockets = 3;
 asteroid[] asteroids;
-int amount_of_asteroids = 5;
+int amount_of_asteroids = 30;
 
+
+// TODO: Basketball planet with Bryces name
+// TODO: Add planets
+// TODO: Add aliens
 void setup()
 {
   size(2400, 1200);

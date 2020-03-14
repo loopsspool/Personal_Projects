@@ -3,6 +3,7 @@
 class asteroid
 {
   PImage asteroid_img;
+  int size;
   float rotation;
   // Accumulator changing rotation each loop
   float rotation_acc;
@@ -16,6 +17,7 @@ class asteroid
   asteroid()
   {
     asteroid_img = loadImage("Asteroid.png");
+    size = int(random(40, 80));
     top_speed = random(0.5, 1.5);
     
     float x_decider = random(-1, 1);  // Decides if asteroid will move left or right
@@ -77,7 +79,7 @@ class asteroid
     // Rotate origin by default is (0, 0), changing this gives object rotation about itself
     translate(location.x, location.y);
     rotate(rotation);
-    image(asteroid_img, 0, 0, 80, 80);
+    image(asteroid_img, 0, 0, size, size);
     pop();
   }
 }
