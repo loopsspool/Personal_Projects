@@ -16,7 +16,7 @@ class asteroid
   asteroid()
   {
     asteroid_img = loadImage("Asteroid.png");
-    top_speed = random(1, 3);
+    top_speed = random(0.5, 1.5);
     
     float x_decider = random(-1, 1);  // Decides if asteroid will move left or right
     float y_decider = random(-1, 1);  // Decides if asteroid will move up or down

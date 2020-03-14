@@ -1,12 +1,16 @@
 rocket[] rockets;
 int amount_of_rockets = 3;
 asteroid[] asteroids;
-int amount_of_asteroids = 8;
+int amount_of_asteroids = 5;
 
 void setup()
 {
   size(2400, 1200);
   colorMode(HSB, 360, 100, 100);
+  // imageMode must be center for asteroids to rotate properly around their origin
+    // Otherwise location appears to be shifted
+       // bc default imageMode will rotate around top left corner
+  imageMode(CENTER);
   
   // Initializing rockets
   rockets = new rocket[amount_of_rockets];
