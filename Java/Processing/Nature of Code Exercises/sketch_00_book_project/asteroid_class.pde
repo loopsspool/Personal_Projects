@@ -4,6 +4,7 @@ class asteroid
 {
   PImage asteroid_img;
   float rotation;
+  // Accumulator changing rotation each loop
   float rotation_acc;
   
   PVector acceleration;
@@ -22,6 +23,7 @@ class asteroid
     location = new PVector(random(width), random(height));
     velocity = new PVector(0, 0);  
 
+    // Determining asteroid directions
     if (x_decider >= 0)
     {
       if (y_decider >= 0)
@@ -38,11 +40,13 @@ class asteroid
     }
     
     rotation = 0;
+    // Rotation shall be different for each asteroid
     rotation_acc = radians(random(-1, 1));
   }
   
   void check_edges()
   {
+    // Resets image if outside boundaries
     if (location.x > width + asteroid_img.width)
       location.x = 0;
     if (location.x < -asteroid_img.width)
@@ -56,6 +60,7 @@ class asteroid
 
   void update()
   {
+    // Causing movement
     velocity.add(acceleration);
     velocity.limit(top_speed);
     location.add(velocity);
@@ -68,6 +73,7 @@ class asteroid
   void display()
   {
     push();
+    // Rotate origin by default is (0, 0), changing this gives object rotation about itself
     translate(location.x, location.y);
     rotate(rotation);
     image(asteroid_img, 0, 0, 80, 80);
