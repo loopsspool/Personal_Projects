@@ -2,7 +2,7 @@
 
 class rocket
 {
-  PImage rocket_ship;
+  PImage rocket_ship_img;
   float rotation;
   
   PVector location;
@@ -13,7 +13,7 @@ class rocket
   
   rocket()
   {
-    rocket_ship = loadImage("Rocket Ship RIGHT.png");
+    rocket_ship_img = loadImage("Rocket Ship RIGHT.png");
     
     top_speed = random(5, 12);
     
@@ -55,7 +55,7 @@ class rocket
     push();
     translate(location.x, location.y);
     rotate(rotation);
-    image(rocket_ship, 0, 0, 100, 60);
+    image(rocket_ship_img, 0, 0, 100, 60);
     pop();
   }
 }
