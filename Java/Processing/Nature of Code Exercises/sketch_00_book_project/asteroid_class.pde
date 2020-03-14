@@ -15,7 +15,7 @@ class asteroid
   asteroid()
   {
     asteroid_img = loadImage("Asteroid.png");
-    top_speed = random(3, 5);
+    top_speed = random(1, 3);
     
     float x_decider = random(-1, 1);  // Decides if asteroid will move left or right
     float y_decider = random(-1, 1);  // Decides if asteroid will move up or down
@@ -43,14 +43,14 @@ class asteroid
   
   void check_edges()
   {
-    if (location.x > width)
+    if (location.x > width + asteroid_img.width)
       location.x = 0;
-    if (location.x < 0)
+    if (location.x < -asteroid_img.width)
       location.x = width;
       
-    if (location.y > height)
+    if (location.y > height + asteroid_img.width)
       location.y = 0;
-    if (location.y < 0)
+    if (location.y < -asteroid_img.width)
       location.y = height;
   }
 
