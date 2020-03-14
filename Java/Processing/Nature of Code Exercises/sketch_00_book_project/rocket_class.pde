@@ -57,6 +57,5 @@ class rocket
     rotate(rotation);
     image(rocket_ship, 0, 0, 100, 60);
     pop();
-    //circle(location.x, location.y, 30);
   }
 }
