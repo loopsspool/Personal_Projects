@@ -1,4 +1,4 @@
-// Asteroids plow through space carried solely by the momentum
+// Asteroids inch through space carried solely by the momentum
 
 class asteroid
 {
