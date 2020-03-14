@@ -47,15 +47,16 @@ class asteroid
   void check_edges()
   {
     // Resets image if outside boundaries
+      // Boundaries and reset based on image width so transition is smooth
     if (location.x > width + asteroid_img.width)
-      location.x = 0;
+      location.x = -asteroid_img.width;
     if (location.x < -asteroid_img.width)
-      location.x = width;
+      location.x = width + asteroid_img.width;
       
     if (location.y > height + asteroid_img.width)
-      location.y = 0;
+      location.y = -asteroid_img.width;
     if (location.y < -asteroid_img.width)
-      location.y = height;
+      location.y = height + asteroid_img.width;
   }
 
   void update()

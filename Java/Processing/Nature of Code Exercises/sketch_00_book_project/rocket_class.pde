@@ -34,15 +34,16 @@ class rocket
   void check_edges()
   {
     // Resets image if its outside boundaries
-    if (location.x > width)
-      location.x = 0;
-    if (location.x < 0)
-      location.x = width;
+      // Boundaries and reset based on image height so transition is smooth
+    if (location.x > width + rocket_ship_img.height)
+      location.x = -rocket_ship_img.height;
+    if (location.x < -rocket_ship_img.height)
+      location.x = width + rocket_ship_img.height;
       
-    if (location.y > height)
-      location.y = 0;
-    if (location.y < 0)
-      location.y = height;
+    if (location.y > height + rocket_ship_img.height)
+      location.y = -rocket_ship_img.height;
+    if (location.y < -rocket_ship_img.height)
+      location.y = height + rocket_ship_img.height;
   }
   
   void update()
