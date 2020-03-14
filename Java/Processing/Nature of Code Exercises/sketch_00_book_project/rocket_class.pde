@@ -4,6 +4,7 @@ class rocket
 {
   PImage rocket_ship_img;
   float rotation;
+  float size_scale;  // Scales size of ship
   
   PVector location;
   PVector velocity;
@@ -14,6 +15,8 @@ class rocket
   rocket()
   {
     rocket_ship_img = loadImage("Rocket Ship RIGHT.png");
+    // Scales size of ship
+    size_scale = random(0.7, 1.2);
     
     top_speed = random(5, 12);
     
@@ -62,7 +65,7 @@ class rocket
     // Rotate origin by default is (0, 0), changing this gives object rotation about itself
     translate(location.x, location.y);
     rotate(rotation);
-    image(rocket_ship_img, 0, 0, 100, 60);
+    image(rocket_ship_img, 0, 0, 100 * size_scale, 60 * size_scale);
     pop();
   }
 }
