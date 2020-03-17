@@ -36,17 +36,23 @@ class Ball
     {
       location.x = width;
       location.y = -size;
+      col = color(random(0, 360), random(10, 60), 100, 80);
     }
     if (location.x > width + size)
     {
       location.x = 0;
       location.y = -size;
+      col = color(random(0, 360), random(10, 60), 100, 80);
     }
       
-    if (location.y < -size)
-      location.x = height;
+    // Not needed since particles oonly move down
+    //if (location.y < -size)
+    //  location.x = height;
     if (location.y > height + size)
+    {
       location.y = -size;
+      col = color(random(0, 360), random(10, 60), 100, 80);
+    }
   }
   
   void update()
