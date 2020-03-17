@@ -5,6 +5,9 @@ class Ball
   
   PVector location;
   PVector velocity;
+  PVector acceleration;
+  
+  int top_speed;
   
   
   Ball(int size_)
@@ -12,8 +15,12 @@ class Ball
     size = size_;
     col = color(random(0, 360), random(10, 60), 100, 80);
     
+    // Limits velocity
+    top_speed = 7;
+    
     location = new PVector(random(0, width), 0);
     velocity = new PVector(random(-1, 1), random(3, 7));
+    acceleration = new PVector(random(-1, 1), random(-1, 1));
   }
   
   void check_edges()
@@ -38,7 +45,15 @@ class Ball
   
   void update()
   {
+    // Changes acceleration each frame to make squiggles
+    acceleration.x = random(-1, 1);
+    acceleration.y = random(-1, 1);
+    
+    // Creating movement
+    velocity.add(acceleration);
+    velocity.limit(top_speed);
     location.add(velocity);
+    
     check_edges();
   }
   
