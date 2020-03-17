@@ -1,5 +1,5 @@
 Ball[] balls;
-int amount_of_balls = 40;
+int amount_of_balls = 70;
 
 void setup()
 {
@@ -9,7 +9,7 @@ void setup()
   
   balls = new Ball[amount_of_balls];
   for (int i = 0; i < amount_of_balls; i++)
-    balls[i] = new Ball(40);
+    balls[i] = new Ball(10);
 }
 
 void draw()

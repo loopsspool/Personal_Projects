@@ -10,10 +10,10 @@ class Ball
   Ball(int size_)
   {
     size = size_;
-    col = color(random(0, 360), random(10, 60), 100);
+    col = color(random(0, 360), random(10, 60), 100, 80);
     
     location = new PVector(random(0, width), 0);
-    velocity = new PVector(random(-1, 1), random(1, 5));
+    velocity = new PVector(random(-1, 1), random(3, 7));
   }
   
   void check_edges()
