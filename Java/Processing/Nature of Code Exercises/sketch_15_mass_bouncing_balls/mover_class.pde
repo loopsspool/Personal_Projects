@@ -23,11 +23,22 @@ class mover
   
   void check_edges()
   {
-    if ((location.x > width) || (location.x < width))
+    if (location.x > width)
+    {
+      location.x = width;
       velocity.x *= -1;
+    }
+    if (location.x < 0)
+    {
+      location.x = 0;
+      velocity.x *= -1;
+    }
       
-    if ((location.y > height) || (location.y < 0))
+    if (location.y > height)
+    {
+      location.y = height;
       velocity.y *= -1;
+    }
   }
 
   void update()

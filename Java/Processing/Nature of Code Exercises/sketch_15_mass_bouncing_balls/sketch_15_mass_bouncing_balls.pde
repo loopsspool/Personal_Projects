@@ -1,5 +1,5 @@
-mover[] movers = new mover[20];
-PVector wind = new PVector(3, 0);
+mover[] movers = new mover[10];
+PVector wind = new PVector(0.01, 0);
 PVector gravity = new PVector(0, 0.1);
 
 void setup()
@@ -17,6 +17,12 @@ void draw()
   {
     movers[i].apply_force(wind);
     movers[i].apply_force(gravity);
+    // INVISIBLE FORCEFIELD ON RIGHT EDGE OF WINDOW
+    if (movers[i].location.x > (2*width)/3)
+    {
+      PVector forcefield = new PVector(map(movers[i].location.x, (2*width)/3, width, -0.0001, -0.1), 0);
+      movers[i].apply_force(forcefield);
+    }
     
     movers[i].update();
     movers[i].display();
