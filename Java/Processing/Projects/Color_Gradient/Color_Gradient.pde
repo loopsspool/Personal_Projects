@@ -15,9 +15,12 @@ void setup()
     //from = color(58, 100, 100);
     //to = color(313, 100, 100);
     
+    // TODO: Create some sort of list of these that can be refrenced by name?
     // RGB colors
-    from = color(255, 247, 0);
-    to = color(255, 0, 200);
+    //from = color(255, 247, 0);  // Yellow
+    from = color(29, 255, 255);  // Neon blue
+    //to = color(255, 0, 200);  // Hot pink
+    to = color(0, 255, 213);
     
     amount_of_lines = 10;  // Increase this to get a more fluid gradient
     // Careful of gaps when line count is high
