@@ -7,6 +7,7 @@ float gap;  // Gaps between the lines, measured in pixels
 // Stores color values
 HashMap<String, Integer> colors = new HashMap<String, Integer>();  // Integer because HashMap can only refrence types
 
+// TODO: Add variable to differ width of lines to create taper/bulge effect?
 void setup()
 {
     size(2000, 1000);
@@ -42,6 +43,7 @@ void setup()
 
 void draw()
 {
+  // Keep in draw loop, otherwise displays gaps where there shouldn't be
   for (int i = 1; i <= amount_of_lines; i++)
   {
     // Setting each line color to the gradient color
