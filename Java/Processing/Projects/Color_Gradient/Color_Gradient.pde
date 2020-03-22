@@ -4,23 +4,24 @@ int stroke_weight;
 int amount_of_lines;  // Increase this to get a more fluid gradient
 int gap;  // Gaps between the lines, measured in pixels
 
+// Stores color values
+HashMap<String, Integer> colors = new HashMap<String, Integer>();  // Integer because HashMap can only refrence types
+
 void setup()
 {
     size(800, 800);
     // If in HSB just shifts color wheel through other colors
       // So use default RGB colorspace
     //colorMode(HSB, 360, 100, 100);
-    
-    //HSB colors
-    //from = color(58, 100, 100);
-    //to = color(313, 100, 100);
-    
-    // TODO: Create some sort of list of these that can be refrenced by name?
-    // RGB colors
-    //from = color(255, 247, 0);  // Yellow
-    from = color(29, 255, 255);  // Neon blue
-    //to = color(255, 0, 200);  // Hot pink
-    to = color(0, 255, 213);
+
+    // COLORS (in RGB)
+    colors.put("yellow", color(255, 247, 0));
+    colors.put("neon blue", color(29, 255, 255));
+    colors.put("hot pink", color(255, 0, 200));
+    colors.put("seafoam green", color(0, 255, 213));
+
+    from = colors.get("neon blue");
+    to = colors.get("hot pink");
     
     amount_of_lines = 10;  // Increase this to get a more fluid gradient
     // Careful of gaps when line count is high
@@ -33,8 +34,7 @@ void setup()
       stroke_weight = 400;
     strokeWeight(stroke_weight);
     
-    // Color of gaps, if any
-    // IN RGB
+    // RGB Color of gaps, if any
     background(0);
 }
 
