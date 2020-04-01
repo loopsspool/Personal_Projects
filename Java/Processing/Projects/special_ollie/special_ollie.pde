@@ -5,6 +5,8 @@ int amount_of_ollies = 30;
 void setup()
 {
   size(600, 1000);
+  surface.setResizable(true);
+  surface.setLocation(500, 0);
   colorMode(HSB, 360, 100, 100);
   
   rachel = loadImage("rachel cubed.jpg");
