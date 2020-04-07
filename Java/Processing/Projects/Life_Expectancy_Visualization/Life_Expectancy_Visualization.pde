@@ -8,10 +8,11 @@ int LIVED_DAYS;  // How long you've lived in days
 HashMap<String, Integer> LIVED;  // Maps days lived to weeks and years
 int ADULT_DAYS;
 HashMap<String, Integer> ADULT_LIVED;
+// TODO: Add in red squares/hashmap for years prior to being a teenager
 
 // TODO: Add in text of remaining <selected_interval>
 int REMAINING;
-String SELECTED_INTERVAL;  // How grid shows up (days, weeks, years)
+String SELECTED_INTERVAL;  // How grid shows up (days, weeks, months, years)
 
 int SCALE;  // Size of squares based off window width & height
 int COLS, ROWS;
@@ -43,6 +44,7 @@ void setup()
   EXPECTED.put("WEEKS", EXPECTED_YEARS * 52);
   EXPECTED.put("DAYS", EXPECTED_YEARS * 365);
   
+  // TODO: Make this a variable to be added to born date so don't have to have exact date
   ADULT_DAYS = int(days_between("2016-10-24"));
   ADULT_LIVED = new HashMap<String, Integer>();
   //////////////////////  CAREFUL!!!  //////////////////////
@@ -66,6 +68,7 @@ void setup()
 
   background(0);
   stroke(0);
+  //noStroke();
   
   // Label used to break outer loop from inner loop
   outer_loop:
