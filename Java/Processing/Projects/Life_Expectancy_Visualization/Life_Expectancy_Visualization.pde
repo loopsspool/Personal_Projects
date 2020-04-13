@@ -2,7 +2,7 @@
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-String born_date;
+String BORN_DATE;
 int EXPECTED_YEARS;  // Expectancy to base years, weeks, and days expectancy
 HashMap<String, Integer> EXPECTED;  // Life expectancy in years, weeks, and days
 int LIVED_DAYS;  // How long you've lived in days
@@ -29,11 +29,16 @@ void setup()
   // Makes it so when sketch pops up doesn't interfere with code window
   surface.setLocation(70, 100);
   colorMode(HSB, 360, 100, 100);
-  born_date = "1998-10-24";
+  
+  BORN_DATE = "1998-10-24";
+  KID_END_AGE = 12;
+  ADULT_START_AGE = 18;
+  EXPECTED_YEARS = 80;
+  SELECTED_INTERVAL = "YEARS";
   
   // TODO: Format the string so you can write dates how you're used to
   // 0 is for the add_years parameter, in this case is none
-  LIVED_DAYS = days_between_to_current(born_date, 0);
+  LIVED_DAYS = days_between_to_current(BORN_DATE, 0);
   // TODO: Color in half squares (using rect) for weeks/months/years unfinished
   LIVED = new HashMap<String, Integer>();
   LIVED.put("DAYS", LIVED_DAYS);
@@ -42,7 +47,6 @@ void setup()
   LIVED.put("YEARS", LIVED_DAYS / 365);
   
   
-  EXPECTED_YEARS = 80;
   EXPECTED = new HashMap<String, Integer>();
   EXPECTED.put("YEARS", EXPECTED_YEARS);
   EXPECTED.put("MONTHS", EXPECTED_YEARS * 12);
@@ -50,8 +54,7 @@ void setup()
   EXPECTED.put("DAYS", EXPECTED_YEARS * 365);
   
   
-  ADULT_START_AGE = 18;
-  ADULT_DAYS = days_between_to_current(born_date, ADULT_START_AGE);
+  ADULT_DAYS = days_between_to_current(BORN_DATE, ADULT_START_AGE);
   ADULT_LIVED = new HashMap<String, Integer>();
   //////////////////////  CAREFUL!!!  //////////////////////
     // This IS NOT a count of adult times lived!!!!
@@ -62,8 +65,8 @@ void setup()
   ADULT_LIVED.put("MONTHS", LIVED.get("MONTHS") - (ADULT_DAYS / 30));
   ADULT_LIVED.put("YEARS", LIVED.get("YEARS") - (ADULT_DAYS / 365));
   
-  KID_END_AGE = 12;
-  KID_DAYS = days_between_two_dates(born_date, KID_END_AGE);
+  
+  KID_DAYS = days_between_two_dates(BORN_DATE, KID_END_AGE);
   KID_LIVED = new HashMap<String, Integer>();
   KID_LIVED.put("DAYS", KID_DAYS);
   KID_LIVED.put("WEEKS", KID_DAYS / 7);
@@ -71,7 +74,7 @@ void setup()
   KID_LIVED.put("YEARS", KID_DAYS / 365);
   
   
-  SELECTED_INTERVAL = "DAYS";
+  
   CURRENT_SQUARE = 0;
   // Finds next perfect square for grid size
     // Consequence of this is the grid will always attempt to be as square as possible
