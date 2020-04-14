@@ -7,13 +7,14 @@ float[][] z_vals;  // Mountain z (height) values
 
 PVector sunlight_dir;  // Direction of sunlight
 float sunlight_x_acc, sunlight_y_acc;  // Controls sun movement
-
+color sun_color;
 
 void setup()
 {
   size(900, 900, P3D);
   surface.setLocation(100, 50);
   colorMode(HSB, 360, 100, 100, 100);
+  sun_color = color(310, 100, 100);
   
   scale = 15;
   // Bigger than width and height so mountains still extend to edges after rotation
@@ -38,9 +39,9 @@ void setup()
   
   // Creating vector for sunlight origin and direction
   sunlight_dir = new PVector(-1, 0, 0.1);
-  directionalLight(64, 30, 100, sunlight_dir.x, sunlight_dir.y, sunlight_dir.z);
-  sunlight_x_acc = 0.003;
-  sunlight_y_acc = sunlight_x_acc * 2;
+  directionalLight(hue(sun_color), saturation(sun_color), brightness(sun_color), sunlight_dir.x, sunlight_dir.y, sunlight_dir.z);
+  sunlight_x_acc = 0.002;
+  sunlight_y_acc = sunlight_x_acc * 6;
 }
 
 void draw()
@@ -56,24 +57,26 @@ void draw()
   if (sunlight_dir.x > 0.99)
   {
     sunlight_dir.x = -1;
-    sunlight_dir.y = 0;
+    sunlight_dir.z = 0.1;
   }
   // Moves sun slightly on y-axis (mimics it rising)
     // Can't map bc it breaks for some reason
+  // sunlight_y_acc adds to z because of rotation... z kinda takes place of y
   if (sunlight_dir.x <= 0)
-    sunlight_dir.y += sunlight_y_acc;
-  if ((sunlight_dir.x > 0) && sunlight_dir.y > 0.1)
-    sunlight_dir.y -= sunlight_y_acc;
+    sunlight_dir.z -= sunlight_y_acc;
+  if (sunlight_dir.x > 0)
+    sunlight_dir.z += sunlight_y_acc;
     
   // Normalized so I can think in terms of vectors, but directionalLgiht expects normalized vector
   sunlight_dir.normalize();
-  directionalLight(64, 30, 100, sunlight_dir.x, sunlight_dir.y, sunlight_dir.z);
+  directionalLight(hue(sun_color), saturation(sun_color), brightness(sun_color), sunlight_dir.x, sunlight_dir.y, sunlight_dir.z);
 
   background(color(200, 75, 100));
   //fill(color(277, 100, 25));
   //stroke(color(277, 100, 10));
   noStroke();
   
+  push();
   translate(width/2, height/2);  // Draw to (and rotate around) center of window
   rotateX(PI/3);  // Angles so looking at mountains from semi-birds-eye view
   // Allows things to be drawn in the top left of the window after rotateX(PI/3);
@@ -81,9 +84,9 @@ void draw()
   
   // Sun display
   push();
-  ambient(0, 100, 100);
+  emissive(hue(sun_color), saturation(sun_color), brightness(sun_color));
   float sun_x = map(sunlight_dir.x, -1, 1, w, 0);
-  float sun_z = map(sunlight_dir.y, 0.1, 1, 0, h/8);
+  float sun_z = map(sunlight_dir.z, 0.1, -1, -h/10, h/7);
   // -100 y so sun doesn't clip through mountains at back
   translate(sun_x, -100, sun_z);
   sphere(80);
@@ -105,4 +108,5 @@ void draw()
     }
     endShape();
   }
+  pop();
 }
