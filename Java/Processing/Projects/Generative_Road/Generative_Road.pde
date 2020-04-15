@@ -44,6 +44,7 @@ void draw()
   y_off = flying;
   
   // Setting next row to previous row
+  // TODO: Attempting to keep heights so they're not constantly changing so road wont either
   for (int y = rows - 2; y > 0; y--)
   {
     for (int x = 0; x < cols; x++)
