@@ -1,6 +1,6 @@
 float x_off, y_off;  // For mountain noise
-float road_x_off;
-float[][] road_points;
+float road_x_off;  // For road noise
+float[][] road_points;  // x, y, z of road points
 int scale;  // Size of strips
 int rows, cols;
 int w, h;  // Not actually width and height but bigger so mountains still extend to edges after rotation
@@ -9,6 +9,9 @@ float flying = 0;
 float[][] z_vals;  // Mountain z (height) values
 
 int road_index;  // Selects which vertices to draw the road on
+int road_raise;  // Sets houw much higher road is above mountains (so doesn't get clipped)
+float road_noise_acc;
+int road_noise_range;
 
 void setup()
 {
@@ -40,18 +43,21 @@ void setup()
   road_points = new float[rows][3];
   road_index = floor(random(cols));
   road_x_off = 0.0;
+  road_noise_acc = 0.2;
+  road_noise_range = 3;
+  road_raise = 3;
   for (int y = 0; y < rows - 1; y++)
   {
-    //road_x_off += 0.01;
-    //road_index += int(map(noise(road_x_off), 0, 1, -2, 2));
-    //if (road_index > cols - 1)
-    //  road_index = cols - 1;
-    //if (road_index < 0)
-    //  road_index = 0;
-
+    road_x_off += road_noise_acc;
+    road_index += int(map(noise(road_x_off), 0, 1, -road_noise_range, road_noise_range));
+    if (road_index > cols - 1)
+      road_index = cols - 1;
+    if (road_index < 0)
+      road_index = 0;
+    
     road_points[y][0] = road_index * scale;
     road_points[y][1] = y * scale;
-    road_points[y][2] = z_vals[road_index][y] + 2;
+    road_points[y][2] = z_vals[road_index][y] + road_raise;
   }
 }
 
@@ -70,7 +76,10 @@ void draw()
         // Setting next mountain row height to previous mountain row height
         z_vals[x][y] = z_vals[x][y-1];
       }
-      // Sets next road z height to previous road z height
+      // Sets next road points to previous road points
+      // Only update the x and the z values, otherwiwse gets bugged
+      road_points[y][0] = road_points[y-1][0];
+      //road_points[y][1] = road_points[y-1][1];
       road_points[y][2] = road_points[y-1][2];
     }
   }
@@ -88,9 +97,16 @@ void draw()
   // Sets new road height
   if (frameCount % 4 == 0)
   {
+    road_x_off += road_noise_acc;
+    road_index += int(map(noise(road_x_off), 0, 1, -road_noise_range, road_noise_range));
+    if (road_index > (19 * cols)/20)
+      road_index = (19 * cols)/20;
+    if (road_index < cols/20)
+      road_index = cols/20;
+    
     road_points[0][0] = road_index * scale;
     road_points[0][1] = 0 * scale;
-    road_points[0][2] = z_vals[road_index][0] + 2;
+    road_points[0][2] = z_vals[road_index][0] + road_raise;
   }
   
   background(color(200, 75, 100));
