@@ -9,9 +9,12 @@ float flying = 0;
 float[][] z_vals;  // Mountain z (height) values
 
 int road_index;  // Selects which vertices to draw the road on
+int road_scale;
 int road_raise;  // Sets houw much higher road is above mountains (so doesn't get clipped)
 float road_noise_acc;
 int road_noise_range;
+int yellow_line_raise;
+float yellow_line_buffer;
 
 void setup()
 {
@@ -45,7 +48,9 @@ void setup()
   road_x_off = 0.0;
   road_noise_acc = 0.2;
   road_noise_range = 3;
-  road_raise = 3;
+  road_scale = 12;
+  road_raise = int(road_scale / 5);
+  yellow_line_buffer = road_scale/10;
   for (int y = 0; y < rows - 1; y++)
   {
     road_x_off += road_noise_acc;
@@ -99,10 +104,10 @@ void draw()
   {
     road_x_off += road_noise_acc;
     road_index += int(map(noise(road_x_off), 0, 1, -road_noise_range, road_noise_range));
-    if (road_index > (19 * cols)/20)
-      road_index = (19 * cols)/20;
-    if (road_index < cols/20)
-      road_index = cols/20;
+    if (road_index > (4 * cols)/5)
+      road_index = (4 * cols)/5;
+    if (road_index < cols/5)
+      road_index = cols/5;
     
     road_points[0][0] = road_index * scale;
     road_points[0][1] = 0 * scale;
@@ -115,7 +120,7 @@ void draw()
   noStroke();
 
   translate(width/2, height/2);  // Draw to (and rotate around) center of window
-  rotateX(PI/3);  // Angles so looking at mountains from semi-birds-eye view
+  rotateX(PI/4);  // Angles so looking at mountains from semi-birds-eye view
   // Allows things to be drawn in the top left of the window after rotateX(PI/3);
   translate(-w/2, -h/2);
   
@@ -133,15 +138,32 @@ void draw()
     endShape();
   }
   
-  // Road
   push();
   noFill();
-  stroke(0);
-  strokeWeight(10);
+  stroke(150);
+  strokeWeight(road_scale);
+  // Road
   beginShape();
   for (int y = 0; y < rows - 1; y++)
   {
     curveVertex(road_points[y][0], road_points[y][1], road_points[y][2]);
+  }
+  endShape();
+  // Yellow lines
+  strokeWeight(road_scale / 10);
+  stroke(50, 40, 75);
+  beginShape();
+  for (int y = 0; y < rows - 1; y++)
+  {
+    float yellow_line_y = road_points[y][1] - yellow_line_raise;
+    curveVertex(road_points[y][0] - yellow_line_buffer / 2, yellow_line_y, road_points[y][2]);
+  }
+  endShape();
+  beginShape();
+  for (int y = 0; y < rows - 1; y++)
+  {
+    float yellow_line_y = road_points[y][1] - yellow_line_raise;
+    curveVertex(road_points[y][0] + yellow_line_buffer / 2, yellow_line_y, road_points[y][2]);
   }
   endShape();
   pop();
