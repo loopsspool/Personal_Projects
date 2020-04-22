@@ -138,6 +138,7 @@ void draw()
     endShape();
   }
   
+  // TODO: Try changing to a bunch of little arcs so can map color on smaller scale like with mountains
   push();
   noFill();
   stroke(150);
