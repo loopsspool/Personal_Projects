@@ -1,5 +1,5 @@
-int STAR_SIZE = 300;
-int STAR_SIDES = 4;
+int STAR_SIZE = 200;
+int STAR_SIDES = 8;
 
 void setup()
 {
@@ -11,27 +11,38 @@ void setup()
 
 void draw()
 {
-  test_lines();
+  push();
+    translate(width/2, height/2);
+    star(80);
+  pop();
 }
 
-void test_lines()
+// Courtesy of https://processing.org/examples/star.html
+  // Modified a bit to make curved stars
+void star(float curve_point) 
 {
-  push();
-    noFill();
-    strokeWeight(3);
-    
-    translate(width/2, height/2);
-    float angle = radians(360 / STAR_SIDES);
-    for (int i = 0; i < STAR_SIDES; i++)
+  noFill();
+  float angle = radians(360 / STAR_SIDES);
+  float half_angle = angle/2.0;
+  beginShape();
+  for (float a = 0; a < TWO_PI; a += angle)
+  {
+    float sx = cos(a) * STAR_SIZE;
+    float sy = sin(a) * STAR_SIZE;
+    curveVertex(sx, sy);
+    if ( a == 0)
+      curveVertex(sx, sy);
+    sx = cos(a+half_angle) * curve_point;
+    sy = sin(a+half_angle) * curve_point;
+    curveVertex(sx, sy);
+    if (a+angle >= TWO_PI)
     {
-      beginShape();
-        curveVertex(0, -STAR_SIZE/2);
-        curveVertex(0, -STAR_SIZE/2);
-        curveVertex(STAR_SIZE/10, -STAR_SIZE/10);
-        curveVertex(STAR_SIZE/2, 0);
-        curveVertex(STAR_SIZE/2, 0);
-      endShape();
-      rotate(angle);
+      // Directing the last curve is where you're gonna fix the straight line
+        // On the final curve
+      sx = cos(a+angle) * STAR_SIZE;
+      sy = sin(a+angle) * STAR_SIZE;
+      curveVertex(sx, sy);
     }
-  pop();
+  }
+  endShape(CLOSE);
 }
