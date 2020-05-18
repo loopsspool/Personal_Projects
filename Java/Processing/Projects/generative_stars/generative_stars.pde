@@ -1,4 +1,4 @@
-int STAR_SIZE = 50;  // Recommend keeping this size
+int STAR_SIZE = 100;
 int STAR_SIDES = 8;
 
 void setup()
@@ -18,7 +18,7 @@ void draw()
     // Larger parameter moves curves closer to outside, smaller to inside
       // 0 is pretty cool too
       // Same with negative numbers
-    star(-8);
+    star(30);
   pop();
 }
 
@@ -35,7 +35,7 @@ void star(float curve_point)
   beginShape();
     // 2 * TWO_PI to give it that kind of sketched look
       // + (2 * angle) to give the final curve a natural finish (by adding another that draws over)
-    for (float a = angle; a < TWO_PI + (2 * angle); a += angle)
+    for (float a = angle; a <= TWO_PI + (2 * angle); a += angle)
     {
       loop_acc++;
       
@@ -49,14 +49,13 @@ void star(float curve_point)
       }
       else
       {
-        // To change angle of star, change what's after a-(half_angle/2)
-        sx = cos(a-half_angle) * curve_point;
-        sy = sin(a-half_angle) * curve_point;
+        // To change angle of star, change what's after a- eg (a-(half_angle/16))
+          // If bigger positive multiples, the fingers look more like leaves (a-(10 * half_angle))
+        // Also potentially changing independantly
+        sx = cos(a-(half_angle/4)) * curve_point;
+        sy = sin(a-(half_angle/4)) * curve_point;
       }
       curveVertex(sx, sy);
-      // If first point, set first curve anchor point (necessary by curveVertex)
-      if (a == angle)
-        curveVertex(sx, sy);
         
       // Outtermost points
       sx = cos(a) * STAR_SIZE;
@@ -65,8 +64,10 @@ void star(float curve_point)
       // Smoothing the final curve
       if (loop_acc >= (STAR_SIDES + 1))
       {
+
         sx = cos(a) * STAR_SIZE;
         sy = sin(a) * STAR_SIZE;
+        curveVertex(sx, sy);
         curveVertex(sx, sy);
 
         // DO NOT TAKE THIS OUT
