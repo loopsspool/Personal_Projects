@@ -3,6 +3,7 @@ import java.util.ArrayList;
 int STAR_SIZE = 100;
 int STAR_POINTS;
 int HIGHEST_POINTS_NUM = 20;
+int OUTLINE_SIZE = floor(STAR_SIZE * 1.3);
 
 void setup()
 {
@@ -21,6 +22,7 @@ void draw()
   push();
     translate(width/2, height/2);
     star();
+    outline_shape();
   pop();
 }
 
@@ -31,7 +33,7 @@ void star()
   // Amount of star points
   STAR_POINTS = floor(random(3, HIGHEST_POINTS_NUM));
   // Where the curve occurs (Larger parameter moves curves closer to outside, smaller to inside)
-  int curve_point = floor(random(-STAR_SIZE, STAR_SIZE));
+  int curve_point = floor(random(-STAR_SIZE, STAR_SIZE)/2);
   
   int loop_acc = 0;
   float angle = radians(360 / float(STAR_POINTS));
@@ -45,7 +47,7 @@ void star()
   noFill();
   beginShape();
     // + (2 * angle) to give the final curve a natural finish (by adding another that draws over)
-    for (float a = angle; a <= TWO_PI + (2 * angle); a += angle)
+    for (float a = angle; a <= TWO_PI  + (2 * angle); a += angle)
     {
       loop_acc++;
       
@@ -54,8 +56,8 @@ void star()
         // or middle of an arc so the curve doesn't sharpen at a point
       if (a == angle)
       {
-        sx = cos(a - (half_angle/1.1)) * curve_point;
-        sy = sin(a - (half_angle/1.1)) * curve_point;
+        sx = cos((a - half_angle/1.1) - inner_curve_angle) * curve_point;
+        sy = sin((a - half_angle/1.1) - inner_curve_angle) * curve_point;
       }
       else
       {
@@ -69,14 +71,15 @@ void star()
         
       // Outtermost points
       // To change angle of outtermost star points, change what's after a eg (a-1)
-      sx = cos(a - outer_curve_angle) * STAR_SIZE;
-      sy = sin(a - outer_curve_angle) * STAR_SIZE;
+      sx = cos(a - outer_curve_angle) * STAR_SIZE/2;
+      sy = sin(a - outer_curve_angle) * STAR_SIZE/2;
       curveVertex(sx, sy);
       
       // Drawing the final curve
       if (loop_acc >= (STAR_POINTS + 1))
       {
-        // TODO: Last curve still comes out pointy
+        sx = cos((a + half_angle/1.1) - inner_curve_angle) * curve_point;
+        sy = sin((a + half_angle/1.1) - inner_curve_angle) * curve_point;
         curveVertex(sx, sy);
 
         // DO NOT TAKE THIS OUT
@@ -84,7 +87,7 @@ void star()
         break;
       }
     }
-  endShape(CLOSE);
+  endShape();
 }
 
 ArrayList multiples(int points)
@@ -99,4 +102,10 @@ ArrayList multiples(int points)
   }
   
   return divisible_by;
+}
+
+void outline_shape()
+{
+  strokeWeight(floor(random(1, 6)));
+  circle(0, 0, OUTLINE_SIZE);
 }
