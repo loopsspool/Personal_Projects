@@ -1,5 +1,8 @@
+import java.util.ArrayList;
+
 int STAR_SIZE = 100;
-int STAR_SIDES;
+int STAR_POINTS;
+int HIGHEST_POINTS_NUM = 20;
 
 void setup()
 {
@@ -26,12 +29,12 @@ void draw()
 void star() 
 {
   // Amount of star points
-  STAR_SIDES = floor(random(3, 20));
+  STAR_POINTS = floor(random(3, HIGHEST_POINTS_NUM));
   // Where the curve occurs (Larger parameter moves curves closer to outside, smaller to inside)
   int curve_point = floor(random(-STAR_SIZE, STAR_SIZE));
   
   int loop_acc = 0;
-  float angle = radians(360 / float(STAR_SIDES));
+  float angle = radians(360 / float(STAR_POINTS));
   float half_angle = angle/2.0;
   float sx;
   float sy;
@@ -71,7 +74,7 @@ void star()
       curveVertex(sx, sy);
       
       // Drawing the final curve
-      if (loop_acc >= (STAR_SIDES + 1))
+      if (loop_acc >= (STAR_POINTS + 1))
       {
         // TODO: Last curve still comes out pointy
         curveVertex(sx, sy);
@@ -82,4 +85,18 @@ void star()
       }
     }
   endShape(CLOSE);
+}
+
+ArrayList multiples(int points)
+{
+  ArrayList<Integer> divisible_by = new ArrayList<Integer>();
+  
+  // Finds all numbers that can divide points number
+  for (int i = 2; i <= HIGHEST_POINTS_NUM; i++)
+  {
+    if (points % i == 0)
+      divisible_by.add(i);
+  }
+  
+  return divisible_by;
 }
