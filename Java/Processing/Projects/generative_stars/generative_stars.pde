@@ -1,9 +1,11 @@
 import java.util.ArrayList;
+import java.util.Random;
 
 int STAR_SIZE = 100;
 int STAR_POINTS;
 int HIGHEST_POINTS_NUM = 20;
-int OUTLINE_SIZE = floor(STAR_SIZE * 1.3);
+int OUTLINE_SIZE = floor(STAR_SIZE * 1.5);
+int[] OUTLINE_POINTS;
 
 void setup()
 {
@@ -14,6 +16,8 @@ void setup()
   
   strokeWeight(2);
   //curveTightness(-1);
+  
+  OUTLINE_POINTS = new int[]{3, 4, 6, 8, 10, 12, 14, 16};
 }
 
 void draw()
@@ -107,5 +111,71 @@ ArrayList multiples(int points)
 void outline_shape()
 {
   strokeWeight(floor(random(1, 6)));
-  circle(0, 0, OUTLINE_SIZE);
+  boolean is_ngon = true_50_50();
+  // Gets random points number from outline points array
+  int rand = new Random().nextInt(OUTLINE_POINTS.length);
+  if (is_ngon)
+    ngon(OUTLINE_POINTS[rand], OUTLINE_SIZE/2);
+  else
+    circle(0, 0, OUTLINE_SIZE);
+  
+}
+
+void ngon(int points, int radius)
+{
+  // Determines if triangles should be pointing up or down
+    // and if squares should be flat or diamonds
+  boolean additional_rotate = true_50_50();
+  
+  // Adjusting triangle/square sizes a bit
+  if (points == 3)
+    radius *= 1.6;
+  if (points == 4)
+    radius *= 1.2;
+    
+  float rotate = radians(360/points);
+  beginShape();
+    for (int i = 0; i < points; i++)
+    {
+      float angle = i * rotate;
+      
+      // Potential additional rotate for even ngons
+      if (additional_rotate)
+      {
+        // Makes flat square, not diamond
+        if (points == 4)
+          angle += rotate/2;
+        // Gives even ngon a flat bottom
+        if ( (points != 4) && (points % 2 == 0))
+          angle += rotate/4;
+      }
+      
+      // Adjusts triangles to point up or down
+      if (points == 3)
+      {
+        if (additional_rotate)
+        {
+          // Point up
+          angle += rotate/4;
+        }
+        else
+        {
+          // Point down
+          angle += rotate - radians(30);
+        }
+      }       
+      
+      float x = cos(angle) * radius;
+      float y = sin(angle) * radius;
+      vertex(x, y);
+    }
+  endShape(CLOSE);
+}
+
+boolean true_50_50()
+{
+  if (random(1) < 0.5)
+    return true;
+  else
+    return false;
 }
