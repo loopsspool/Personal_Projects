@@ -3,8 +3,11 @@ import java.util.Random;
 
 int STAR_SIZE = 100;
 int STAR_POINTS;
+float INNER_CURVE_ANGLE;
+float OUTER_CURVE_ANGLE;
 int HIGHEST_POINTS_NUM = 20;
-int OUTLINE_SIZE = floor(STAR_SIZE * 1.5);
+float OUTLINE_SIZE_MULTIPLIER = 1.5;
+int OUTLINE_SIZE = floor(STAR_SIZE * OUTLINE_SIZE_MULTIPLIER);
 int[] OUTLINE_POINTS;
 
 void setup()
@@ -12,7 +15,8 @@ void setup()
   size(800, 800);
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
-  noLoop();
+  //noLoop();
+  frameRate(1);
   
   strokeWeight(2);
   //curveTightness(-1);
@@ -22,11 +26,12 @@ void setup()
 
 void draw()
 {
-  
+  background(255);
   push();
     translate(width/2, height/2);
     star();
-    outline_shape();
+    point_lines();
+    //outline_shape();
   pop();
 }
 
@@ -45,8 +50,8 @@ void star()
   float sx;
   float sy;
   
-  float inner_curve_angle = random(half_angle/4, 10 * half_angle);
-  float outer_curve_angle = radians(random(TWO_PI));
+  INNER_CURVE_ANGLE = random(half_angle/4, 10 * half_angle);
+  OUTER_CURVE_ANGLE = radians(random(TWO_PI));
   
   noFill();
   beginShape();
@@ -60,30 +65,30 @@ void star()
         // or middle of an arc so the curve doesn't sharpen at a point
       if (a == angle)
       {
-        sx = cos((a - half_angle/1.1) - inner_curve_angle) * curve_point;
-        sy = sin((a - half_angle/1.1) - inner_curve_angle) * curve_point;
+        sx = cos((a - half_angle/1.1) - INNER_CURVE_ANGLE) * curve_point;
+        sy = sin((a - half_angle/1.1) - INNER_CURVE_ANGLE) * curve_point;
       }
       else
       {
         // To change angle of star where it meets the center, change what's after a- eg (a-(half_angle/16))
           // If bigger positive multiples, the fingers look more like leaves (a-(10 * half_angle))
         // Also potentially changing independantly
-        sx = cos(a - inner_curve_angle) * curve_point;
-        sy = sin(a - inner_curve_angle) * curve_point;
+        sx = cos(a - INNER_CURVE_ANGLE) * curve_point;
+        sy = sin(a - INNER_CURVE_ANGLE) * curve_point;
       }
       curveVertex(sx, sy);
         
       // Outtermost points
       // To change angle of outtermost star points, change what's after a eg (a-1)
-      sx = cos(a - outer_curve_angle) * STAR_SIZE/2;
-      sy = sin(a - outer_curve_angle) * STAR_SIZE/2;
+      sx = cos(a - OUTER_CURVE_ANGLE) * STAR_SIZE/2;
+      sy = sin(a - OUTER_CURVE_ANGLE) * STAR_SIZE/2;
       curveVertex(sx, sy);
       
       // Drawing the final curve
       if (loop_acc >= (STAR_POINTS + 1))
       {
-        sx = cos((a + half_angle/1.1) - inner_curve_angle) * curve_point;
-        sy = sin((a + half_angle/1.1) - inner_curve_angle) * curve_point;
+        sx = cos((a + half_angle/1.1) - INNER_CURVE_ANGLE) * curve_point;
+        sy = sin((a + half_angle/1.1) - INNER_CURVE_ANGLE) * curve_point;
         curveVertex(sx, sy);
 
         // DO NOT TAKE THIS OUT
@@ -92,6 +97,41 @@ void star()
       }
     }
   endShape();
+}
+
+void point_lines() 
+{
+  float angle = radians(360 / float(STAR_POINTS));
+  float sx1;
+  float sy1;
+  float sx2;
+  float sy2;
+  float sx3;
+  float sy3;
+  float sx4;
+  float sy4;
+
+  //OUTER_CURVE_ANGLE = radians(random(TWO_PI));
+  float start_point_scale = random(0, OUTLINE_SIZE_MULTIPLIER - 0.5);
+  float end_point_scale = random(OUTLINE_SIZE_MULTIPLIER - 0.5, OUTLINE_SIZE_MULTIPLIER - 0.1);
+  float end_anchor_x = random(-0.1, 0.1);
+  float end_anchor_y = random(-0.1, 0.1);
+  
+  noFill();
+    for (float a = angle; a <= TWO_PI + angle; a += angle)
+    {
+      //sx1 = cos(a - INNER_CURVE_ANGLE) * (start_point * STAR_SIZE/2);
+      //sy1 = sin(a - INNER_CURVE_ANGLE) * (start_point * STAR_SIZE/2);
+      sx1 = 0;
+      sy1 = 0;
+      sx2 = cos(a - INNER_CURVE_ANGLE) * (start_point_scale * STAR_SIZE/2);
+      sy2 = sin(a - INNER_CURVE_ANGLE) * (start_point_scale * STAR_SIZE/2);
+      sx3 = cos(a - OUTER_CURVE_ANGLE) * (end_point_scale * STAR_SIZE/2);
+      sy3 = sin(a - OUTER_CURVE_ANGLE) * (end_point_scale * STAR_SIZE/2);
+      sx4 = cos(a - end_anchor_x) * (end_point_scale * STAR_SIZE/2);
+      sy4 = sin(a - end_anchor_y) * (end_point_scale * STAR_SIZE/2);
+      curve(sx1, sy1, sx2, sy2, sx3, sy3, sx4, sy4);
+    }
 }
 
 ArrayList multiples(int points)
