@@ -111,7 +111,7 @@ ArrayList multiples(int points)
 void outline_shape()
 {
   strokeWeight(floor(random(1, 6)));
-  boolean is_ngon = true_50_50();
+  boolean is_ngon = true_below(0.6);
   // Gets random points number from outline points array
   int rand = new Random().nextInt(OUTLINE_POINTS.length);
   if (is_ngon)
@@ -125,7 +125,7 @@ void ngon(int points, int radius)
 {
   // Determines if triangles should be pointing up or down
     // and if squares should be flat or diamonds
-  boolean additional_rotate = true_50_50();
+  boolean additional_rotate = true_below(0.5);
   
   // Adjusting triangle/square sizes a bit
   if (points == 3)
@@ -172,9 +172,9 @@ void ngon(int points, int radius)
   endShape(CLOSE);
 }
 
-boolean true_50_50()
+boolean true_below(float limit)
 {
-  if (random(1) < 0.5)
+  if (random(1) < limit)
     return true;
   else
     return false;
