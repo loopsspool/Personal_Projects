@@ -2,6 +2,8 @@ import java.util.*;  // For Date
 import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 
+// TODO: ONLY ALLOW NUMBERED DAYS TO GO UP TO ONES IN MONTH
+
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
 String[] MONTHS = {"JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"};
@@ -22,8 +24,8 @@ float DAY_NAME_BOX_HEIGHT = 25;
 
 void setup()
 {
-  size(825, 638);
-  //size(825, 638, PDF, "calendar_test.pdf");
+  //size(825, 638);
+  size(825, 638, PDF, "calendar_test.pdf");
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
   background(360);
@@ -39,8 +41,6 @@ void setup()
   MONTH_NAME = LOCAL_DATE.getMonth().toString();
   FIRST_DAY_OF_MONTH_NAME = LOCAL_DATE.minusDays(DAY-1).getDayOfWeek().toString();
   MONTH_AND_YEAR = MONTH_NAME + " " + YEAR;
-  
-  println(MONTH_AND_YEAR);
 }
 
 void draw()
@@ -87,20 +87,42 @@ void draw()
     }
   pop();
   
+  int month_acc = 1;
   push();
+    translate(10, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + 10);
     boolean initial = true;
-    for (int x = 0; x < 7; x++)
+    float x_translate_added = 0;  // This is to accurately realign the numbers when the y-axis moves down
+    for (int y_ = 0; y_ < 5; y_++)
     {
-      // Sets first day of month number to proper weekday
-      if (initial)
+      for (int x_ = 0; x_ < 7; x_++)
       {
-        if (WEEKDAYS[x] != FIRST_DAY_OF_MONTH_NAME)
-          continue;
-        else
-          initial = false;
+        // Sets first day of month number to proper weekday
+        if (initial)
+        {
+          if (WEEKDAYS[x_] != FIRST_DAY_OF_MONTH_NAME)
+          {
+            translate(width/7, 0);
+            x_translate_added += width/7;
+            continue;
+          }
+          else
+            initial = false;
+        }
+        // Actually writing the number
+        textAlign(LEFT, CENTER);
+        textSize(12);
+        noStroke();
+        fill(0);
+        text(String.valueOf(month_acc), 0, 0);
+        
+        // Keeping tabs of accumulation
+        month_acc++;
+        translate(width/7, 0);
+        x_translate_added += width/7;
       }
-      for (int y = 0; y < 5; y++)
+      translate(-x_translate_added, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
+      x_translate_added = 0;
     }
   pop();
-  //exit();
+  exit();
 }
