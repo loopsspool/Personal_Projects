@@ -2,8 +2,6 @@ import java.util.*;  // For Date
 import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 
-// TODO: ONLY ALLOW NUMBERED DAYS TO GO UP TO ONES IN MONTH
-
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
 
@@ -26,6 +24,7 @@ void setup()
 {
   size(825, 638);
   //size(825, 638, PDF, "calendar_test.pdf");
+  surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
   background(360);
@@ -34,6 +33,7 @@ void setup()
   
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+  LOCAL_DATE = LOCAL_DATE.minusMonths(5);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -90,6 +90,8 @@ void draw()
   pop();
   
   int day_acc = 1;
+  // Weird shift left of grey boxes, this'll eliminate that
+  int grey_box_x_acc = 0;
   push();
     translate(10, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + 10);
     boolean initial = true;
@@ -103,12 +105,25 @@ void draw()
         {
           if (WEEKDAYS[x_] != FIRST_DAY_OF_MONTH_NAME)
           {
+            // Greying out days before month start
+            push();
+              strokeWeight(1);
+              stroke(0);
+              translate(-10, -10);
+              fill(320);
+              rect(grey_box_x_acc, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
+            pop();
+        
+            grey_box_x_acc += 1;
             translate(width/7, 0);
             x_translate_added += width/7;
             continue;
           }
           else
+          {
             initial = false;
+            grey_box_x_acc = 0;
+          }
         }
         // Actually writing the number
         textAlign(LEFT, CENTER);
@@ -120,7 +135,17 @@ void draw()
         // Keeping tabs of accumulation
         day_acc++;
         if (day_acc > DAYS_IN_MONTH)
-          break;
+        {
+            // Greying out days after month ends
+            push();
+              strokeWeight(1);
+              stroke(0);
+              translate(-7, -10);
+              fill(320);
+              // x + 1 maybe to adjust for rounding of float?
+              rect(0, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
+            pop();
+        }
           
         translate(width/7, 0);
         x_translate_added += width/7;
