@@ -6,7 +6,6 @@ import processing.pdf.*;  // To convert to PDF
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
-String[] MONTHS = {"JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"};
 
 // CURENT DATE STUFF
 Date CURRENT_DATE;
@@ -16,6 +15,7 @@ String DAY_NAME;
 String MONTH_NAME;
 String MONTH_AND_YEAR;
 String FIRST_DAY_OF_MONTH_NAME;
+int DAYS_IN_MONTH;
 
 // CALENDAR ALIGNMENTS
 float MONTH_BOX_HEIGHT;
@@ -24,8 +24,8 @@ float DAY_NAME_BOX_HEIGHT = 25;
 
 void setup()
 {
-  //size(825, 638);
-  size(825, 638, PDF, "calendar_test.pdf");
+  size(825, 638);
+  //size(825, 638, PDF, "calendar_test.pdf");
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
   background(360);
@@ -41,6 +41,8 @@ void setup()
   MONTH_NAME = LOCAL_DATE.getMonth().toString();
   FIRST_DAY_OF_MONTH_NAME = LOCAL_DATE.minusDays(DAY-1).getDayOfWeek().toString();
   MONTH_AND_YEAR = MONTH_NAME + " " + YEAR;
+  
+  DAYS_IN_MONTH = LOCAL_DATE.lengthOfMonth();
 }
 
 void draw()
@@ -87,7 +89,7 @@ void draw()
     }
   pop();
   
-  int month_acc = 1;
+  int day_acc = 1;
   push();
     translate(10, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + 10);
     boolean initial = true;
@@ -113,16 +115,20 @@ void draw()
         textSize(12);
         noStroke();
         fill(0);
-        text(String.valueOf(month_acc), 0, 0);
+        text(String.valueOf(day_acc), 0, 0);
         
         // Keeping tabs of accumulation
-        month_acc++;
+        day_acc++;
+        if (day_acc > DAYS_IN_MONTH)
+          break;
+          
         translate(width/7, 0);
         x_translate_added += width/7;
       }
       translate(-x_translate_added, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
       x_translate_added = 0;
+      
     }
   pop();
-  exit();
+  //exit();
 }
