@@ -2,6 +2,8 @@ import java.util.*;  // For Date
 import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 
+// TODO: Fix lines bleeding into month header (line cap?)
+
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
 
@@ -22,8 +24,8 @@ float DAY_NAME_BOX_HEIGHT = 25;
 
 void setup()
 {
-  size(825, 638);
-  //size(825, 638, PDF, "calendar_test.pdf");
+  //size(825, 638);
+  size(825, 638, PDF, "calendar_test.pdf");
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
@@ -70,8 +72,11 @@ void draw()
     
     // HORIZONTAL LINES
     // DAY NAME LINE  
+    //strokeWeight(2);
+    //line(0, 0, width, 0);
     translate(0, DAY_NAME_BOX_HEIGHT);
     push();
+      strokeWeight(2);
       line(0, 0, width, 0);
       noStroke();
       fill(0);
@@ -80,6 +85,7 @@ void draw()
         // + width/14 to center text between lines
         text(WEEKDAYS[i], (i * width/7) + width/14, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
     pop();
+    strokeWeight(1);
     // Starts at 1 so it doesn't draw a line over the day name line
     float y;
     for (int i = 1; i < 6; i++)
@@ -106,7 +112,7 @@ void draw()
             // Greying out days before month start
             push();
               stroke(1);
-              translate(-10, -10);
+              translate(-10, -9);
               fill(320);
               rect(0, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
             pop();
@@ -149,5 +155,14 @@ void draw()
       
     }
   pop();
-  //exit();
+  
+  //OUTLINE LINES
+  stroke(0);
+  strokeWeight(2);
+  int line_buffer = 1;
+  line(line_buffer, MONTH_BOX_HEIGHT, line_buffer, height - line_buffer);  // LEFT
+  line(width - line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, height - line_buffer);  // RIGHT
+  line(line_buffer, height - line_buffer, width - line_buffer, height - line_buffer);  // BOTTOM
+  
+  exit();
 }
