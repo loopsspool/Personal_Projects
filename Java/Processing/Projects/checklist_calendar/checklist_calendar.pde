@@ -64,7 +64,7 @@ void draw()
     float x;
     for (int i = 0; i < 7; i++)
     {
-      x = i * width/7;
+      x = i * (width/7);
       line(x, 0, x, height);
     }
     
@@ -89,9 +89,7 @@ void draw()
     }
   pop();
   
-  int day_acc = 1;
-  // Weird shift left of grey boxes, this'll eliminate that
-  int grey_box_x_acc = 0;
+  int day_acc = 0;
   push();
     translate(10, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + 10);
     boolean initial = true;
@@ -107,14 +105,12 @@ void draw()
           {
             // Greying out days before month start
             push();
-              strokeWeight(1);
-              stroke(0);
+              stroke(1);
               translate(-10, -10);
               fill(320);
-              rect(grey_box_x_acc, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
+              rect(0, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
             pop();
         
-            grey_box_x_acc += 1;
             translate(width/7, 0);
             x_translate_added += width/7;
             continue;
@@ -122,7 +118,6 @@ void draw()
           else
           {
             initial = false;
-            grey_box_x_acc = 0;
           }
         }
         // Actually writing the number
@@ -138,12 +133,11 @@ void draw()
         {
             // Greying out days after month ends
             push();
-              strokeWeight(1);
-              stroke(0);
-              translate(-7, -10);
+              stroke(1);
+              translate(-10, -10);
               fill(320);
-              // x + 1 maybe to adjust for rounding of float?
-              rect(0, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
+              // No clue why the +10 is needed on the end width of the square
+              rect(0, 0, width/7 + 10, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
             pop();
         }
           
