@@ -3,6 +3,7 @@ import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 
 // TODO: Seperate grey boxes into their own function
+  // Implement interate through month as ultimate helper function
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -71,6 +72,7 @@ void draw()
   grid_lines();
   weekday_names();
   day_numbers();
+  daily_text();
   calendar_outline();
   
   //exit();
@@ -153,12 +155,14 @@ void day_numbers()
             // Greying out days before month start
             grey_box(-x_buffer, -y_buffer, 0);
         
+            // Moving onto next day
             translate(width/7, 0);
             x_translate_added += width/7;
             continue;
           }
           else
           {
+            // Stopping grey boxes, starting day numbers
             initial = false;
           }
         }
@@ -178,13 +182,83 @@ void day_numbers()
         // Keeping tabs of accumulation
         day_acc++;
           
+        // Moving onto next day
         translate(width/7, 0);
         x_translate_added += width/7;
       }
+      // Moving onto next week
       translate(-x_translate_added, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
-      x_translate_added = 0;
-      
+      x_translate_added = 0;  // Resetting x to beginning of week
     }
+  pop();
+}
+
+void iterate_through_month(String doing)
+{
+  int day_acc = 1;
+  push();  
+    float x_translate_added = 0;  // This is to accurately realignwhen the y-axis moves down
+    for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
+    {
+      for (int x_ = 0; x_ < 7; x_++)
+      {
+        number_display(day_acc, x_);
+        
+        // Moving onto next day
+        day_acc++;
+        translate(width/7, 0);
+        x_translate_added += width/7;
+      }
+      // Moving onto next week
+      translate(-x_translate_added, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+      x_translate_added = 0;  // Resetting x to beginning of week
+    }
+  pop();
+}
+
+void number_display(int day_num, int weekday_iterator)
+{
+  // TODO: Make greying out boxes its own function
+  
+  int x_buffer = 5;
+  int y_buffer = 10;
+  
+  push();
+    translate(x_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + y_buffer);
+    
+    boolean initial = true;
+    // Sets first day of month number to proper weekday
+        if (initial)
+        {
+          if (WEEKDAYS[weekday_iterator] != FIRST_DAY_OF_MONTH_NAME)
+          {
+            // Greying out days before month start
+            grey_box(-x_buffer, -y_buffer, 0);
+        
+            // Moving onto next day
+            translate(width/7, 0);
+            x_translate_added += width/7;
+            continue;
+          }
+          else
+          {
+            // Stopping grey boxes, starting day numbers
+            initial = false;
+          }
+        }
+        // Actually writing the number
+        textAlign(LEFT, CENTER);
+        textSize(12);
+        noStroke();
+        fill(0);
+        text(String.valueOf(day_acc), 0, 0);
+        
+        if (day_acc > DAYS_IN_MONTH)
+        {
+            // Greying out days after month ends
+            // No clue why the +10 is needed on the end width of the square
+            grey_box(-x_buffer, -y_buffer, 10);
+        }
   pop();
 }
 
@@ -203,9 +277,22 @@ void calendar_outline()
   push();
     stroke(0);
     strokeWeight(2);
-    int line_buffer = 1;
+    int line_buffer = 1;  // For visibility
     line(line_buffer, MONTH_BOX_HEIGHT, line_buffer, height - line_buffer);  // LEFT
     line(width - line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, height - line_buffer);  // RIGHT
     line(line_buffer, height - line_buffer, width - line_buffer, height - line_buffer);  // BOTTOM
+  pop();
+}
+
+void daily_text()
+{
+  
+}
+
+void bullet_point(float x, float y, int size)
+{
+  push();
+    stroke(0);
+    square(x, y, size);
   pop();
 }
