@@ -2,7 +2,7 @@ import java.util.*;  // For Date
 import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 
-// TODO: Fix lines bleeding into month header (line cap?)
+// TODO: Seperate grey boxes into their own function
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -15,11 +15,15 @@ String DAY_NAME;
 String MONTH_NAME;
 String MONTH_AND_YEAR;
 String FIRST_DAY_OF_MONTH_NAME;
+int FIRST_DAY_OF_MONTH_COLUMN;
 int DAYS_IN_MONTH;
 
 // CALENDAR ALIGNMENTS
 float MONTH_BOX_HEIGHT;
 float DAY_NAME_BOX_HEIGHT = 25;
+
+// CALENDAR GRID INFO
+int AMOUNT_OF_ROWS;
 
 
 void setup()
@@ -29,10 +33,13 @@ void setup()
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
+  strokeCap(SQUARE);
   background(360);
   
+  // CALENDAR ALIGNMENT
   MONTH_BOX_HEIGHT = height/6;
   
+  // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
   LOCAL_DATE = LOCAL_DATE.minusMonths(5);
@@ -43,8 +50,19 @@ void setup()
   MONTH_NAME = LOCAL_DATE.getMonth().toString();
   FIRST_DAY_OF_MONTH_NAME = LOCAL_DATE.minusDays(DAY-1).getDayOfWeek().toString();
   MONTH_AND_YEAR = MONTH_NAME + " " + YEAR;
-  
   DAYS_IN_MONTH = LOCAL_DATE.lengthOfMonth();
+  
+  // GRID STUFF
+  AMOUNT_OF_ROWS = 5;
+  
+  FIRST_DAY_OF_MONTH_COLUMN = 0;
+  while (WEEKDAYS[FIRST_DAY_OF_MONTH_COLUMN] != FIRST_DAY_OF_MONTH_NAME)
+    FIRST_DAY_OF_MONTH_COLUMN++;
+  
+  // Adjusting rows if days don't fit into 7x5 grid
+  int DAYS_FITTING_INTO_7X5 = 35 - FIRST_DAY_OF_MONTH_COLUMN;
+  if (DAYS_FITTING_INTO_7X5 < DAYS_IN_MONTH)
+    AMOUNT_OF_ROWS = 6;
 }
 
 void draw()
@@ -93,9 +111,9 @@ void grid_lines()
 
     // Starts at 1 so it doesn't draw a line over the day name line
     float y;
-    for (int i = 1; i < 6; i++)
+    for (int i = 1; i < AMOUNT_OF_ROWS + 1; i++)
     {
-      y = i * ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5);
+      y = i * ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS);
       line(0, y, width, y);
     }
   pop();
@@ -117,13 +135,13 @@ void weekday_names()
 void day_numbers()
 {
   int day_acc = 1;
-  int x_buffer = 10;
+  int x_buffer = 5;
   int y_buffer = 10;
   push();
     translate(x_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + y_buffer);
     boolean initial = true;
     float x_translate_added = 0;  // This is to accurately realign the numbers when the y-axis moves down
-    for (int y_ = 0; y_ < 5; y_++)
+    for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
     {
       for (int x_ = 0; x_ < 7; x_++)
       {
@@ -133,12 +151,7 @@ void day_numbers()
           if (WEEKDAYS[x_] != FIRST_DAY_OF_MONTH_NAME)
           {
             // Greying out days before month start
-            push();
-              stroke(1);
-              translate(-x_buffer, -y_buffer);
-              fill(320);
-              rect(0, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
-            pop();
+            grey_box(-x_buffer, -y_buffer, 0);
         
             translate(width/7, 0);
             x_translate_added += width/7;
@@ -159,13 +172,8 @@ void day_numbers()
         if (day_acc > DAYS_IN_MONTH)
         {
             // Greying out days after month ends
-            push();
-              stroke(0);
-              translate(-x_buffer, -y_buffer);
-              fill(320);
-              // No clue why the +10 is needed on the end width of the square
-              rect(0, 0, width/7 + 10, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
-            pop();
+            // No clue why the +10 is needed on the end width of the square
+            grey_box(-x_buffer, -y_buffer, 10);
         }
         // Keeping tabs of accumulation
         day_acc++;
@@ -173,10 +181,20 @@ void day_numbers()
         translate(width/7, 0);
         x_translate_added += width/7;
       }
-      translate(-x_translate_added, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/5));
+      translate(-x_translate_added, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
       x_translate_added = 0;
       
     }
+  pop();
+}
+
+void grey_box(int x_translate, int y_translate, int x_additional)
+{
+  push();
+    stroke(0);
+    translate(x_translate, y_translate);
+    fill(320);
+    rect(0, 0, width/7 + x_additional, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
   pop();
 }
 
