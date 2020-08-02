@@ -64,6 +64,7 @@ void setup()
   int DAYS_FITTING_INTO_7X5 = 35 - FIRST_DAY_OF_MONTH_COLUMN;
   if (DAYS_FITTING_INTO_7X5 < DAYS_IN_MONTH)
     AMOUNT_OF_ROWS = 6;
+    
 }
 
 void draw()
@@ -71,7 +72,9 @@ void draw()
   month_box();
   grid_lines();
   weekday_names();
-  day_numbers();
+  iterate_through_month("Numbers");
+  iterate_through_month("Grey Boxes");
+  //day_numbers();
   daily_text();
   calendar_outline();
   
@@ -134,78 +137,28 @@ void weekday_names()
   pop();
 }
 
-void day_numbers()
-{
-  int day_acc = 1;
-  int x_buffer = 5;
-  int y_buffer = 10;
-  push();
-    translate(x_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + y_buffer);
-    boolean initial = true;
-    float x_translate_added = 0;  // This is to accurately realign the numbers when the y-axis moves down
-    for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
-    {
-      for (int x_ = 0; x_ < 7; x_++)
-      {
-        // Sets first day of month number to proper weekday
-        if (initial)
-        {
-          if (WEEKDAYS[x_] != FIRST_DAY_OF_MONTH_NAME)
-          {
-            // Greying out days before month start
-            grey_box(-x_buffer, -y_buffer, 0);
-        
-            // Moving onto next day
-            translate(width/7, 0);
-            x_translate_added += width/7;
-            continue;
-          }
-          else
-          {
-            // Stopping grey boxes, starting day numbers
-            initial = false;
-          }
-        }
-        // Actually writing the number
-        textAlign(LEFT, CENTER);
-        textSize(12);
-        noStroke();
-        fill(0);
-        text(String.valueOf(day_acc), 0, 0);
-        
-        if (day_acc > DAYS_IN_MONTH)
-        {
-            // Greying out days after month ends
-            // No clue why the +10 is needed on the end width of the square
-            grey_box(-x_buffer, -y_buffer, 10);
-        }
-        // Keeping tabs of accumulation
-        day_acc++;
-          
-        // Moving onto next day
-        translate(width/7, 0);
-        x_translate_added += width/7;
-      }
-      // Moving onto next week
-      translate(-x_translate_added, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
-      x_translate_added = 0;  // Resetting x to beginning of week
-    }
-  pop();
-}
-
 void iterate_through_month(String doing)
 {
+  int square_acc = 0;
   int day_acc = 1;
   push();  
+    translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     float x_translate_added = 0;  // This is to accurately realignwhen the y-axis moves down
     for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
     {
       for (int x_ = 0; x_ < 7; x_++)
       {
-        number_display(day_acc, x_);
+        if (doing == "Numbers")
+          number_display(day_acc);
+        
+        if (doing == "Grey Boxes")
+          grey_out_non_month_days(square_acc, day_acc, 0);
+        
         
         // Moving onto next day
-        day_acc++;
+        if (square_acc >= FIRST_DAY_OF_MONTH_COLUMN)
+          day_acc++;
+        square_acc++;
         translate(width/7, 0);
         x_translate_added += width/7;
       }
@@ -216,59 +169,39 @@ void iterate_through_month(String doing)
   pop();
 }
 
-void number_display(int day_num, int weekday_iterator)
+void number_display(int day_num)
 {
-  // TODO: Make greying out boxes its own function
-  
   int x_buffer = 5;
   int y_buffer = 10;
   
   push();
-    translate(x_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + y_buffer);
-    
-    boolean initial = true;
-    // Sets first day of month number to proper weekday
-        if (initial)
-        {
-          if (WEEKDAYS[weekday_iterator] != FIRST_DAY_OF_MONTH_NAME)
-          {
-            // Greying out days before month start
-            grey_box(-x_buffer, -y_buffer, 0);
-        
-            // Moving onto next day
-            translate(width/7, 0);
-            x_translate_added += width/7;
-            continue;
-          }
-          else
-          {
-            // Stopping grey boxes, starting day numbers
-            initial = false;
-          }
-        }
-        // Actually writing the number
-        textAlign(LEFT, CENTER);
-        textSize(12);
-        noStroke();
-        fill(0);
-        text(String.valueOf(day_acc), 0, 0);
-        
-        if (day_acc > DAYS_IN_MONTH)
-        {
-            // Greying out days after month ends
-            // No clue why the +10 is needed on the end width of the square
-            grey_box(-x_buffer, -y_buffer, 10);
-        }
+    translate(x_buffer, y_buffer);
+
+    textAlign(LEFT, CENTER);
+    textSize(12);
+    noStroke();
+    fill(0);
+    text(String.valueOf(day_num), 0, 0);
+
   pop();
 }
 
-void grey_box(int x_translate, int y_translate, int x_additional)
+void grey_out_non_month_days(int square, int day, int x_additional)
 {
   push();
     stroke(0);
-    translate(x_translate, y_translate);
     fill(320);
-    rect(0, 0, width/7 + x_additional, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+    if (square < FIRST_DAY_OF_MONTH_COLUMN)
+    {
+      // Greying out days before month start
+      rect(0, 0, width/7 + x_additional, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+    }
+    if (day > DAYS_IN_MONTH)
+    {
+      // Greying out days after month ends
+      // + 5 on width because last column might be slightly larger? Due to width/7 whatevers left after saturday line
+      rect(0, 0, + width/7 + 5, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+    }
   pop();
 }
 
