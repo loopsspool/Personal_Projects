@@ -43,7 +43,6 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  LOCAL_DATE = LOCAL_DATE.minusMonths(5);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -140,7 +139,7 @@ void weekday_names()
 void iterate_through_month(String doing)
 {
   int square_acc = 0;
-  int day_acc = 1;
+  int day_acc = 0;
   push();  
     translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     float x_translate_added = 0;  // This is to accurately realignwhen the y-axis moves down
@@ -152,13 +151,13 @@ void iterate_through_month(String doing)
           number_display(day_acc);
         
         if (doing == "Grey Boxes")
-          grey_out_non_month_days(square_acc, day_acc, 0);
+          grey_out_non_month_days(day_acc);
         
         
         // Moving onto next day
+        square_acc++;
         if (square_acc >= FIRST_DAY_OF_MONTH_COLUMN)
           day_acc++;
-        square_acc++;
         translate(width/7, 0);
         x_translate_added += width/7;
       }
@@ -186,15 +185,15 @@ void number_display(int day_num)
   pop();
 }
 
-void grey_out_non_month_days(int square, int day, int x_additional)
+void grey_out_non_month_days(int day)
 {
   push();
     stroke(0);
     fill(320);
-    if (square < FIRST_DAY_OF_MONTH_COLUMN)
+    if (day < 1)
     {
       // Greying out days before month start
-      rect(0, 0, width/7 + x_additional, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+      rect(0, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
     }
     if (day > DAYS_IN_MONTH)
     {
