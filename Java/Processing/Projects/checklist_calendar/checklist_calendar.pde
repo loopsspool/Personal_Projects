@@ -2,6 +2,8 @@ import java.util.*;  // For Date
 import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 
+// TODO: Import texts you like
+
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
 
@@ -40,7 +42,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  //LOCAL_DATE = LOCAL_DATE.plusMonths(1);
+  //LOCAL_DATE = LOCAL_DATE.plusMonths(3);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -159,11 +161,11 @@ void iterate_through_month(String doing)
     {
       for (int x_ = 0; x_ < 7; x_++)
       {
-        if (doing == "Numbers")
-          number_display(day_acc);
-        
         if (doing == "Grey Boxes")
           grey_out_non_month_days(day_acc);
+          
+        if (doing == "Numbers")
+          number_display(day_acc);
           
         if (doing == "Checklist")
           daily_text();
@@ -185,15 +187,19 @@ void iterate_through_month(String doing)
 
 void number_display(int day_num)
 {
-  int x_buffer = 5;
-  int y_buffer = 10;
+  // TODO: Bold daily number
+  
+  int x_buffer = 4;
+  int y_buffer = 8;
   
   push();
     translate(x_buffer, y_buffer);
 
     textAlign(LEFT, CENTER);
     textSize(12);
-    noStroke();
+    stroke(0);
+    //strokeWeight(15);   Not how you bold... maybe try number in same place a little bigger?
+      // If you can't find anything else
     fill(0);
     text(String.valueOf(day_num), 0, 0);
 
@@ -234,7 +240,7 @@ void calendar_outline()
 void daily_text()
 {
   push();
-    translate(5, 7);
+    translate(5, 6);
     bullet_point("Do morning routine");
     bullet_point("Be present");
     bullet_point("Do thing you love");
@@ -249,6 +255,7 @@ void bullet_point(String text)
   float size = 10;
   float y_translate = 0;
   // Adjusting for rows of calendar so alignment doesn't look funky
+  // TODO: Align to liking
   if (AMOUNT_OF_ROWS == 6)
     y_translate = 13;
   if (AMOUNT_OF_ROWS == 5)
