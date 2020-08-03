@@ -2,9 +2,6 @@ import java.util.*;  // For Date
 import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 
-// TODO: Seperate grey boxes into their own function
-  // Implement interate through month as ultimate helper function
-
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
 
@@ -43,6 +40,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+  //LOCAL_DATE = LOCAL_DATE.plusMonths(1);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -55,15 +53,20 @@ void setup()
   // GRID STUFF
   AMOUNT_OF_ROWS = 5;
   
+  // Finding what column month starts in
   FIRST_DAY_OF_MONTH_COLUMN = 0;
   while (WEEKDAYS[FIRST_DAY_OF_MONTH_COLUMN] != FIRST_DAY_OF_MONTH_NAME)
     FIRST_DAY_OF_MONTH_COLUMN++;
   
-  // Adjusting rows if days don't fit into 7x5 grid
+  // Adding a row if days don't fit into 7x5 grid
+    // If longer month starts later in the week
   int DAYS_FITTING_INTO_7X5 = 35 - FIRST_DAY_OF_MONTH_COLUMN;
   if (DAYS_FITTING_INTO_7X5 < DAYS_IN_MONTH)
     AMOUNT_OF_ROWS = 6;
-    
+  
+  // If February starts on a Monday and it isn't a leap year it only needs 4 rows
+  if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
+    AMOUNT_OF_ROWS = 4;
 }
 
 void draw()
@@ -72,9 +75,8 @@ void draw()
   grid_lines();
   weekday_names();
   iterate_through_month("Numbers");
+  iterate_through_month("Checklist");
   iterate_through_month("Grey Boxes");
-  //day_numbers();
-  daily_text();
   calendar_outline();
   
   //exit();
@@ -82,10 +84,13 @@ void draw()
 
 void month_box()
 {
+  // TODO: Switch for month color
+  // TODO: Add in generative design in the header related to the season for month
+  
   // Month name "text box"
   push();
     noStroke();
-    fill(22, 100, 100);
+    fill(40, 100, 100);
     rect(0, 0, width, MONTH_BOX_HEIGHT);
     fill(360);
     textSize(60);
@@ -140,9 +145,16 @@ void iterate_through_month(String doing)
 {
   int square_acc = 0;
   int day_acc = 0;
+  // If month starts on a Monday (first square), make it day 1
+      // So square doesn't get greyed out & day number shows as 1
+        // Since normally isn't accumulated until after function calls
+  if (FIRST_DAY_OF_MONTH_COLUMN == 0)
+    day_acc++;
+      
   push();  
     translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     float x_translate_added = 0;  // This is to accurately realignwhen the y-axis moves down
+    
     for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
     {
       for (int x_ = 0; x_ < 7; x_++)
@@ -152,6 +164,9 @@ void iterate_through_month(String doing)
         
         if (doing == "Grey Boxes")
           grey_out_non_month_days(day_acc);
+          
+        if (doing == "Checklist")
+          daily_text();
         
         
         // Moving onto next day
@@ -218,13 +233,35 @@ void calendar_outline()
 
 void daily_text()
 {
-  
+  push();
+    translate(5, 7);
+    bullet_point("Do morning routine");
+    bullet_point("Be present");
+    bullet_point("Do thing you love");
+    bullet_point("Spend time w/ self");
+    bullet_point("Do list");
+  pop();
 }
 
-void bullet_point(float x, float y, int size)
+void bullet_point(String text)
 {
-  push();
-    stroke(0);
-    square(x, y, size);
-  pop();
+  float indent = 14;
+  float size = 10;
+  float y_translate = 0;
+  // Adjusting for rows of calendar so alignment doesn't look funky
+  if (AMOUNT_OF_ROWS == 6)
+    y_translate = 13;
+  if (AMOUNT_OF_ROWS == 5)
+    y_translate = 15;
+  if (AMOUNT_OF_ROWS == 4)
+    y_translate = 20;
+
+  // No push/pop so translates will stack for bullet points
+  translate(0, y_translate);
+  square(0, 0, size);
+  textSize(size);
+  textAlign(LEFT);
+  fill(0);
+  text(text, indent, 0.9 * size);
+  noFill();  // Keep this here so following check-boxes aren't filled
 }
