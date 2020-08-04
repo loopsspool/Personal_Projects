@@ -2,8 +2,6 @@ import java.util.*;  // For Date
 import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 
-// TODO: Import texts you like
-
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
 
@@ -25,16 +23,28 @@ float DAY_NAME_BOX_HEIGHT = 25;
 // CALENDAR GRID INFO
 int AMOUNT_OF_ROWS;
 
+// FONTS
+PFont august_month_font;
+PFont body_text;
+PFont body_text_bold;
+
 
 void setup()
 {
-  size(825, 638);
-  //size(825, 638, PDF, "calendar_test.pdf");
+  //size(825, 638);
+  size(825, 638, PDF, "calendar_test.pdf");
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
   strokeCap(SQUARE);
   background(360);
+  
+  // Uncomment to view available fonts
+  //String[] fontList = PFont.list();
+  //printArray(fontList);
+  august_month_font = createFont("Castellar", 60);
+  body_text = createFont("Century Schoolbook", 12);
+  body_text_bold = createFont("Century Schoolbook Bold", 12);
   
   // CALENDAR ALIGNMENT
   MONTH_BOX_HEIGHT = height/6;
@@ -81,13 +91,15 @@ void draw()
   iterate_through_month("Grey Boxes");
   calendar_outline();
   
-  //exit();
+  exit();
 }
 
 void month_box()
 {
   // TODO: Switch for month color
   // TODO: Add in generative design in the header related to the season for month
+  
+  textFont(august_month_font);
   
   // Month name "text box"
   push();
@@ -132,6 +144,8 @@ void grid_lines()
 
 void weekday_names()
 {
+  textFont(body_text_bold);
+  
   push();
     translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     noStroke();
@@ -186,9 +200,7 @@ void iterate_through_month(String doing)
 }
 
 void number_display(int day_num)
-{
-  // TODO: Bold daily number
-  
+{ 
   int x_buffer = 4;
   int y_buffer = 8;
   
@@ -225,20 +237,10 @@ void grey_out_non_month_days(int day)
   pop();
 }
 
-void calendar_outline()
-{
-  push();
-    stroke(0);
-    strokeWeight(2);
-    int line_buffer = 1;  // For visibility
-    line(line_buffer, MONTH_BOX_HEIGHT, line_buffer, height - line_buffer);  // LEFT
-    line(width - line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, height - line_buffer);  // RIGHT
-    line(line_buffer, height - line_buffer, width - line_buffer, height - line_buffer);  // BOTTOM
-  pop();
-}
-
 void daily_text()
 {
+  textFont(body_text);
+  
   push();
     translate(5, 6);
     bullet_point("Do morning routine");
@@ -271,4 +273,16 @@ void bullet_point(String text)
   fill(0);
   text(text, indent, 0.9 * size);
   noFill();  // Keep this here so following check-boxes aren't filled
+}
+
+void calendar_outline()
+{
+  push();
+    stroke(0);
+    strokeWeight(1);
+    int line_buffer = 1;  // For visibility
+    line(line_buffer, MONTH_BOX_HEIGHT, line_buffer, height - line_buffer);  // LEFT
+    line(width - line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, height - line_buffer);  // RIGHT
+    line(line_buffer, height - line_buffer, width - line_buffer, height - line_buffer);  // BOTTOM
+  pop();
 }
