@@ -1,8 +1,13 @@
+// ART ALIGNMENT
 String[] months_needing_margin_buffer = {"JANUARY", "MARCH", "MAY"};
 int margin_buffer = 0;
-
 float before_month_name_art_end_x;
 float after_month_name_art_start_x;
+
+// IMAGES
+PImage leaf;
+
+// TODO: Allow full-width art (0, width)(includes text)
 
 void month_art()
 {
@@ -47,9 +52,14 @@ void draw_month_art()
 
 void september_art()
 {
-  noStroke();
-  fill(360);
-  rect(0, 0, before_month_name_art_end_x, MONTH_BOX_HEIGHT);
-  rect(after_month_name_art_start_x, 0, width, MONTH_BOX_HEIGHT);
+  leaf = loadImage("leaf.png");
+  
+  tint(23, 100, 100);
+  image(leaf, width/2, height/2);
+  //noStroke();
+  //fill(360);
+  //rect(0, 0, before_month_name_art_end_x, MONTH_BOX_HEIGHT);
+  //rect(after_month_name_art_start_x, 0, width, MONTH_BOX_HEIGHT);
+  
 
 }
