@@ -17,6 +17,7 @@ int FIRST_DAY_OF_MONTH_COLUMN;
 int DAYS_IN_MONTH;
 
 // CALENDAR ALIGNMENTS
+int MONTH_TEXT_SIZE = 60;
 float MONTH_BOX_HEIGHT;
 float DAY_NAME_BOX_HEIGHT = 25;
 
@@ -31,8 +32,8 @@ PFont body_text_bold;
 
 void setup()
 {
-  //size(825, 638);
-  size(825, 638, PDF, "calendar_test.pdf");
+  size(825, 638);
+  //size(825, 638, PDF, "calendar_test.pdf");
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
@@ -52,7 +53,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  //LOCAL_DATE = LOCAL_DATE.plusMonths(3);
+  LOCAL_DATE = LOCAL_DATE.plusMonths(1);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -79,22 +80,24 @@ void setup()
   // If February starts on a Monday and it isn't a leap year it only needs 4 rows
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
+
 }
 
 void draw()
 {
-  month_box();
+  month_text_box();
+  month_art();
   grid_lines();
   weekday_names();
   iterate_through_month("Numbers");
   iterate_through_month("Checklist");
   iterate_through_month("Grey Boxes");
   calendar_outline();
-  
-  exit();
+    
+  //exit();
 }
 
-void month_box()
+void month_text_box()
 {
   // TODO: Switch for month color
   // TODO: Add in generative design in the header related to the season for month
@@ -104,10 +107,10 @@ void month_box()
   // Month name "text box"
   push();
     noStroke();
-    fill(40, 100, 100);
+    fill(0);
     rect(0, 0, width, MONTH_BOX_HEIGHT);
     fill(360);
-    textSize(60);
+    textSize(MONTH_TEXT_SIZE);
     text(MONTH_AND_YEAR, width/2, MONTH_BOX_HEIGHT/2.3);
   pop();
 }
@@ -222,7 +225,7 @@ void grey_out_non_month_days(int day)
 {
   push();
     stroke(0);
-    fill(320);
+    fill(280);
     if (day < 1)
     {
       // Greying out days before month start
@@ -279,7 +282,7 @@ void calendar_outline()
 {
   push();
     stroke(0);
-    strokeWeight(1);
+    strokeWeight(2);
     int line_buffer = 1;  // For visibility
     line(line_buffer, MONTH_BOX_HEIGHT, line_buffer, height - line_buffer);  // LEFT
     line(width - line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, height - line_buffer);  // RIGHT
