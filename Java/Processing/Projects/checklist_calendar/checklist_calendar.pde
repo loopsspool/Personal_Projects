@@ -29,10 +29,14 @@ PFont august_month_font;
 PFont body_text;
 PFont body_text_bold;
 
+// GRAPHICS
+PGraphics september_banner;
+
 
 void setup()
 {
   size(825, 638);
+  noLoop();
   //size(825, 638, PDF, "calendar_test.pdf");
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
@@ -85,8 +89,9 @@ void setup()
 
 void draw()
 {
-  month_text_box();
   month_art();
+  //month_text_box();
+  month_art_cutoff();
   grid_lines();
   weekday_names();
   iterate_through_month("Numbers");
@@ -99,6 +104,7 @@ void draw()
 
 void month_text_box()
 {
+  // TODO: Consider getting rid of this function and making it part of the month art function
   // TODO: Switch for month color
   // TODO: Add in generative design in the header related to the season for month
   
@@ -106,12 +112,19 @@ void month_text_box()
   
   // Month name "text box"
   push();
-    noStroke();
-    fill(0);
-    rect(0, 0, width, MONTH_BOX_HEIGHT);
-    fill(360);
     textSize(MONTH_TEXT_SIZE);
     text(MONTH_AND_YEAR, width/2, MONTH_BOX_HEIGHT/2.3);
+  pop();
+}
+
+void month_art_cutoff()
+{
+  // White box covering any overlap from the monthly art header
+  push();
+  stroke(0);
+  strokeWeight(1);
+  fill(360);
+  rect(0, MONTH_BOX_HEIGHT, width, height);
   pop();
 }
 

@@ -52,14 +52,59 @@ void draw_month_art()
 
 void september_art()
 {
-  leaf = loadImage("leaf.png");
+  september_banner = createGraphics(width, ceil(MONTH_BOX_HEIGHT));
+  september_banner.colorMode(HSB, 360, 100, 100);
+  september_banner.beginDraw();
   
-  tint(23, 100, 100);
-  image(leaf, width/2, height/2);
+  // Background color
+  september_banner.noStroke();
+  september_banner.fill(202, 43, 100); // Blue sky
+  //fill(360);
+  september_banner.rect(0, 0, width, MONTH_BOX_HEIGHT);
+  
+  leaf = loadImage("leaf.png");
+  september_banner.imageMode(CENTER);
+  
+  // TODO: Lots of leaves falling across whole banner?
+    // Random rotation and tint within warm colors
+  
+  int leaf_size;
+  float x, y;
+  float rotation;
+  int tint;
+  for (int i = 0; i < 2000; i++)
+  {
+    push();
+      // Randomizing leaf elements
+      leaf_size = ceil(random(20, 50));
+      x = random(-leaf_size, width + leaf_size);
+      y = random(-leaf_size, MONTH_BOX_HEIGHT);
+      september_banner.translate(x, y);
+      rotation = radians(random(360));
+      tint = ceil(random(0, 60));
+      
+      // TODO: Not being drawn properly to graphics renderer
+      // Drawing the leaves
+      september_banner.rotate(rotation);
+      september_banner.tint(tint, 100, 100);
+      september_banner.image(leaf, 0, 0, leaf_size, leaf_size);  // Tint doesn't work with PDF export
+      //copy(leaf, 0, 0, leaf.width, leaf.height, 0, 0, leaf_size, leaf_size);  // Tint not applied  
+    pop();
+  }
+
+  september_banner.endDraw();
+  image(september_banner, width, ceil(MONTH_BOX_HEIGHT));
+  september_banner.save("test.png");
   //noStroke();
   //fill(360);
   //rect(0, 0, before_month_name_art_end_x, MONTH_BOX_HEIGHT);
   //rect(after_month_name_art_start_x, 0, width, MONTH_BOX_HEIGHT);
   
-
+  // MONTH NAME
+  fill(0);
+  textFont(august_month_font);
+  textSize(MONTH_TEXT_SIZE);
+  // "Bolds" the font a little -- since theres no bold version
+  for (int i = 0; i < 2; i++)
+    text(MONTH_AND_YEAR, (width/2) + i, MONTH_BOX_HEIGHT/2.3);
 }
