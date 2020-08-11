@@ -52,29 +52,27 @@ void draw_month_art()
 
 void september_art()
 {
+  // TODO: Leaf image quality is bad
+  
   september_banner = createGraphics(width, ceil(MONTH_BOX_HEIGHT));
-  september_banner.colorMode(HSB, 360, 100, 100);
   september_banner.beginDraw();
+  september_banner.colorMode(HSB, 360, 100, 100);
   
   // Background color
   september_banner.noStroke();
   september_banner.fill(202, 43, 100); // Blue sky
-  //fill(360);
   september_banner.rect(0, 0, width, MONTH_BOX_HEIGHT);
   
   leaf = loadImage("leaf.png");
   september_banner.imageMode(CENTER);
   
-  // TODO: Lots of leaves falling across whole banner?
-    // Random rotation and tint within warm colors
-  
   int leaf_size;
   float x, y;
   float rotation;
   int tint;
-  for (int i = 0; i < 2000; i++)
+  for (int i = 0; i < 2500; i++)
   {
-    push();
+    september_banner.push();
       // Randomizing leaf elements
       leaf_size = ceil(random(20, 50));
       x = random(-leaf_size, width + leaf_size);
@@ -83,18 +81,17 @@ void september_art()
       rotation = radians(random(360));
       tint = ceil(random(0, 60));
       
-      // TODO: Not being drawn properly to graphics renderer
       // Drawing the leaves
       september_banner.rotate(rotation);
       september_banner.tint(tint, 100, 100);
-      september_banner.image(leaf, 0, 0, leaf_size, leaf_size);  // Tint doesn't work with PDF export
-      //copy(leaf, 0, 0, leaf.width, leaf.height, 0, 0, leaf_size, leaf_size);  // Tint not applied  
-    pop();
+      september_banner.image(leaf, 0, 0, leaf_size, leaf_size);
+    september_banner.pop();
   }
 
   september_banner.endDraw();
-  image(september_banner, width, ceil(MONTH_BOX_HEIGHT));
-  september_banner.save("test.png");
+  image(september_banner, 0, 0);
+
+  // CODE FOR ONLY DRAWING AROUND THE NAME, NOT FULL BANNER
   //noStroke();
   //fill(360);
   //rect(0, 0, before_month_name_art_end_x, MONTH_BOX_HEIGHT);
