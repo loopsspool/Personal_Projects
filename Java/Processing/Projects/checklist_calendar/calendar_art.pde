@@ -4,6 +4,9 @@ int margin_buffer = 0;
 float before_month_name_art_end_x;
 float after_month_name_art_start_x;
 
+float pixel_buffer_scale = 2;  // To retain image quality drawn on the buffer
+
+
 // IMAGES
 PImage leaf;
 
@@ -52,16 +55,16 @@ void draw_month_art()
 
 void september_art()
 {
-  // TODO: Leaf image quality is bad
-  
-  september_banner = createGraphics(width, ceil(MONTH_BOX_HEIGHT));
+  // Using a graphics buffer because theres a bug that tint doesn't show when exported as a pdf
+    // There's also a scalar & scale call to retain image quality drawn on the buffer
+  september_banner = createGraphics(ceil(width * pixel_buffer_scale), ceil(MONTH_BOX_HEIGHT * pixel_buffer_scale));
   september_banner.beginDraw();
   september_banner.colorMode(HSB, 360, 100, 100);
   
   // Background color
   september_banner.noStroke();
   september_banner.fill(202, 43, 100); // Blue sky
-  september_banner.rect(0, 0, width, MONTH_BOX_HEIGHT);
+  september_banner.rect(0, 0, width * pixel_buffer_scale, MONTH_BOX_HEIGHT * pixel_buffer_scale);
   
   leaf = loadImage("leaf.png");
   september_banner.imageMode(CENTER);
@@ -74,9 +77,9 @@ void september_art()
   {
     september_banner.push();
       // Randomizing leaf elements
-      leaf_size = ceil(random(20, 50));
-      x = random(-leaf_size, width + leaf_size);
-      y = random(-leaf_size, MONTH_BOX_HEIGHT);
+      leaf_size = ceil(random(20, 50) * pixel_buffer_scale);
+      x = random(-leaf_size, (width * pixel_buffer_scale) + leaf_size);
+      y = random(-leaf_size, MONTH_BOX_HEIGHT * pixel_buffer_scale);
       september_banner.translate(x, y);
       rotation = radians(random(360));
       tint = ceil(random(0, 60));
@@ -89,7 +92,10 @@ void september_art()
   }
 
   september_banner.endDraw();
-  image(september_banner, 0, 0);
+  push();
+    scale(1/pixel_buffer_scale, 1/pixel_buffer_scale);
+    image(september_banner, 0, 0);
+  pop();
 
   // CODE FOR ONLY DRAWING AROUND THE NAME, NOT FULL BANNER
   //noStroke();
