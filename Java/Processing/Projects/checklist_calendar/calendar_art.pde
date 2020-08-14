@@ -4,7 +4,7 @@ int margin_buffer = 0;
 float before_month_name_art_end_x;
 float after_month_name_art_start_x;
 
-float pixel_buffer_scale = 2;  // To retain image quality drawn on the buffer
+float pixel_buffer_scale = 3;  // To retain image quality drawn on the buffer
 
 
 // IMAGES
@@ -72,7 +72,8 @@ void september_art()
   int leaf_size;
   float x, y;
   float rotation;
-  int tint;
+  int hue;
+  int saturation;
   for (int i = 0; i < 2500; i++)
   {
     september_banner.push();
@@ -82,11 +83,12 @@ void september_art()
       y = random(-leaf_size, MONTH_BOX_HEIGHT * pixel_buffer_scale);
       september_banner.translate(x, y);
       rotation = radians(random(360));
-      tint = ceil(random(0, 60));
+      hue = ceil(random(0, 50));
+      saturation = ceil(random(70, 90));
       
       // Drawing the leaves
       september_banner.rotate(rotation);
-      september_banner.tint(tint, 100, 100);
+      september_banner.tint(hue, saturation, 100);
       september_banner.image(leaf, 0, 0, leaf_size, leaf_size);
     september_banner.pop();
   }
