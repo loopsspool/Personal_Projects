@@ -25,12 +25,12 @@ float DAY_NAME_BOX_HEIGHT = 25;
 int AMOUNT_OF_ROWS;
 
 // FONTS
-PFont august_month_font;
+PFont month_font;
 PFont body_text;
 PFont body_text_bold;
 
 // GRAPHICS
-PGraphics september_banner;
+PGraphics month_banner;
 
 
 void setup()
@@ -47,7 +47,7 @@ void setup()
   // Uncomment to view available fonts
   //String[] fontList = PFont.list();
   //printArray(fontList);
-  august_month_font = createFont("Castellar", 60);
+  month_font = createFont("Castellar", 60);
   body_text = createFont("Century Schoolbook", 12);
   body_text_bold = createFont("Century Schoolbook Bold", 12);
   
@@ -61,7 +61,6 @@ void setup()
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
-  DAY_NAME = LOCAL_DATE.getDayOfWeek().toString();
   MONTH_NAME = LOCAL_DATE.getMonth().toString();
   FIRST_DAY_OF_MONTH_NAME = LOCAL_DATE.minusDays(DAY-1).getDayOfWeek().toString();
   MONTH_AND_YEAR = MONTH_NAME + " " + YEAR;
@@ -90,7 +89,6 @@ void setup()
 void draw()
 {
   month_art();
-  //month_text_box();
   month_art_cutoff();
   grid_lines();
   weekday_names();
@@ -102,29 +100,14 @@ void draw()
   //exit();
 }
 
-void month_text_box()
-{
-  // TODO: Consider getting rid of this function and making it part of the month art function
-  // TODO: Switch for month color
-  // TODO: Add in generative design in the header related to the season for month
-  
-  textFont(august_month_font);
-  
-  // Month name "text box"
-  push();
-    textSize(MONTH_TEXT_SIZE);
-    text(MONTH_AND_YEAR, width/2, MONTH_BOX_HEIGHT/2.3);
-  pop();
-}
-
 void month_art_cutoff()
 {
   // White box covering any overlap from the monthly art header
   push();
-  stroke(0);
-  strokeWeight(1);
-  fill(360);
-  rect(0, MONTH_BOX_HEIGHT, width, height);
+    stroke(0);
+    strokeWeight(1);
+    fill(360);
+    rect(0, MONTH_BOX_HEIGHT, width, height);
   pop();
 }
 
@@ -166,6 +149,7 @@ void weekday_names()
     translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     noStroke();
     fill(0);
+    textFont(body_text_bold);
     textSize(15);
     for (int i = 0; i < 7; i++)
       // + width/14 to center text between lines
@@ -177,6 +161,7 @@ void iterate_through_month(String doing)
 {
   int square_acc = 0;
   int day_acc = 0;
+  
   // If month starts on a Monday (first square), make it day 1
       // So square doesn't get greyed out & day number shows as 1
         // Since normally isn't accumulated until after function calls
@@ -191,20 +176,26 @@ void iterate_through_month(String doing)
     {
       for (int x_ = 0; x_ < 7; x_++)
       {
-        if (doing == "Grey Boxes")
-          grey_out_non_month_days(day_acc);
-          
-        if (doing == "Numbers")
-          number_display(day_acc);
-          
-        if (doing == "Checklist")
-          daily_text();
-        
+        switch(doing)
+        {
+          case "Grey Boxes":
+            grey_out_non_month_days(day_acc);
+            break;
+            
+          case "Numbers":
+            number_display(day_acc);
+            break;
+            
+          case "Checklist":
+            daily_text();
+            break;
+        }
         
         // Moving onto next day
         square_acc++;
         if (square_acc >= FIRST_DAY_OF_MONTH_COLUMN)
           day_acc++;
+          
         translate(width/7, 0);
         x_translate_added += width/7;
       }
@@ -222,15 +213,12 @@ void number_display(int day_num)
   
   push();
     translate(x_buffer, y_buffer);
-
     textAlign(LEFT, CENTER);
+    textFont(body_text_bold);
     textSize(12);
     stroke(0);
-    //strokeWeight(15);   Not how you bold... maybe try number in same place a little bigger?
-      // If you can't find anything else
     fill(0);
     text(String.valueOf(day_num), 0, 0);
-
   pop();
 }
 
@@ -300,5 +288,17 @@ void calendar_outline()
     line(line_buffer, MONTH_BOX_HEIGHT, line_buffer, height - line_buffer);  // LEFT
     line(width - line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, height - line_buffer);  // RIGHT
     line(line_buffer, height - line_buffer, width - line_buffer, height - line_buffer);  // BOTTOM
+  pop();
+}
+
+void bold_font(String text, PFont font_name, int font_size, int boldness, float x, float y)
+{
+  push();
+    fill(0);
+    textFont(font_name);
+    textSize(font_size);
+    // "Bolds" the font a little -- since theres no bold versions of some fonts
+    for (int i = 0; i < boldness; i++)
+      text(text, x + i, y);
   pop();
 }
