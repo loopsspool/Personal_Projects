@@ -35,9 +35,9 @@ PGraphics month_banner;
 
 void setup()
 {
-  size(825, 638);
+  size(785, 606);
   noLoop();
-  //size(825, 638, PDF, "calendar_test.pdf");
+  //size(785, 606, PDF, "calendar_test.pdf");
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
@@ -88,6 +88,7 @@ void setup()
 
 void draw()
 {
+  
   month_art();
   month_art_cutoff();
   grid_lines();
@@ -97,6 +98,7 @@ void draw()
   iterate_through_month("Grey Boxes");
   calendar_outline();
     
+  
   //exit();
 }
 
@@ -284,21 +286,39 @@ void calendar_outline()
   push();
     stroke(0);
     strokeWeight(2);
-    int line_buffer = 1;  // For visibility
-    line(line_buffer, MONTH_BOX_HEIGHT, line_buffer, height - line_buffer);  // LEFT
-    line(width - line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, height - line_buffer);  // RIGHT
+    int line_buffer = 1;  // For visibility & so outline matches line weight below month & weekday names
+    line(line_buffer, line_buffer, line_buffer, height - line_buffer);  // LEFT
+    line(width - line_buffer, line_buffer, width - line_buffer, height - line_buffer);  // RIGHT
+    line(line_buffer, line_buffer, width - line_buffer, line_buffer);  // TOP
+    line(line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, MONTH_BOX_HEIGHT);  // BELOW MONTH BOX
+    line(line_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT, width - line_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);  // BELOW WEEKDAY NAMES
     line(line_buffer, height - line_buffer, width - line_buffer, height - line_buffer);  // BOTTOM
   pop();
 }
 
-void bold_font(String text, PFont font_name, int font_size, int boldness, float x, float y)
+void bold_font(String text, PFont font_name, int font_size, float boldness, float x, float y)
 {
   push();
     fill(0);
     textFont(font_name);
     textSize(font_size);
     // "Bolds" the font a little -- since theres no bold versions of some fonts
-    for (int i = 0; i < boldness; i++)
+    float x_shift_divisor = 5;
+    for (float i = 0; i < boldness/x_shift_divisor; i += 1/x_shift_divisor)
+    {
+      outline_text(text, x + i, y);
+      fill(0);
       text(text, x + i, y);
+    }
   pop();
+}
+
+void outline_text(String text, float x, float y)
+{
+  fill(360);
+  for(int adj = -1; adj < 2; adj++)
+  {
+      text(text, x + adj, y);
+      text(text, x, y + adj);
+  }
 }
