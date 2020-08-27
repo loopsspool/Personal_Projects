@@ -296,6 +296,24 @@ void calendar_outline()
   pop();
 }
 
+void text_effects(String text, boolean is_bold, boolean is_outlined, PFont font_name, int font_size, float boldness, float x, float y)
+{
+  push();
+    if (is_bold && is_outlined)
+    {
+      
+    }
+    else if (is_bold)
+    {
+      
+    }
+    else if (is_outlined)
+    {
+      
+    }
+  pop();
+}
+
 void bold_font(String text, PFont font_name, int font_size, float boldness, float x, float y)
 {
   push();
@@ -305,20 +323,21 @@ void bold_font(String text, PFont font_name, int font_size, float boldness, floa
     // "Bolds" the font a little -- since theres no bold versions of some fonts
     float x_shift_divisor = 5;
     for (float i = 0; i < boldness/x_shift_divisor; i += 1/x_shift_divisor)
-    {
-      outline_text(text, x + i, y);
-      fill(0);
       text(text, x + i, y);
-    }
   pop();
 }
 
-void outline_text(String text, float x, float y)
+void outline_text(String text, PFont font_name, int font_size, float boldness, float x, float y)
 {
-  fill(360);
-  for(int adj = -1; adj < 2; adj++)
-  {
-      text(text, x + adj, y);
-      text(text, x, y + adj);
-  }
+  push();
+    textFont(font_name);
+    textSize(font_size);
+    fill(outline_color);
+    
+    for(int adj = -1; adj < 2; adj++)
+    {
+        text(text, x + adj, y);
+        text(text, x, y + adj);
+    }
+  pop();
 }
