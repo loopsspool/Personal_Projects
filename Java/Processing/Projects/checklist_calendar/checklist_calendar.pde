@@ -35,9 +35,11 @@ PGraphics month_banner;
 
 void setup()
 {
-  size(785, 606);
-  noLoop();
-  //size(785, 606, PDF, "calendar_test.pdf");
+  //size(746, 576);
+  //noLoop();
+  // TODO: Test x, y of non-PDF size to see if printable
+    // If so, adjust checklist y-adjusters
+  size(785, 606, PDF, "calendar_test.pdf");
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
@@ -99,7 +101,7 @@ void draw()
   calendar_outline();
     
   
-  //exit();
+  exit();
 }
 
 void month_art_cutoff()
@@ -296,24 +298,6 @@ void calendar_outline()
   pop();
 }
 
-void text_effects(String text, boolean is_bold, boolean is_outlined, PFont font_name, int font_size, float boldness, float x, float y)
-{
-  push();
-    if (is_bold && is_outlined)
-    {
-      
-    }
-    else if (is_bold)
-    {
-      
-    }
-    else if (is_outlined)
-    {
-      
-    }
-  pop();
-}
-
 void bold_font(String text, PFont font_name, int font_size, float boldness, float x, float y)
 {
   push();
@@ -327,17 +311,21 @@ void bold_font(String text, PFont font_name, int font_size, float boldness, floa
   pop();
 }
 
-void outline_text(String text, PFont font_name, int font_size, float boldness, float x, float y)
+void outline_text(String text, color outline_color, float outline_spread, PFont font_name, int font_size, float x, float y)
 {
+  // TODO: See if geometive library will still work in processing 3
+  // TODO: OR figure out why outline is still pointy??!
   push();
     textFont(font_name);
     textSize(font_size);
     fill(outline_color);
     
-    for(int adj = -1; adj < 2; adj++)
+    for(int degree = 0; degree < 360; degree += 1)
     {
-        text(text, x + adj, y);
-        text(text, x, y + adj);
+        text(text, x + (outline_spread * sin(degree)), y + (outline_spread * cos(degree)));
+        //text(text, sin(x), y + adj);
     }
   pop();
 }
+
+// TODO: Text effect of 3D gradually increasing font size
