@@ -34,14 +34,26 @@ PFont body_text_bold;
 // GRAPHICS
 PGraphics month_banner;
 
+// PDF Switcher
+boolean is_PDF = true;
+
+
+// TODO: Make it so line_buffer from outline is factored into gridlines/day numbers/checkbox margin
+void settings()
+{
+  // TODO: When adjusting sketch size for ease of printing, change checklist y-adjustments and text size
+  if (is_PDF)
+  {
+    size(748, 575, PDF, "calendar_test.pdf");
+  }
+  else
+  {
+    size(748, 575);
+  }
+}
 
 void setup()
 {
-  size(746, 576);
-  noLoop();
-  // TODO: Test x, y of non-PDF size to see if printable
-    // If so, adjust checklist y-adjusters
-  //size(785, 606, PDF, "calendar_test.pdf");
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
@@ -63,7 +75,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  LOCAL_DATE = LOCAL_DATE.plusMonths(1);
+  LOCAL_DATE = LOCAL_DATE.plusMonths(6);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -104,8 +116,8 @@ void draw()
   iterate_through_month("Grey Boxes");
   calendar_outline();
     
-  
-  //exit();
+  if (is_PDF)
+    exit();
 }
 
 void month_art_cutoff()
@@ -158,7 +170,7 @@ void weekday_names()
     noStroke();
     fill(0);
     textFont(body_text_bold);
-    textSize(15);
+    textSize(14);
     for (int i = 0; i < 7; i++)
       // + width/14 to center text between lines
       text(WEEKDAYS[i], (i * width/7) + width/14, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
@@ -254,7 +266,7 @@ void daily_text()
   textFont(body_text);
   
   push();
-    translate(5, 6);
+    translate(4, 5.5);
     bullet_point("Do morning routine");
     bullet_point("Be present");
     bullet_point("Do thing you love");
@@ -265,17 +277,17 @@ void daily_text()
 
 void bullet_point(String text)
 {
-  float indent = 14;
-  float size = 10;
+  float indent = 13;
+  float size = 9.4;
   float y_translate = 0;
   // Adjusting for rows of calendar so alignment doesn't look funky
   // TODO: Align to liking
   if (AMOUNT_OF_ROWS == 6)
-    y_translate = 13;
+    y_translate = 11.7;
   if (AMOUNT_OF_ROWS == 5)
-    y_translate = 15;
+    y_translate = 14.5;
   if (AMOUNT_OF_ROWS == 4)
-    y_translate = 20;
+    y_translate = 18;
 
   // No push/pop so translates will stack for bullet points
   translate(0, y_translate);
