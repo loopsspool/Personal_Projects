@@ -58,6 +58,7 @@ void september_art()
   // Using a graphics buffer because theres a bug that tint doesn't show when exported to a pdf
     // There's also a scalar & scale call to retain image quality drawn on the buffer
   month_banner = createGraphics(ceil(width * pixel_buffer_scale), ceil(MONTH_BOX_HEIGHT * pixel_buffer_scale));
+  
   month_banner.beginDraw();
     month_banner.colorMode(HSB, 360, 100, 100);
     
@@ -92,16 +93,29 @@ void september_art()
         month_banner.image(leaf, 0, 0, leaf_size, leaf_size);
       month_banner.pop();
     }
-
   month_banner.endDraw();
+  
   push();
     scale(1/pixel_buffer_scale, 1/pixel_buffer_scale);
     image(month_banner, 0, 0);
   pop();
   
   // MONTH NAME
-  outline_text(MONTH_AND_YEAR, color(360), 0.2, outlined_month_font, MONTH_TEXT_SIZE, width/2, MONTH_BOX_HEIGHT/1.4);
-  //bold_font(MONTH_AND_YEAR, month_font, MONTH_TEXT_SIZE, 2, width/2, MONTH_BOX_HEIGHT/2.3);
+  font_class sept_font = new font_class();
+  
+  sept_font.font = default_month_font;
+  sept_font.size = MONTH_TEXT_SIZE;
+  sept_font.fill = color(0);
+  sept_font.text = MONTH_AND_YEAR;
+  sept_font.x = width/2;
+  sept_font.y = MONTH_BOX_HEIGHT/1.4;
+  sept_font.is_outlined = false;
+  sept_font.outline_color = color(360);
+  sept_font.outline_weight = .5;
+  sept_font.is_bolded = false;
+  sept_font.bold_weight = 6;
+  
+  draw_text(sept_font);
 }
 
 

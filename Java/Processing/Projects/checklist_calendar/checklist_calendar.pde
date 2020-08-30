@@ -26,7 +26,7 @@ float DAY_NAME_BOX_HEIGHT = 25;
 int AMOUNT_OF_ROWS;
 
 // FONTS
-RFont outlined_month_font;
+RFont default_month_font;
 PFont month_font;
 PFont body_text;
 PFont body_text_bold;
@@ -52,7 +52,7 @@ void setup()
   //String[] fontList = PFont.list();
   //printArray(fontList);
   RG.init(this);  // Initializes geomerative stuff
-  outlined_month_font = new RFont("data\\CASTELAR.TTF", 60, RFont.CENTER);
+  default_month_font = new RFont("data\\CASTELAR.TTF", 60, RFont.CENTER);
   month_font = createFont("Castellar", 60);
   body_text = createFont("Century Schoolbook", 12);
   body_text_bold = createFont("Century Schoolbook Bold", 12);
@@ -302,31 +302,35 @@ void calendar_outline()
   pop();
 }
 
-void bold_font(String text, PFont font_name, int font_size, float boldness, float x, float y)
+void draw_text(font_class Font)
+{
+  if (Font.is_bolded)
+    bold_font(Font);
+  else
+  {
+    push();
+    Font.set_features();
+    Font.display();
+    pop();
+  }
+}
+
+void bold_font(font_class Font)
 {
   push();
-    fill(0);
-    textFont(font_name);
-    textSize(font_size);
+    Font.set_features();
     // "Bolds" the font a little -- since theres no bold versions of some fonts
-    float x_shift_divisor = 5;
-    for (float i = 0; i < boldness/x_shift_divisor; i += 1/x_shift_divisor)
-      text(text, x + i, y);
+    float x_shift_divisor = 5;  // To utilize i as coordinate, small shifts in x
+    for (float i = 0; i < Font.bold_weight/x_shift_divisor; i += 1/x_shift_divisor)
+    {
+      translate(i, 0);
+      Font.display();
+    }
   pop();
 }
 
-void outline_text(String text, color outline_color, float outline_weight, RFont font_name, int font_size, float x, float y)
-{
-  push();
-    font_name.setSize(font_size);
-    fill(0);
-    strokeWeight(outline_weight);
-    stroke(outline_color);
-    
-    translate(x, y);
-    font_name.draw(text);
-    
-  pop();
-}
-
-// TODO: Text effect of 3D gradually increasing font size
+/** 
+TODO: Text effects: 
+  - 3D gradually increasing font size
+  - Text Fade in/out
+**/ 
