@@ -3,6 +3,9 @@ import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
 import geomerative.*;  // For text outline
 
+// PDF Switcher
+boolean is_PDF = false;
+
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
 
@@ -34,9 +37,6 @@ PFont body_text_bold;
 // GRAPHICS
 PGraphics month_banner;
 
-// PDF Switcher
-boolean is_PDF = true;
-
 
 // TODO: Make it so line_buffer from outline is factored into gridlines/day numbers/checkbox margin
 void settings()
@@ -49,6 +49,7 @@ void settings()
   else
   {
     size(748, 575);
+    noLoop();
   }
 }
 
@@ -75,7 +76,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  LOCAL_DATE = LOCAL_DATE.plusMonths(6);
+  LOCAL_DATE = LOCAL_DATE.plusMonths(1);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -316,15 +317,15 @@ void calendar_outline()
 
 void draw_text(font_class Font)
 {
-  if (Font.is_bolded)
-    bold_font(Font);
-  else
-  {
-    push();
-    Font.set_features();
-    Font.display();
-    pop();
-  }
+  push();
+    if (Font.is_bolded)
+      bold_font(Font);
+    else
+    {
+      Font.set_features();
+      Font.display();
+    }
+  pop();
 }
 
 void bold_font(font_class Font)
@@ -345,4 +346,5 @@ void bold_font(font_class Font)
 TODO: Text effects: 
   - 3D gradually increasing font size
   - Text Fade in/out
+  + See what geomerative can do
 **/ 

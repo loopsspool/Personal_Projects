@@ -100,6 +100,7 @@ void september_art()
     image(month_banner, 0, 0);
   pop();
   
+  
   // MONTH NAME
   font_class sept_font = new font_class();
   
@@ -109,10 +110,10 @@ void september_art()
   sept_font.text = MONTH_AND_YEAR;
   sept_font.x = width/2;
   sept_font.y = MONTH_BOX_HEIGHT/1.4;
-  sept_font.is_outlined = false;
+  sept_font.is_outlined = true;
   sept_font.outline_color = color(360);
   sept_font.outline_weight = .5;
-  sept_font.is_bolded = false;
+  sept_font.is_bolded = true;
   sept_font.bold_weight = 6;
   
   draw_text(sept_font);
