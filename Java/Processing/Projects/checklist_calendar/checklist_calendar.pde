@@ -1,6 +1,7 @@
 import java.util.*;  // For Date
 import java.time.*;  // For LocalDate
 import processing.pdf.*;  // To convert to PDF
+import geomerative.*;  // For text outline
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -25,6 +26,7 @@ float DAY_NAME_BOX_HEIGHT = 25;
 int AMOUNT_OF_ROWS;
 
 // FONTS
+RFont outlined_month_font;
 PFont month_font;
 PFont body_text;
 PFont body_text_bold;
@@ -35,11 +37,11 @@ PGraphics month_banner;
 
 void setup()
 {
-  //size(746, 576);
-  //noLoop();
+  size(746, 576);
+  noLoop();
   // TODO: Test x, y of non-PDF size to see if printable
     // If so, adjust checklist y-adjusters
-  size(785, 606, PDF, "calendar_test.pdf");
+  //size(785, 606, PDF, "calendar_test.pdf");
   surface.setLocation(50, 50);
   colorMode(HSB, 360, 100, 100, 100);
   textAlign(CENTER, CENTER);
@@ -49,6 +51,8 @@ void setup()
   // Uncomment to view available fonts
   //String[] fontList = PFont.list();
   //printArray(fontList);
+  RG.init(this);  // Initializes geomerative stuff
+  outlined_month_font = new RFont("data\\CASTELAR.TTF", 60, RFont.CENTER);
   month_font = createFont("Castellar", 60);
   body_text = createFont("Century Schoolbook", 12);
   body_text_bold = createFont("Century Schoolbook Bold", 12);
@@ -101,7 +105,7 @@ void draw()
   calendar_outline();
     
   
-  exit();
+  //exit();
 }
 
 void month_art_cutoff()
@@ -311,20 +315,17 @@ void bold_font(String text, PFont font_name, int font_size, float boldness, floa
   pop();
 }
 
-void outline_text(String text, color outline_color, float outline_spread, PFont font_name, int font_size, float x, float y)
+void outline_text(String text, color outline_color, float outline_weight, RFont font_name, int font_size, float x, float y)
 {
-  // TODO: See if geometive library will still work in processing 3
-  // TODO: OR figure out why outline is still pointy??!
   push();
-    textFont(font_name);
-    textSize(font_size);
-    fill(outline_color);
+    font_name.setSize(font_size);
+    fill(0);
+    strokeWeight(outline_weight);
+    stroke(outline_color);
     
-    for(int degree = 0; degree < 360; degree += 1)
-    {
-        text(text, x + (outline_spread * sin(degree)), y + (outline_spread * cos(degree)));
-        //text(text, sin(x), y + adj);
-    }
+    translate(x, y);
+    font_name.draw(text);
+    
   pop();
 }
 

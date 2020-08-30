@@ -100,8 +100,8 @@ void september_art()
   pop();
   
   // MONTH NAME
-  outline_text(MONTH_AND_YEAR, color(360), 1.0, month_font, MONTH_TEXT_SIZE, width/2, MONTH_BOX_HEIGHT/2.3);
-  bold_font(MONTH_AND_YEAR, month_font, MONTH_TEXT_SIZE, 2, width/2, MONTH_BOX_HEIGHT/2.3);
+  outline_text(MONTH_AND_YEAR, color(360), 0.2, outlined_month_font, MONTH_TEXT_SIZE, width/2, MONTH_BOX_HEIGHT/1.4);
+  //bold_font(MONTH_AND_YEAR, month_font, MONTH_TEXT_SIZE, 2, width/2, MONTH_BOX_HEIGHT/2.3);
 }
 
 
