@@ -4,7 +4,7 @@ import processing.pdf.*;  // To convert to PDF
 import geomerative.*;  // For text outline
 
 // PDF Switcher
-boolean is_PDF = false;
+boolean is_PDF = true;
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -21,15 +21,20 @@ int FIRST_DAY_OF_MONTH_COLUMN;
 int DAYS_IN_MONTH;
 
 // CALENDAR ALIGNMENTS
-int MONTH_TEXT_SIZE = 60;
 float MONTH_BOX_HEIGHT;
 float DAY_NAME_BOX_HEIGHT = 25;
 
 // CALENDAR GRID INFO
 int AMOUNT_OF_ROWS;
-int outline_buffer = 3;  // For visibility & so outline matches line weight below month & weekday names
+float ROW_SIZE;
+float COL_SIZE;
+int CALENDAR_BORDER_WEIGHT = 2;
+int CALENDAR_BORDER_BUFFER = floor(CALENDAR_BORDER_WEIGHT/2);  // So strokeWeight lines up with pixels inside border to align all squares the same
+int DAY_NAME_OUTLINE_WEIGHT = 2;
+int DAY_NAME_OUTLINE_BUFFER = floor(DAY_NAME_OUTLINE_WEIGHT/2);
 
 // FONTS
+int MONTH_TEXT_SIZE = 60;
 RFont default_month_font;
 PFont month_font;
 PFont body_text;
@@ -39,17 +44,19 @@ PFont body_text_bold;
 PGraphics month_banner;
 
 
-// TODO: Make it so outline_buffer from outline is factored into gridlines/day numbers/checkbox margin
+// TODO: Make it so CALENDAR_BORDER_BUFFER from outline is factored into gridlines/day numbers/checkbox margin
 void settings()
 {
-  // When adjusting sketch size for ease of printing, change checklist y-adjustments and text size
+  //////////////////////////////    WARNING    //////////////////////////////
+  // Sizes pretty much have to remain here for rows/cols to display evenly
+    // width 600 is divisible by 4, 5, and 6 (all possible row amounts) so will always have rounded int row lines
   if (is_PDF)
   {
-    size(748, 575, PDF, "calendar_test.pdf");
+    size(776, 600, PDF, "calendar_test.pdf");
   }
   else
   {
-    size(748, 575);
+    size(776, 600);
     noLoop();
   }
 }
@@ -62,6 +69,7 @@ void setup()
   strokeCap(SQUARE);
   background(360);
   
+  
   // Uncomment to view available fonts
   //String[] fontList = PFont.list();
   //printArray(fontList);
@@ -72,7 +80,12 @@ void setup()
   body_text_bold = createFont("Century Schoolbook Bold", 12);
   
   // CALENDAR ALIGNMENT
-  MONTH_BOX_HEIGHT = height/6;
+  //////////////////////////////    WARNING    //////////////////////////////
+  // -7 here to keep (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_BUFFER) == 120
+    // 120 is a multiple of 60 (divisible by 4, 5, and 6 (all possible row amounts))
+      // So rows will always fall on rounded integers
+  // If adjusting ANY of the variables above, adjust this so the sum will == 120
+  MONTH_BOX_HEIGHT = height/6 - 7;
   
   // DATE STUFF
   CURRENT_DATE = new Date();
@@ -104,6 +117,9 @@ void setup()
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
 
+  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_BUFFER);
+  ROW_SIZE /= AMOUNT_OF_ROWS;
+  
 }
 
 void draw()
@@ -142,9 +158,9 @@ void grid_lines()
     float x;
     for (int i = 1; i < 7; i++)
     {
-      // + outline_buffer to make all squares display the same
+      // + CALENDAR_BORDER_BUFFER to make all squares display the same
         // left row was being cut into by outline
-      x = (i * (width/7)) + outline_buffer;
+      x = (i * (width/7)) + CALENDAR_BORDER_BUFFER;
       line(x, 0, x, height);
     }
     
@@ -154,9 +170,9 @@ void grid_lines()
     float y;
     for (int i = 1; i < AMOUNT_OF_ROWS; i++)
     {
-      // - outline_buffer to make all squares display the same
+      // - CALENDAR_BORDER_BUFFER to make all squares display the same
         // bottom row was being cut into by outline
-      y = i * ((height - outline_buffer - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS);
+      y = i * ROW_SIZE;
       line(0, y, width, y);
     }
   pop();
@@ -169,7 +185,7 @@ void weekday_names()
   push();
     // Border lines
     stroke(0);
-    strokeWeight(2);
+    strokeWeight(DAY_NAME_OUTLINE_WEIGHT);
     line(0, MONTH_BOX_HEIGHT, width, MONTH_BOX_HEIGHT);
     line(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT, width, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     
@@ -181,8 +197,8 @@ void weekday_names()
     textSize(14);
     for (int i = 0; i < 7; i++)
       // + width/14 to center text between lines
-      // + outline_buffer to adjust for column adjustment from outline
-      text(WEEKDAYS[i], (i * width/7) + width/14 + outline_buffer, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
+      // + CALENDAR_BORDER_BUFFER to adjust for column adjustment from outline
+      text(WEEKDAYS[i], (i * width/7) + width/14 + CALENDAR_BORDER_BUFFER, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
   pop();
 }
 
@@ -198,8 +214,8 @@ void iterate_through_month(String doing)
     day_acc++;
       
   push();  
-    translate(outline_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
-    float x_translate_added = 0;  // This is to accurately realignwhen the y-axis moves down
+    translate(CALENDAR_BORDER_BUFFER, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
+    float x_translate_added = 0;  // This is to accurately realign when the y-axis moves down
     
     for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
     {
@@ -229,7 +245,8 @@ void iterate_through_month(String doing)
         x_translate_added += width/7;
       }
       // Moving onto next week
-      translate(-x_translate_added, ((height - outline_buffer - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+      //translate(-x_translate_added, (((height - CALENDAR_BORDER_BUFFER - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT)))/AMOUNT_OF_ROWS));
+      translate(-x_translate_added, ROW_SIZE);
       x_translate_added = 0;  // Resetting x to beginning of week
     }
   pop();
@@ -260,7 +277,7 @@ void grey_out_non_month_days(int day)
     {
       // TODO: First box not aligned to edge
       // Greying out days before month start
-      rect(0, 0, width/7, ((height - outline_buffer - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+      rect(0, 0, width/7, ((height - CALENDAR_BORDER_BUFFER - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
     }
     if (day > DAYS_IN_MONTH)
     {
@@ -311,14 +328,19 @@ void bullet_point(String text)
 
 void calendar_outline()
 {
-  // TODO: Left outline line not locked to window edge?
   push();
     stroke(0);
-    strokeWeight(outline_buffer + 1);
-    line(0, 0, 0, height);  // LEFT
-    line(width, 0, width, height);  // RIGHT
-    line(0, 0, width, 0);  // TOP
-    line(0, height, width, height);  // BOTTOM
+    strokeWeight(CALENDAR_BORDER_WEIGHT);
+    line(CALENDAR_BORDER_BUFFER, 0, CALENDAR_BORDER_BUFFER, height);  // LEFT
+    line(width - CALENDAR_BORDER_BUFFER, 0, width - CALENDAR_BORDER_BUFFER, height);  // RIGHT
+    line(0, CALENDAR_BORDER_BUFFER, width, CALENDAR_BORDER_BUFFER);  // TOP
+    line(0, height - CALENDAR_BORDER_BUFFER, width, height - CALENDAR_BORDER_BUFFER);  // BOTTOM
+
+    // For some reason still neeed to add this tiny line to align things on the last row equal to the others
+    stroke(0);
+    strokeWeight(0.5);
+    line(0, 597.75, width, 597.75);
+  
   pop();
 }
 
