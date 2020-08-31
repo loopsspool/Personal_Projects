@@ -27,6 +27,7 @@ float DAY_NAME_BOX_HEIGHT = 25;
 
 // CALENDAR GRID INFO
 int AMOUNT_OF_ROWS;
+int outline_buffer = 3;  // For visibility & so outline matches line weight below month & weekday names
 
 // FONTS
 RFont default_month_font;
@@ -38,10 +39,10 @@ PFont body_text_bold;
 PGraphics month_banner;
 
 
-// TODO: Make it so line_buffer from outline is factored into gridlines/day numbers/checkbox margin
+// TODO: Make it so outline_buffer from outline is factored into gridlines/day numbers/checkbox margin
 void settings()
 {
-  // TODO: When adjusting sketch size for ease of printing, change checklist y-adjustments and text size
+  // When adjusting sketch size for ease of printing, change checklist y-adjustments and text size
   if (is_PDF)
   {
     size(748, 575, PDF, "calendar_test.pdf");
@@ -76,7 +77,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  LOCAL_DATE = LOCAL_DATE.plusMonths(1);
+  //LOCAL_DATE = LOCAL_DATE.plusMonths(1);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -125,8 +126,7 @@ void month_art_cutoff()
 {
   // White box covering any overlap from the monthly art header
   push();
-    stroke(0);
-    strokeWeight(1);
+    noStroke();
     fill(360);
     rect(0, MONTH_BOX_HEIGHT, width, height);
   pop();
@@ -140,23 +140,23 @@ void grid_lines()
     translate(0, MONTH_BOX_HEIGHT);
     // VERTICAL LINES
     float x;
-    for (int i = 0; i < 7; i++)
+    for (int i = 1; i < 7; i++)
     {
-      x = i * (width/7);
+      // + outline_buffer to make all squares display the same
+        // left row was being cut into by outline
+      x = (i * (width/7)) + outline_buffer;
       line(x, 0, x, height);
     }
     
     // HORIZONTAL LINES
-    
-    // DAY NAME LINE  
     translate(0, DAY_NAME_BOX_HEIGHT);
-    line(0, 0, width, 0);
-
-    // Starts at 1 so it doesn't draw a line over the day name line
+    
     float y;
-    for (int i = 1; i < AMOUNT_OF_ROWS + 1; i++)
+    for (int i = 1; i < AMOUNT_OF_ROWS; i++)
     {
-      y = i * ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS);
+      // - outline_buffer to make all squares display the same
+        // bottom row was being cut into by outline
+      y = i * ((height - outline_buffer - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS);
       line(0, y, width, y);
     }
   pop();
@@ -167,6 +167,13 @@ void weekday_names()
   textFont(body_text_bold);
   
   push();
+    // Border lines
+    stroke(0);
+    strokeWeight(2);
+    line(0, MONTH_BOX_HEIGHT, width, MONTH_BOX_HEIGHT);
+    line(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT, width, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
+    
+    // Actual day names 
     translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     noStroke();
     fill(0);
@@ -174,7 +181,8 @@ void weekday_names()
     textSize(14);
     for (int i = 0; i < 7; i++)
       // + width/14 to center text between lines
-      text(WEEKDAYS[i], (i * width/7) + width/14, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
+      // + outline_buffer to adjust for column adjustment from outline
+      text(WEEKDAYS[i], (i * width/7) + width/14 + outline_buffer, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
   pop();
 }
 
@@ -190,7 +198,7 @@ void iterate_through_month(String doing)
     day_acc++;
       
   push();  
-    translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
+    translate(outline_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     float x_translate_added = 0;  // This is to accurately realignwhen the y-axis moves down
     
     for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
@@ -221,7 +229,7 @@ void iterate_through_month(String doing)
         x_translate_added += width/7;
       }
       // Moving onto next week
-      translate(-x_translate_added, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+      translate(-x_translate_added, ((height - outline_buffer - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
       x_translate_added = 0;  // Resetting x to beginning of week
     }
   pop();
@@ -250,14 +258,15 @@ void grey_out_non_month_days(int day)
     fill(280);
     if (day < 1)
     {
+      // TODO: First box not aligned to edge
       // Greying out days before month start
-      rect(0, 0, width/7, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+      rect(0, 0, width/7, ((height - outline_buffer - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
     }
     if (day > DAYS_IN_MONTH)
     {
       // Greying out days after month ends
-      // + 5 on width because last column might be slightly larger? Due to width/7 whatevers left after saturday line
-      rect(0, 0, + width/7 + 5, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+        // + 5 on height/width because last row/column might be slightly larger? Due to width/7 whatevers left after saturday line
+      rect(0, 0, + width/7 + 5, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS) + 5);
     }
   pop();
 }
@@ -302,16 +311,14 @@ void bullet_point(String text)
 
 void calendar_outline()
 {
+  // TODO: Left outline line not locked to window edge?
   push();
     stroke(0);
-    strokeWeight(2);
-    int line_buffer = 1;  // For visibility & so outline matches line weight below month & weekday names
-    line(line_buffer, line_buffer, line_buffer, height - line_buffer);  // LEFT
-    line(width - line_buffer, line_buffer, width - line_buffer, height - line_buffer);  // RIGHT
-    line(line_buffer, line_buffer, width - line_buffer, line_buffer);  // TOP
-    line(line_buffer, MONTH_BOX_HEIGHT, width - line_buffer, MONTH_BOX_HEIGHT);  // BELOW MONTH BOX
-    line(line_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT, width - line_buffer, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);  // BELOW WEEKDAY NAMES
-    line(line_buffer, height - line_buffer, width - line_buffer, height - line_buffer);  // BOTTOM
+    strokeWeight(outline_buffer + 1);
+    line(0, 0, 0, height);  // LEFT
+    line(width, 0, width, height);  // RIGHT
+    line(0, 0, width, 0);  // TOP
+    line(0, height, width, height);  // BOTTOM
   pop();
 }
 
