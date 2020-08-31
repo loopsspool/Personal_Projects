@@ -44,7 +44,7 @@ PFont body_text_bold;
 PGraphics month_banner;
 
 
-// TODO: Make it so CALENDAR_BORDER_BUFFER from outline is factored into gridlines/day numbers/checkbox margin
+// TODO: Make each day have its own little square
 void settings()
 {
   //////////////////////////////    WARNING    //////////////////////////////
@@ -53,11 +53,11 @@ void settings()
   if (is_PDF)
   {
     // Was 776
-    size(772, 600, PDF, "calendar_test.pdf");
+    size(774, 600, PDF, "calendar_test.pdf");
   }
   else
   {
-    size(772, 600);
+    size(774, 600);
     noLoop();
   }
 }
@@ -121,8 +121,8 @@ void setup()
   ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_BUFFER);
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
-  COL_SIZE = (width - (2 * CALENDAR_BORDER_BUFFER))/7;
-  println(MONTH_BOX_HEIGHT);
+  COL_SIZE = (width - (2 * CALENDAR_BORDER_WEIGHT))/7;
+  println(width - (2 * CALENDAR_BORDER_WEIGHT));
 }
 
 void draw()
@@ -213,7 +213,7 @@ void iterate_through_month(String doing)
       
   push();  
     translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
-    float x_translate_added = 0;  // This is to accurately realign when the y-axis moves down
+    float x_translate_added = CALENDAR_BORDER_WEIGHT;  // This is to accurately realign when the y-axis moves down
     
     for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
     {
@@ -243,9 +243,8 @@ void iterate_through_month(String doing)
         x_translate_added += COL_SIZE;
       }
       // Moving onto next week
-      //translate(-x_translate_added, (((height - CALENDAR_BORDER_BUFFER - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT)))/AMOUNT_OF_ROWS));
-      translate(-x_translate_added, ROW_SIZE);
-      x_translate_added = 0;  // Resetting x to beginning of week
+      translate(-x_translate_added + CALENDAR_BORDER_WEIGHT, ROW_SIZE);
+      x_translate_added = CALENDAR_BORDER_WEIGHT;  // Resetting x to beginning of week
     }
   pop();
 }
@@ -333,6 +332,7 @@ void calendar_outline()
     line(0, CALENDAR_BORDER_BUFFER, width, CALENDAR_BORDER_BUFFER);  // TOP
     line(0, height - CALENDAR_BORDER_BUFFER, width, height - CALENDAR_BORDER_BUFFER);  // BOTTOM
 
+    // TODO:
     // For some reason still neeed to add this tiny line to align things on the last row equal to the others
       // Issue seems to be coming from line ubderbeatg day name box...
         // Grey boxes at 0, 0 cover 0.25px of that line????
