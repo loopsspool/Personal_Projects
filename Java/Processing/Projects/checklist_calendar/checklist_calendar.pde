@@ -52,11 +52,12 @@ void settings()
     // width 600 is divisible by 4, 5, and 6 (all possible row amounts) so will always have rounded int row lines
   if (is_PDF)
   {
-    size(776, 600, PDF, "calendar_test.pdf");
+    // Was 776
+    size(772, 600, PDF, "calendar_test.pdf");
   }
   else
   {
-    size(776, 600);
+    size(772, 600);
     noLoop();
   }
 }
@@ -120,6 +121,8 @@ void setup()
   ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_BUFFER);
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
+  COL_SIZE = (width - (2 * CALENDAR_BORDER_BUFFER))/7;
+  println(MONTH_BOX_HEIGHT);
 }
 
 void draw()
@@ -158,9 +161,7 @@ void grid_lines()
     float x;
     for (int i = 1; i < 7; i++)
     {
-      // + CALENDAR_BORDER_BUFFER to make all squares display the same
-        // left row was being cut into by outline
-      x = (i * (width/7)) + CALENDAR_BORDER_BUFFER;
+      x = i * COL_SIZE;
       line(x, 0, x, height);
     }
     
@@ -170,8 +171,6 @@ void grid_lines()
     float y;
     for (int i = 1; i < AMOUNT_OF_ROWS; i++)
     {
-      // - CALENDAR_BORDER_BUFFER to make all squares display the same
-        // bottom row was being cut into by outline
       y = i * ROW_SIZE;
       line(0, y, width, y);
     }
@@ -197,8 +196,7 @@ void weekday_names()
     textSize(14);
     for (int i = 0; i < 7; i++)
       // + width/14 to center text between lines
-      // + CALENDAR_BORDER_BUFFER to adjust for column adjustment from outline
-      text(WEEKDAYS[i], (i * width/7) + width/14 + CALENDAR_BORDER_BUFFER, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
+      text(WEEKDAYS[i], (i * COL_SIZE) + width/14, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
   pop();
 }
 
@@ -214,7 +212,7 @@ void iterate_through_month(String doing)
     day_acc++;
       
   push();  
-    translate(CALENDAR_BORDER_BUFFER, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
+    translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
     float x_translate_added = 0;  // This is to accurately realign when the y-axis moves down
     
     for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
@@ -241,8 +239,8 @@ void iterate_through_month(String doing)
         if (square_acc >= FIRST_DAY_OF_MONTH_COLUMN)
           day_acc++;
           
-        translate(width/7, 0);
-        x_translate_added += width/7;
+        translate(COL_SIZE, 0);
+        x_translate_added += COL_SIZE;
       }
       // Moving onto next week
       //translate(-x_translate_added, (((height - CALENDAR_BORDER_BUFFER - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT)))/AMOUNT_OF_ROWS));
@@ -275,15 +273,14 @@ void grey_out_non_month_days(int day)
     fill(280);
     if (day < 1)
     {
-      // TODO: First box not aligned to edge
       // Greying out days before month start
-      rect(0, 0, width/7, ((height - CALENDAR_BORDER_BUFFER - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS));
+      rect(0, 0, COL_SIZE, ROW_SIZE);
     }
     if (day > DAYS_IN_MONTH)
     {
       // Greying out days after month ends
-        // + 5 on height/width because last row/column might be slightly larger? Due to width/7 whatevers left after saturday line
-      rect(0, 0, + width/7 + 5, ((height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT))/AMOUNT_OF_ROWS) + 5);
+        // + 1 on width so last square outline doesn't show
+      rect(0, 0, COL_SIZE + 1, ROW_SIZE);
     }
   pop();
 }
@@ -337,6 +334,8 @@ void calendar_outline()
     line(0, height - CALENDAR_BORDER_BUFFER, width, height - CALENDAR_BORDER_BUFFER);  // BOTTOM
 
     // For some reason still neeed to add this tiny line to align things on the last row equal to the others
+      // Issue seems to be coming from line ubderbeatg day name box...
+        // Grey boxes at 0, 0 cover 0.25px of that line????
     stroke(0);
     strokeWeight(0.5);
     line(0, 597.75, width, 597.75);
