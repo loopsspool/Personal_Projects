@@ -32,6 +32,7 @@ int CALENDAR_BORDER_WEIGHT = 2;
 int CALENDAR_BORDER_BUFFER = floor(CALENDAR_BORDER_WEIGHT/2);  // So strokeWeight lines up with pixels inside border to align all squares the same
 int DAY_NAME_OUTLINE_WEIGHT = 2;
 int DAY_NAME_OUTLINE_BUFFER = floor(DAY_NAME_OUTLINE_WEIGHT/2);
+daily_box_class[] day_boxes;
 
 // FONTS
 int MONTH_TEXT_SIZE = 60;
@@ -117,12 +118,16 @@ void setup()
   // If February starts on a Monday and it isn't a leap year it only needs 4 rows
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
+    
+  int square_amount = AMOUNT_OF_ROWS * 7;
+  day_boxes = new daily_box_class[square_amount];
+  for (int i = 0; i < square_amount; i++)
+    day_boxes[i] = new daily_box_class();
 
   ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_BUFFER);
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
   COL_SIZE = (width - (2 * CALENDAR_BORDER_WEIGHT))/7;
-  println(width - (2 * CALENDAR_BORDER_WEIGHT));
 }
 
 void draw()
@@ -132,9 +137,10 @@ void draw()
   month_art_cutoff();
   grid_lines();
   weekday_names();
-  iterate_through_month("Numbers");
-  iterate_through_month("Checklist");
-  iterate_through_month("Grey Boxes");
+  draw_daily_boxes();
+  //iterate_through_month("Numbers");
+  //iterate_through_month("Checklist");
+  //iterate_through_month("Grey Boxes");
   calendar_outline();
     
   if (is_PDF)
@@ -179,28 +185,33 @@ void grid_lines()
 
 void weekday_names()
 {
+  // TODO: Make each their own textbox
   textFont(body_text_bold);
   
   push();
     // Border lines
-    stroke(0);
+    stroke(#F093FF);
     strokeWeight(DAY_NAME_OUTLINE_WEIGHT);
-    line(0, MONTH_BOX_HEIGHT, width, MONTH_BOX_HEIGHT);
-    line(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT, width, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
+    translate(0, MONTH_BOX_HEIGHT);
+    line(0, 0, width, 0);
+    translate(0, DAY_NAME_BOX_HEIGHT);
+    line(0, 0, width, 0);
     
     // Actual day names 
-    translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
-    noStroke();
-    fill(0);
+    translate(0, MONTH_BOX_HEIGHT);
     textFont(body_text_bold);
     textSize(14);
+    fill(0);
+
     for (int i = 0; i < 7; i++)
+    {
       // + width/14 to center text between lines
-      text(WEEKDAYS[i], (i * COL_SIZE) + width/14, -(DAY_NAME_BOX_HEIGHT/2) - 2); 
+      text(WEEKDAYS[i], (i * COL_SIZE) + width/14, (DAY_NAME_BOX_HEIGHT/2) - 2); 
+    }
   pop();
 }
 
-void iterate_through_month(String doing)
+void draw_daily_boxes()
 {
   int square_acc = 0;
   int day_acc = 0;
@@ -210,29 +221,16 @@ void iterate_through_month(String doing)
         // Since normally isn't accumulated until after function calls
   if (FIRST_DAY_OF_MONTH_COLUMN == 0)
     day_acc++;
-      
-  push();  
-    translate(0, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT);
-    float x_translate_added = CALENDAR_BORDER_WEIGHT;  // This is to accurately realign when the y-axis moves down
     
-    for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
+  push();
+  // NOTE ::Factor in that a rect with stroke will apply ONLY half the stroke in the upper left hand corner
+    translate(CALENDAR_BORDER_BUFFER, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER);
+
+    for (int y = 0; y < AMOUNT_OF_ROWS; y++)
     {
-      for (int x_ = 0; x_ < 7; x_++)
+      for (int x = 0; x < 7; x++)
       {
-        switch(doing)
-        {
-          case "Grey Boxes":
-            grey_out_non_month_days(day_acc);
-            break;
-            
-          case "Numbers":
-            number_display(day_acc);
-            break;
-            
-          case "Checklist":
-            daily_text();
-            break;
-        }
+        day_boxes[square_acc].display(day_acc);
         
         // Moving onto next day
         square_acc++;
@@ -240,14 +238,54 @@ void iterate_through_month(String doing)
           day_acc++;
           
         translate(COL_SIZE, 0);
-        x_translate_added += COL_SIZE;
       }
       // Moving onto next week
-      translate(-x_translate_added + CALENDAR_BORDER_WEIGHT, ROW_SIZE);
-      x_translate_added = CALENDAR_BORDER_WEIGHT;  // Resetting x to beginning of week
+      translate(-COL_SIZE * 7, ROW_SIZE);
     }
   pop();
 }
+
+//void iterate_through_month(String doing)
+//{
+//  push();  
+    
+//    float x_translate_added = CALENDAR_BORDER_WEIGHT;  // This is to accurately realign when the y-axis moves down
+    
+//    for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
+//    {
+//      for (int x_ = 0; x_ < 7; x_++)
+//      {
+//        switch(doing)
+//        {
+//          case "Grey Boxes":
+//            grey_out_non_month_days(day_acc);
+//            break;
+            
+//          case "Numbers":
+//            number_display(day_acc);
+//            break;
+            
+//          case "Checklist":
+//            daily_text();
+//            break;
+//        }
+        
+//        day_boxes[square_acc].display(x_, y_);
+        
+//        // Moving onto next day
+//        square_acc++;
+//        if (square_acc >= FIRST_DAY_OF_MONTH_COLUMN)
+//          day_acc++;
+          
+//        translate(COL_SIZE, 0);
+//        x_translate_added += COL_SIZE;
+//      }
+//      // Moving onto next week
+//      translate(-x_translate_added + CALENDAR_BORDER_WEIGHT, ROW_SIZE);
+//      x_translate_added = CALENDAR_BORDER_WEIGHT;  // Resetting x to beginning of week
+//    }
+//  pop();
+//}
 
 void number_display(int day_num)
 { 
