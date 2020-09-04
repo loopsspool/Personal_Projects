@@ -23,15 +23,15 @@ int DAYS_IN_MONTH;
 // CALENDAR ALIGNMENTS
 float MONTH_BOX_HEIGHT;
 float DAY_NAME_BOX_HEIGHT = 25;
-float DAY_GRID_STROKE_WEIGHT = 4;  
 
 // CALENDAR GRID INFO
 int AMOUNT_OF_ROWS;
 float ROW_SIZE;
 float COL_SIZE;
-int CALENDAR_BORDER_WEIGHT = 10;  // If this is changed, boxes are no londer aligned perfectly
+float DAY_GRID_STROKE_WEIGHT = 2;  
+int CALENDAR_BORDER_WEIGHT = 2;  // If this is changed, boxes are no londer aligned perfectly
 int CALENDAR_BORDER_BUFFER = floor(CALENDAR_BORDER_WEIGHT/2);  // So strokeWeight lines up with pixels inside border to align all squares the same
-int DAY_NAME_OUTLINE_WEIGHT = 4;
+int DAY_NAME_OUTLINE_WEIGHT = 2;
 int DAY_NAME_OUTLINE_BUFFER = floor(DAY_NAME_OUTLINE_WEIGHT/2);
 daily_box_class[] day_boxes;
 
@@ -48,6 +48,7 @@ PGraphics month_banner;
 
 void settings()
 {
+  // TODO: Test if the below is even true
   //////////////////////////////    WARNING    //////////////////////////////
   // Sizes pretty much have to remain here for rows/cols to display evenly
     // height 600 is divisible by 4, 5, and 6 (all possible row amounts) so will always have rounded int row lines
@@ -71,7 +72,6 @@ void setup()
   strokeCap(SQUARE);
   background(360);
   
-  
   // Uncomment to view available fonts
   //String[] fontList = PFont.list();
   //printArray(fontList);
@@ -82,6 +82,7 @@ void setup()
   body_text_bold = createFont("Century Schoolbook Bold", 12);
   
   // CALENDAR ALIGNMENT
+  // TODO: See if the below is needed
   //////////////////////////////    WARNING    //////////////////////////////
   // -7 here to keep (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_BUFFER) == 120
     // 120 is a multiple of 60 (divisible by 4, 5, and 6 (all possible row amounts))
@@ -119,26 +120,24 @@ void setup()
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
 
-  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + (CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT));
+  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + (CALENDAR_BORDER_WEIGHT - (2 * DAY_GRID_STROKE_WEIGHT/2)));
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
   // + (2 * DAY_ GRID_STROKE_WEIGHT/2) because the stroke occurs outside where the line for the squares is drawn
   COL_SIZE = (width - (2 * CALENDAR_BORDER_WEIGHT) + (2 * DAY_GRID_STROKE_WEIGHT/2))/7;
   
+  // Initializing daily squares
   int square_amount = AMOUNT_OF_ROWS * 7;
   day_boxes = new daily_box_class[square_amount];
   for (int i = 0; i < square_amount; i++)
     day_boxes[i] = new daily_box_class();
-    
 }
 
 void draw()
 {
-  
   month_art();
   month_art_cutoff();
   //grid_lines();
-  
   draw_daily_boxes();
   weekday_names();
   //iterate_through_month("Numbers");
@@ -229,7 +228,7 @@ void draw_daily_boxes()
   push();
   // NOTE: Factor in that a rect with stroke will apply ONLY half the stroke in the upper left hand corner
     // Hence the stroke_weight adjuster at the end of the x & y translate
-    translate((CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT) + DAY_GRID_STROKE_WEIGHT/2, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER - DAY_GRID_STROKE_WEIGHT/2);
+    translate(CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER - DAY_GRID_STROKE_WEIGHT/2);
 
     for (int y = 0; y < AMOUNT_OF_ROWS; y++)
     {
