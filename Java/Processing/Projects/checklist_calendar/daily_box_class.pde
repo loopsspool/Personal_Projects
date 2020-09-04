@@ -1,5 +1,9 @@
 public class daily_box_class
 {
+  float stroke_weight = GRID_STROKE_WEIGHT;
+  // Stroke weights gonna be tricky to increase if you ever want to
+    // May need to increase the width and the column size (keep it to ints!)
+      // But idk, it works for 1 and its close for anything else
   float box_width = COL_SIZE;
   float box_height = ROW_SIZE;
   int day_number = 0;
@@ -15,12 +19,13 @@ public class daily_box_class
       fill(360);
       noFill();
       stroke(0);
-      strokeWeight(1);
+      strokeWeight(stroke_weight);
       
-      rect(0, 0, COL_SIZE, ROW_SIZE);
+      rect(0, 0, box_width, box_height);
       stroke(180);
-      line(2, 0, 2, ROW_SIZE);
-      line(COL_SIZE - 2, 0, COL_SIZE -2, ROW_SIZE);
+      line(0, 1, box_width, 1);
+      line(0, box_height - 1, box_width, box_height - 1);
+      
     
     pop();
   }

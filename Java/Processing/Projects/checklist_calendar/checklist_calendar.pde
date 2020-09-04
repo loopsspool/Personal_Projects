@@ -23,6 +23,8 @@ int DAYS_IN_MONTH;
 // CALENDAR ALIGNMENTS
 float MONTH_BOX_HEIGHT;
 float DAY_NAME_BOX_HEIGHT = 25;
+float GRID_STROKE_WEIGHT = 1;  // TODO: If adjusted greater than 1 may need to adapt width of program to accomodate
+                                  // While loop in settings with width variable? Good luck
 
 // CALENDAR GRID INFO
 int AMOUNT_OF_ROWS;
@@ -45,20 +47,26 @@ PFont body_text_bold;
 PGraphics month_banner;
 
 
-// TODO: Make each day have its own little square
 void settings()
 {
   //////////////////////////////    WARNING    //////////////////////////////
   // Sizes pretty much have to remain here for rows/cols to display evenly
-    // width 600 is divisible by 4, 5, and 6 (all possible row amounts) so will always have rounded int row lines
+    // height 600 is divisible by 4, 5, and 6 (all possible row amounts) so will always have rounded int row lines
+  
+  // A solution for automating accomodation for different stroke and border sizes
+  // DOESN'T WORK AND IS SLOW
+  //int temp_width = 780;
+  //int temp_height = 600;
+  //while ((temp_width - (2 * CALENDAR_BORDER_WEIGHT) + (2 * GRID_STROKE_WEIGHT/2))/7 != 111)
+  //  temp_width++;
+  
   if (is_PDF)
   {
-    // Was 776
-    size(774, 600, PDF, "calendar_test.pdf");
+    size(780, 600, PDF, "calendar_test.pdf");
   }
   else
   {
-    size(774, 600);
+    size(780, 600);
     noLoop();
   }
 }
@@ -118,16 +126,18 @@ void setup()
   // If February starts on a Monday and it isn't a leap year it only needs 4 rows
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
-    
-  int square_amount = AMOUNT_OF_ROWS * 7;
-  day_boxes = new daily_box_class[square_amount];
-  for (int i = 0; i < square_amount; i++)
-    day_boxes[i] = new daily_box_class();
 
   ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_BUFFER);
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
-  COL_SIZE = (width - (2 * CALENDAR_BORDER_WEIGHT))/7;
+  // + (2 * GRID_STROKE_WEIGHT/2) because the stroke occurs outside where the line for the squares is drawn
+  COL_SIZE = (width - (2 * CALENDAR_BORDER_WEIGHT) + (2 * GRID_STROKE_WEIGHT/2))/7;
+  
+  int square_amount = AMOUNT_OF_ROWS * 7;
+  day_boxes = new daily_box_class[square_amount];
+  for (int i = 0; i < square_amount; i++)
+    day_boxes[i] = new daily_box_class();
+    
 }
 
 void draw()
@@ -135,9 +145,10 @@ void draw()
   
   month_art();
   month_art_cutoff();
-  grid_lines();
-  weekday_names();
+  //grid_lines();
+  
   draw_daily_boxes();
+  weekday_names();
   //iterate_through_month("Numbers");
   //iterate_through_month("Checklist");
   //iterate_through_month("Grey Boxes");
@@ -157,31 +168,31 @@ void month_art_cutoff()
   pop();
 }
 
-void grid_lines()
-{
-  push();
-    strokeWeight(1);
-    stroke(0);
-    translate(0, MONTH_BOX_HEIGHT);
-    // VERTICAL LINES
-    float x;
-    for (int i = 1; i < 7; i++)
-    {
-      x = i * COL_SIZE;
-      line(x, 0, x, height);
-    }
+//void grid_lines()
+//{
+//  push();
+//    strokeWeight(1);
+//    stroke(0);
+//    translate(0, MONTH_BOX_HEIGHT);
+//    // VERTICAL LINES
+//    float x;
+//    for (int i = 1; i < 7; i++)
+//    {
+//      x = i * COL_SIZE;
+//      line(x, 0, x, height);
+//    }
     
-    // HORIZONTAL LINES
-    translate(0, DAY_NAME_BOX_HEIGHT);
+//    // HORIZONTAL LINES
+//    translate(0, DAY_NAME_BOX_HEIGHT);
     
-    float y;
-    for (int i = 1; i < AMOUNT_OF_ROWS; i++)
-    {
-      y = i * ROW_SIZE;
-      line(0, y, width, y);
-    }
-  pop();
-}
+//    float y;
+//    for (int i = 1; i < AMOUNT_OF_ROWS; i++)
+//    {
+//      y = i * ROW_SIZE;
+//      line(0, y, width, y);
+//    }
+//  pop();
+//}
 
 void weekday_names()
 {
@@ -190,23 +201,24 @@ void weekday_names()
   
   push();
     // Border lines
-    stroke(#F093FF);
     strokeWeight(DAY_NAME_OUTLINE_WEIGHT);
     translate(0, MONTH_BOX_HEIGHT);
     line(0, 0, width, 0);
-    translate(0, DAY_NAME_BOX_HEIGHT);
-    line(0, 0, width, 0);
+    line(0, DAY_NAME_BOX_HEIGHT, width, DAY_NAME_BOX_HEIGHT);
     
     // Actual day names 
-    translate(0, MONTH_BOX_HEIGHT);
     textFont(body_text_bold);
     textSize(14);
     fill(0);
 
+    float x;
     for (int i = 0; i < 7; i++)
     {
+      x = CALENDAR_BORDER_WEIGHT - GRID_STROKE_WEIGHT/2 + (i * COL_SIZE);
+      strokeWeight(GRID_STROKE_WEIGHT);
+      line(x, 0, x, DAY_NAME_BOX_HEIGHT);
       // + width/14 to center text between lines
-      text(WEEKDAYS[i], (i * COL_SIZE) + width/14, (DAY_NAME_BOX_HEIGHT/2) - 2); 
+      text(WEEKDAYS[i], x + COL_SIZE/2, (DAY_NAME_BOX_HEIGHT/2) - 2); 
     }
   pop();
 }
@@ -223,8 +235,9 @@ void draw_daily_boxes()
     day_acc++;
     
   push();
-  // NOTE ::Factor in that a rect with stroke will apply ONLY half the stroke in the upper left hand corner
-    translate(CALENDAR_BORDER_BUFFER, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER);
+  // NOTE: Factor in that a rect with stroke will apply ONLY half the stroke in the upper left hand corner
+    // Hence the stroke_weight adjuster at the end of the x & y translate
+    translate(CALENDAR_BORDER_BUFFER + day_boxes[0].stroke_weight/2, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER - day_boxes[0].stroke_weight/2);
 
     for (int y = 0; y < AMOUNT_OF_ROWS; y++)
     {
@@ -240,7 +253,7 @@ void draw_daily_boxes()
         translate(COL_SIZE, 0);
       }
       // Moving onto next week
-      translate(-COL_SIZE * 7, ROW_SIZE);
+      translate(-(COL_SIZE * 7), ROW_SIZE);
     }
   pop();
 }
@@ -374,9 +387,17 @@ void calendar_outline()
     // For some reason still neeed to add this tiny line to align things on the last row equal to the others
       // Issue seems to be coming from line ubderbeatg day name box...
         // Grey boxes at 0, 0 cover 0.25px of that line????
-    stroke(0);
-    strokeWeight(0.5);
-    line(0, 597.75, width, 597.75);
+    //stroke(0);
+    //strokeWeight(0.5);
+    //line(0, 597.75, width, 597.75);
+    
+    //stroke(#F9A7FF, 20);
+    //strokeWeight(1);
+    //line(0, 120, width, 120);
+    
+    stroke(#F9A7FF, 20);
+    strokeWeight(1);
+    line(0, height - CALENDAR_BORDER_WEIGHT, width, height - CALENDAR_BORDER_WEIGHT);
   
   pop();
 }
