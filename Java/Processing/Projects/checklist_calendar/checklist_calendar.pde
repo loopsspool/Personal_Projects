@@ -28,8 +28,8 @@ float DAY_NAME_BOX_HEIGHT = 25;
 int AMOUNT_OF_ROWS;
 float ROW_SIZE;
 float COL_SIZE;
-float DAY_GRID_STROKE_WEIGHT = 2;  
-int CALENDAR_BORDER_WEIGHT = 2;  // If this is changed, boxes are no londer aligned perfectly
+float DAY_GRID_STROKE_WEIGHT = 5;  
+int CALENDAR_BORDER_WEIGHT = 14;
 int CALENDAR_BORDER_BUFFER = floor(CALENDAR_BORDER_WEIGHT/2);  // So strokeWeight lines up with pixels inside border to align all squares the same
 int DAY_NAME_OUTLINE_WEIGHT = 2;
 int DAY_NAME_OUTLINE_BUFFER = floor(DAY_NAME_OUTLINE_WEIGHT/2);
@@ -89,6 +89,7 @@ void setup()
       // So rows will always fall on rounded integers
   // If adjusting ANY of the variables above, adjust this so the sum will == 120
   MONTH_BOX_HEIGHT = height/6 - 7;
+    // TODO: Adjust with border weight
   
   // DATE STUFF
   CURRENT_DATE = new Date();
@@ -120,7 +121,7 @@ void setup()
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
 
-  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + (CALENDAR_BORDER_WEIGHT - (2 * DAY_GRID_STROKE_WEIGHT/2)));
+  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_WEIGHT/2 + (CALENDAR_BORDER_WEIGHT - (2 * DAY_GRID_STROKE_WEIGHT/2)));
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
   // + (2 * DAY_ GRID_STROKE_WEIGHT/2) because the stroke occurs outside where the line for the squares is drawn
