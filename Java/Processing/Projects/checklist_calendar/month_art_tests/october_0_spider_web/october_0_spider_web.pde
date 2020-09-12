@@ -20,12 +20,31 @@ void draw()
     
     int main_strings = 12;
     float rotation = 0;
+    float[] rotation_array;
+    rotation_array = new float [main_strings];
+    // Main strings
     for (int i = 0; i < main_strings; i++)
     {
-      rotation = 360/(main_strings + random(-4, 4));
-      rotate(radians(rotation));
-      line(sin(radians(rotation)) * circle_d/2, cos(radians(rotation)) * circle_d/2, sin(radians(rotation)) * width, cos(radians(rotation)) * height); 
-      println(rotation);
-  }
+      rotation = radians(360/(main_strings + random(-4, 4)));
+      rotation_array[i] = rotation;
+      rotate(rotation);
+      line(sin(rotation) * circle_d/2, cos(rotation) * circle_d/2, sin(rotation) * width, cos(rotation) * height); 
+    }
+    for (int i = 0; i < main_strings; i++)
+    {
+      if (i == main_strings - 1)
+      {
+        // draw arc from [i] to [0]
+        break;
+      }
+      else
+      {
+        // Puts rotation in between two main lines so arc endpoints are linear
+        rotate((rotation_array[i] + rotation_array[i + 1])/2);
+        line(-abs(sin(rotation_array[i + 1]) * 100), -abs(cos(rotation_array[i + 1]) * 100), sin(rotation_array[i]) * 100, -abs(cos(rotation_array[i]) * 100));
+      }
+    }
+    println(rotation_array);
+    // Curves in between main strings
   pop();
 }
