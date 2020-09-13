@@ -23,13 +23,16 @@ void draw()
     float[] rotation_array;
     rotation_array = new float [main_strings];
     // Main strings
-    for (int i = 0; i < main_strings; i++)
-    {
-      rotation = radians(360/(main_strings + random(-4, 4)));
-      rotation_array[i] = rotation;
-      rotate(rotation);
-      line(sin(rotation) * circle_d/2, cos(rotation) * circle_d/2, sin(rotation) * width, cos(rotation) * height); 
-    }
+    push();
+      for (int i = 0; i < main_strings; i++)
+      {
+        rotation = radians(360/(main_strings + random(-4, 4)));
+        rotation_array[i] = rotation;
+        rotate(rotation);
+        line(sin(rotation) * circle_d/2, cos(rotation) * circle_d/2, sin(rotation) * width, cos(rotation) * height); 
+      }
+    pop();
+    // Curves in between main strings
     for (int i = 0; i < main_strings; i++)
     {
       if (i == main_strings - 1)
@@ -39,12 +42,12 @@ void draw()
       }
       else
       {
-        // Puts rotation in between two main lines so arc endpoints are linear
-        rotate((rotation_array[i] + rotation_array[i + 1])/2);
-        line(-abs(sin(rotation_array[i + 1]) * 100), -abs(cos(rotation_array[i + 1]) * 100), sin(rotation_array[i]) * 100, -abs(cos(rotation_array[i]) * 100));
+        rotate(rotation_array[i]);
+        push();
+          translate(-50, 0);
+          line(0, 0, 0, rotation_array[i+1] * 20);
+        pop();
       }
     }
-    println(rotation_array);
-    // Curves in between main strings
   pop();
 }
