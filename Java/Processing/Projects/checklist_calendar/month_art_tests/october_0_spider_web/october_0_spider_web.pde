@@ -51,6 +51,14 @@ void draw()
           translate(0, -circle_d/2);
           stroke(#EA2FEA);
           line(0, 0, 0, -height);
+          float x = 0;
+          float y = 200;
+          float inside_angle = rotation_array[i+1]/2;
+          // TODO: Lines aren't quite reaching to main lines
+            // Is this too complicated? Maybe just do even geometry?
+          translate(0, -y);
+          x = (y * sin(inside_angle))/sin(radians(90) - inside_angle);
+          line(-x, 0, x, 0);
         pop();
       }
     }
