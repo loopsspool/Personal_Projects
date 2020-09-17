@@ -18,7 +18,7 @@ void draw()
     int circle_d = 50;
     circle(0, 0, circle_d);
     
-    int main_strings = 12;
+    int main_strings = 8;
     float rotation = 0;
     float[] rotation_array;
     rotation_array = new float [main_strings];
@@ -29,7 +29,7 @@ void draw()
         rotation = radians(360/(main_strings + random(-4, 4)));
         rotation_array[i] = rotation;
         rotate(rotation);
-        line(sin(rotation) * circle_d/2, cos(rotation) * circle_d/2, sin(rotation) * width, cos(rotation) * height); 
+        line(0, -circle_d/2, 0, -height);
       }
     pop();
     // Curves in between main strings
@@ -42,10 +42,15 @@ void draw()
       }
       else
       {
+        // Puts axis at current main line
         rotate(rotation_array[i]);
         push();
-          translate(-50, 0);
-          line(0, 0, 0, rotation_array[i+1] * 20);
+          // Puts axis halfway between current main line and next
+            // Negated by pop(), so will hop back to current main line so rotte will be accurate still
+          rotate(rotation_array[i+1]/2);
+          translate(0, -circle_d/2);
+          stroke(#EA2FEA);
+          line(0, 0, 0, -height);
         pop();
       }
     }
