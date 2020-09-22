@@ -56,6 +56,9 @@ void draw()
           float inside_angle = rotation_array[i+1]/2;
           // TODO: Lines aren't quite reaching to main lines
             // Is this too complicated? Maybe just do even geometry?
+          
+          // Maybe instead of rotating to the half of each line, draw the arcs with
+            // No rotate calls, just using sin and cosine
           translate(0, -y);
           x = (y * sin(inside_angle))/sin(radians(90) - inside_angle);
           line(-x, 0, x, 0);
