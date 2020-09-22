@@ -26,7 +26,9 @@ void draw()
     push();
       for (int i = 0; i < main_strings; i++)
       {
-        rotation = radians(360/(main_strings + random(-4, 4)));
+        // Adds a bit of randomness but makes it difficult to work around
+        //rotation = radians(360/(main_strings + random(-4, 4)));
+        rotation = radians(360/main_strings);
         rotation_array[i] = rotation;
         rotate(rotation);
         line(0, -circle_d/2, 0, -height);
@@ -46,22 +48,39 @@ void draw()
         rotate(rotation_array[i]);
         push();
           // Puts axis halfway between current main line and next
-            // Negated by pop(), so will hop back to current main line so rotte will be accurate still
+            // Negated by pop(), so will hop back to current main line so rotate will be accurate still
           rotate(rotation_array[i+1]/2);
           translate(0, -circle_d/2);
-          stroke(#EA2FEA);
-          line(0, 0, 0, -height);
+          // Middle test line
+          //stroke(#EA2FEA);
+          //line(0, 0, 0, -height);
           float x = 0;
-          float y = 200;
+          float y = 0;
           float inside_angle = rotation_array[i+1]/2;
-          // TODO: Lines aren't quite reaching to main lines
-            // Is this too complicated? Maybe just do even geometry?
-          
+
           // Maybe instead of rotating to the half of each line, draw the arcs with
             // No rotate calls, just using sin and cosine
-          translate(0, -y);
-          x = (y * sin(inside_angle))/sin(radians(90) - inside_angle);
-          line(-x, 0, x, 0);
+          float amount_of_arcs = 20;
+          float half_diagonal = sqrt(sq(width) + sq(height))/2;
+          
+          for (int i_ = 0; i_ < amount_of_arcs; i_++)
+          {
+            y += pow(1.3, i_);
+            
+            translate(0, -y);
+            // x still doesn't quite reach to the edge of the main lines
+            x = (y * (sin(inside_angle))/sin(radians(90) - inside_angle)) + ((i_ + 2) * y/9);
+  
+            stroke(360);
+            beginShape();
+              // First and fifth vertices are control points
+              curveVertex(-x, 0);
+              curveVertex(-x, 0);
+              curveVertex(0, y/10);
+              curveVertex(x, 0);
+              curveVertex(x, 0);
+            endShape();
+          }
         pop();
       }
     }
