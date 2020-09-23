@@ -28,10 +28,10 @@ float DAY_NAME_BOX_HEIGHT = 25;
 int AMOUNT_OF_ROWS;
 float ROW_SIZE;
 float COL_SIZE;
-float DAY_GRID_STROKE_WEIGHT = 5;  
-int CALENDAR_BORDER_WEIGHT = 14;
+float DAY_GRID_STROKE_WEIGHT = 30;  
+int CALENDAR_BORDER_WEIGHT = 15;
 int CALENDAR_BORDER_BUFFER = floor(CALENDAR_BORDER_WEIGHT/2);  // So strokeWeight lines up with pixels inside border to align all squares the same
-int DAY_NAME_OUTLINE_WEIGHT = 2;
+int DAY_NAME_OUTLINE_WEIGHT = 15;
 int DAY_NAME_OUTLINE_BUFFER = floor(DAY_NAME_OUTLINE_WEIGHT/2);
 daily_box_class[] day_boxes;
 
@@ -94,7 +94,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  //LOCAL_DATE = LOCAL_DATE.plusMonths(2);
+  //LOCAL_DATE = LOCAL_DATE.plusMonths(5);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();

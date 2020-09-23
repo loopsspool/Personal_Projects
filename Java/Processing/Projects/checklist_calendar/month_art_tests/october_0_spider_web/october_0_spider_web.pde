@@ -35,54 +35,85 @@ void draw()
       }
     pop();
     // Curves in between main strings
-    for (int i = 0; i < main_strings; i++)
-    {
-      if (i == main_strings - 1)
-      {
-        // draw arc from [i] to [0]
-        break;
-      }
-      else
-      {
-        // Puts axis at current main line
-        rotate(rotation_array[i]);
-        push();
-          // Puts axis halfway between current main line and next
-            // Negated by pop(), so will hop back to current main line so rotate will be accurate still
-          rotate(rotation_array[i+1]/2);
-          translate(0, -circle_d/2);
-          // Middle test line
-          //stroke(#EA2FEA);
-          //line(0, 0, 0, -height);
-          float x = 0;
-          float y = 0;
-          float inside_angle = rotation_array[i+1]/2;
+    //for (int i = 0; i < main_strings; i++)
+    //{
+    //  if (i == main_strings - 1)
+    //  {
+    //    // draw arc from [i] to [0]
+    //    break;
+    //  }
+    //  else
+    //  {
+    //    // Puts axis at current main line
+    //    rotate(rotation_array[i]);
+    //    push();
+    //      // Puts axis halfway between current main line and next
+    //        // Negated by pop(), so will hop back to current main line so rotate will be accurate still
+    //      rotate(rotation_array[i+1]/2);
+    //      translate(0, -circle_d/2);
+    //      // Middle test line
+    //      //stroke(#EA2FEA);
+    //      //line(0, 0, 0, -height);
+    //      float x = 0;
+    //      float y = 0;
+    //      float inside_angle = rotation_array[i+1]/2;
 
-          // Maybe instead of rotating to the half of each line, draw the arcs with
-            // No rotate calls, just using sin and cosine
-          float amount_of_arcs = 20;
-          float half_diagonal = sqrt(sq(width) + sq(height))/2;
+    //      // Maybe instead of rotating to the half of each line, draw the arcs with
+    //        // No rotate calls, just using sin and cosine
+    //      float amount_of_arcs = 20;
+    //      float half_diagonal = sqrt(sq(width) + sq(height))/2;
           
-          for (int i_ = 0; i_ < amount_of_arcs; i_++)
-          {
-            y += pow(1.3, i_);
+    //      for (int i_ = 0; i_ < amount_of_arcs; i_++)
+    //      {
+    //        y += pow(1.3, i_);
             
-            translate(0, -y);
-            // x still doesn't quite reach to the edge of the main lines
-            x = (y * (sin(inside_angle))/sin(radians(90) - inside_angle)) + ((i_ + 2) * y/9);
+    //        translate(0, -y);
+    //        // x still doesn't quite reach to the edge of the main lines
+    //        x = (y * (sin(inside_angle))/sin(radians(90) - inside_angle)) + ((i_ + 2) * y/9);
   
-            stroke(360);
-            beginShape();
-              // First and fifth vertices are control points
-              curveVertex(-x, 0);
-              curveVertex(-x, 0);
-              curveVertex(0, y/10);
-              curveVertex(x, 0);
-              curveVertex(x, 0);
-            endShape();
-          }
-        pop();
-      }
+    //        stroke(360);
+    //        beginShape();
+    //          // First and fifth vertices are control points
+    //          curveVertex(-x, 0);
+    //          curveVertex(-x, 0);
+    //          curveVertex(0, y/10);
+    //          curveVertex(x, 0);
+    //          curveVertex(x, 0);
+    //        endShape();
+    //      }
+    //    pop();
+    //  }
+    //}
+    
+    // DOESN'T WORK
+    PShape arc;
+    arc = createShape();
+    arc.setStroke(#EA2FEA);
+    for (int i = 0; i < main_strings - 1; i++)
+    {
+      arc.rotate(rotation_array[i]);
+      push();
+        arc.beginShape();
+          
+          arc.curveVertex(0, -150);
+          arc.curveVertex(0, -150);
+          arc.rotate(rotation_array[i+1]/2);
+          arc.curveVertex(10, -100);
+          arc.rotate(rotation_array[i+1]/2);
+          arc.curveVertex(0, -150);
+          arc.curveVertex(0, -150);
+        arc.endShape(CLOSE);
+      pop();
     }
+    shape(arc);
+    
+    /**
+      Okay here's how to do this....
+        Rotate to in between the main points
+        run a loop subtracting x values until you get to a pixel that isn't black
+          save this variable
+        run dist from middle line to that white x value
+        then draw your curve using vertices from -x to 0 to +x
+    **/
   pop();
 }

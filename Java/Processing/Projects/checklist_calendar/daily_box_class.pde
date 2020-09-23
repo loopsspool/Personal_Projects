@@ -26,6 +26,9 @@ public class daily_box_class
       //line(0, 1, box_width, 1);
       //line(0, box_height - 1, box_width, box_height - 1);
       
+      // TODO: Putting DAY_GRID_STROKE_WEIGHT at really high numbers 
+        // shrinks this inner box too much
+          // Fix before putting in checkboxes
       noStroke();
       fill(360, 100, 100);
       rect(stroke_weight, stroke_weight, box_width - (2 * stroke_weight), box_height - (2 * stroke_weight));
