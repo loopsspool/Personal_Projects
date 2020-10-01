@@ -38,12 +38,7 @@ translate([-20, -wheel_track, 0])
 translate([-20, wheel_track, 0])
 	rotate([0, 0, wheel_rotation])
 		resize([wheel_size, wheel_size * 0.5, wheel_size])
-			difference()
-			{
-				sphere(r = wheel_size);
-				resize([wheel_size * 0.6, 10, 10])
-				sphere(r = 10);
-			}
+			sphere(r = wheel_size);
 		//cylinder(h = wheel_width, r = wheel_radius, center = true);
 
 // REAR RIGHT
