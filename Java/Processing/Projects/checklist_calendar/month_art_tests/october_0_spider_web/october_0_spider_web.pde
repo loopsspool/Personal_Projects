@@ -57,10 +57,10 @@ class Spiderweb
         line(0, -circle_d/2, 0, -width);
       }
     pop();
+    
     // Curves in between main strings
     for (int i = 0; i < main_strings; i++)
     {
-      float amount_of_arcs = 20;
       if (i == main_strings - 1)
       {
         // draw arc from [i] to [0]
@@ -75,24 +75,18 @@ class Spiderweb
             // Negated by pop(), so will hop back to current main line so rotate will be accurate still
           rotate(rotation_array[i+1]/2);
           translate(0, -circle_d/2);
-          // Middle test line
-          //stroke(#EA2FEA);
-          //line(0, 0, 0, -height);
-          int x = 0;
-          int x_add;
           
           // The below method works
             // Only drawback is get() will go offscreen after rotate call
               // This means it'll always return black, resulting in an infinite loop
                 // Tho could do an arc amount check and after it gets to a certain number
-                  // Add 25. x looks close to adding 20 + (loop_acc *5)
+                  // Add 25. x looks close to adding 20 + (loop_acc * 4)
           int y_base = 0;
           int y_inc = 0;  // Changes the incrementer value so it doesn't look so "perfect"
           int loop_acc = 0;
           for (int y = -y_base; y > -height * 1.5; y -= y_base + y_inc)
           {
-            x = 0;
-            int x_ = 0;
+            int x = 0;
             while(get(int(screenX(x, y)), int(screenY(x, y))) == color(0))
             {
               x++;
