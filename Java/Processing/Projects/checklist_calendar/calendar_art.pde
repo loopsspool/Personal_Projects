@@ -49,6 +49,9 @@ void draw_month_art()
       case "SEPTEMBER":
         september_art();
         break;
+      case "OCTOBER":
+        october_art();
+        break;
     }
   pop();
 }
@@ -117,6 +120,118 @@ void september_art()
   sept_font.bold_weight = 6;
   
   draw_text(sept_font);
+}
+
+void october_art()
+{ 
+  month_banner = createGraphics(width, int(MONTH_BOX_HEIGHT));
+
+  class Spiderweb
+  {
+    float origin_x;
+    float origin_y;
+    
+    Spiderweb(float x, float y)
+    {
+      origin_x = x;
+      origin_y = y;
+    }
+    
+    void display()
+    {
+      push();
+        month_banner.beginDraw();
+          month_banner.background(0);
+          month_banner.stroke(360);
+          month_banner.noFill();
+          month_banner.strokeWeight(3);
+          int circle_d = 30;
+          month_banner.translate(origin_x, origin_y);
+          month_banner.circle(0, 0, circle_d);
+          
+          int main_strings = 8;
+          float rotation = 0;
+          float[] rotation_array;
+          rotation_array = new float [main_strings];
+          // Main strings
+          push();
+            for (int i = 0; i < main_strings; i++)
+            {
+              // Adds a bit of randomness but makes it difficult to work around
+              //rotation = radians(360/(main_strings + random(-4, 4)));
+              rotation = radians(360/main_strings);
+              rotation_array[i] = rotation;
+              month_banner.rotate(rotation);
+              month_banner.line(0, -circle_d/2, 0, -width);
+            }
+          pop();
+          
+          // Curves in between main strings
+          for (int i = 0; i < main_strings; i++)
+          {
+            if (i == main_strings - 1)
+            {
+              // draw arc from [i] to [0]
+              break;
+            }
+            else
+            {
+              // Puts axis at current main line
+              month_banner.rotate(rotation_array[i]);
+              push();
+                // Puts axis halfway between current main line and next
+                  // Negated by pop(), so will hop back to current main line so rotate will be accurate still
+                month_banner.rotate(rotation_array[i+1]/2);
+                month_banner.translate(0, -circle_d/2);
+                
+                // The below method works
+                  // Only drawback is get() will go offscreen after rotate call
+                    // This means it'll always return black, resulting in an infinite loop
+                      // Tho could do an arc amount check and after it gets to a certain number
+                        // Add 25. x looks close to adding 20 + (loop_acc * 4)
+                int y_base = 0;
+                int y_inc = 0;  // Changes the incrementer value so it doesn't look so "perfect"
+                int loop_acc = 0;
+                for (int y = -y_base; y > -height * 1.5; y -= y_base + y_inc)
+                {
+                  int x = 0;
+                  while(month_banner.get(int(screenX(x, y)), int(screenY(x, y))) == color(0))
+                  {
+                    x++;
+                  }
+                  //x += 20 + (4 * loop_acc);
+                  //println(x);
+        
+                  month_banner.stroke(360);
+                  month_banner.beginShape();
+                    // First and fifth vertices are control points
+                    month_banner.curveVertex(-x, y);
+                    month_banner.curveVertex(-x, y);
+                    month_banner.curveVertex(0, y * 0.8);
+                    month_banner.curveVertex(x, y);
+                    month_banner.curveVertex(x, y);
+                  month_banner.endShape();
+                  
+                  y_inc += 10;
+                  loop_acc++;
+                }
+              pop();
+            }
+          }
+        month_banner.endDraw();
+      pop();
+    }
+  }
+  
+  noStroke();
+  fill(0);
+  rect(0, 0, width, MONTH_BOX_HEIGHT);
+  Spiderweb ul_spiderweb = new Spiderweb(0, 0);
+  Spiderweb lr_spiderweb = new Spiderweb(width - 1, MONTH_BOX_HEIGHT);
+  ul_spiderweb.display();
+  lr_spiderweb.display();
+  
+  image(month_banner, 0, 0);
 }
 
 
