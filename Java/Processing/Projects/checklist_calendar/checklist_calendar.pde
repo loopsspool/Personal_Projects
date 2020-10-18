@@ -4,7 +4,7 @@ import processing.pdf.*;  // To convert to PDF
 import geomerative.*;  // For text outline
 
 // PDF Switcher
-boolean is_PDF = false;
+boolean is_PDF = true;
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -28,10 +28,10 @@ float DAY_NAME_BOX_HEIGHT = 25;
 int AMOUNT_OF_ROWS;
 float ROW_SIZE;
 float COL_SIZE;
-float DAY_GRID_STROKE_WEIGHT = 5;  
-int CALENDAR_BORDER_WEIGHT = 15;
+float DAY_GRID_STROKE_WEIGHT = 2;  
+int CALENDAR_BORDER_WEIGHT = 4;
 int CALENDAR_BORDER_BUFFER = floor(CALENDAR_BORDER_WEIGHT/2);  // So strokeWeight lines up with pixels inside border to align all squares the same
-int DAY_NAME_OUTLINE_WEIGHT = 5;
+int DAY_NAME_OUTLINE_WEIGHT = 3;
 int DAY_NAME_OUTLINE_BUFFER = floor(DAY_NAME_OUTLINE_WEIGHT/2);
 daily_box_class[] day_boxes;
 
@@ -121,7 +121,7 @@ void setup()
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
 
-  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_WEIGHT/2 + (CALENDAR_BORDER_WEIGHT - (2 * DAY_GRID_STROKE_WEIGHT/2)));
+  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + (CALENDAR_BORDER_WEIGHT - (DAY_GRID_STROKE_WEIGHT/2)));
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
   // + (2 * DAY_ GRID_STROKE_WEIGHT/2) because the stroke occurs outside where the line for the squares is drawn
@@ -229,7 +229,7 @@ void draw_daily_boxes()
   push();
   // NOTE: Factor in that a rect with stroke will apply ONLY half the stroke in the upper left hand corner
     // Hence the stroke_weight adjuster at the end of the x & y translate
-    translate(CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER - DAY_GRID_STROKE_WEIGHT/2);
+    translate(CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER);
 
     for (int y = 0; y < AMOUNT_OF_ROWS; y++)
     {
