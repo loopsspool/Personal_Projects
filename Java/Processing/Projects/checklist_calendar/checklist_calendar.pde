@@ -68,7 +68,7 @@ float COL_SIZE;
 float DAY_GRID_STROKE_WEIGHT = 12;  
 float CALENDAR_BORDER_WEIGHT = 6;
 float CALENDAR_BORDER_BUFFER = CALENDAR_BORDER_WEIGHT/2;  // So strokeWeight lines up with pixels inside border to align all squares the same
-float DAY_NAME_OUTLINE_WEIGHT = 3;
+float DAY_NAME_OUTLINE_WEIGHT = 10;
 float DAY_NAME_OUTLINE_BUFFER = DAY_NAME_OUTLINE_WEIGHT/2;
 daily_box_class[] day_boxes;
 day_name_box_class[] day_names;
@@ -163,8 +163,9 @@ void setup()
   ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2);
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
-  // + (2 * DAY_ GRID_STROKE_WEIGHT/2) because the stroke occurs outside where the line for the squares is drawn
-  COL_SIZE = (float(width) - (2 * CALENDAR_BORDER_WEIGHT))/7;
+  // CALENDAR_BORDER_WEIGHT - 0.5 to hide the default strokeWeight of 1 within the border
+    // Also allows cell sizes to be COL_SIZE, not that +/- something
+  COL_SIZE = (float(width) - (2 * (CALENDAR_BORDER_WEIGHT - 0.5)))/7;
   
   // Initializing daily squares
   int square_amount = AMOUNT_OF_ROWS * 7;
@@ -178,6 +179,7 @@ void setup()
   {
     day_names[i] = new day_name_box_class();
     day_names[i].day_name = WEEKDAYS[i];
+    day_names[i].weekday_num = i;
   }
 }
 
@@ -205,7 +207,6 @@ void month_art_cutoff()
 
 void weekday_names()
 {
-  // TODO: Make each their own textbox
   textFont(body_text_bold);
   
   push();
