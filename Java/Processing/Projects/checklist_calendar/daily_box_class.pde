@@ -2,8 +2,8 @@ public class daily_box_class
 {
   float stroke_weight = DAY_GRID_STROKE_WEIGHT;
 
-  float box_width = COL_SIZE;
-  float box_height = ROW_SIZE;
+  float box_width = COL_SIZE + DAY_GRID_STROKE_WEIGHT/7;
+  float box_height = ROW_SIZE + DAY_GRID_STROKE_WEIGHT/AMOUNT_OF_ROWS;
   int buffer_from_gridline_to_usable_space = 1;
   float inside_box_upper_left = stroke_weight/2 + buffer_from_gridline_to_usable_space;
   // 2 * buffer_from_gridline_to_usable_space because once for upper left corner, once for bottom right
@@ -41,9 +41,9 @@ public class daily_box_class
       }
       
       // INSIDE BOX TEST
-      //noStroke();
-      //fill(360, 100, 100);
-      //rect(inside_box_upper_left, inside_box_upper_left, inner_box_width, inner_box_height);
+      noStroke();
+      fill(360, 100, 100);
+      rect(inside_box_upper_left, inside_box_upper_left, inner_box_width, inner_box_height);
     
     pop();
   }

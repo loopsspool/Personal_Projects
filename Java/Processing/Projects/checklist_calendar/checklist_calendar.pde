@@ -28,12 +28,50 @@ float DAY_NAME_BOX_HEIGHT = 25;
 int AMOUNT_OF_ROWS;
 float ROW_SIZE;
 float COL_SIZE;
-float DAY_GRID_STROKE_WEIGHT = 2;  
-int CALENDAR_BORDER_WEIGHT = 4;
-int CALENDAR_BORDER_BUFFER = floor(CALENDAR_BORDER_WEIGHT/2);  // So strokeWeight lines up with pixels inside border to align all squares the same
-int DAY_NAME_OUTLINE_WEIGHT = 3;
-int DAY_NAME_OUTLINE_BUFFER = floor(DAY_NAME_OUTLINE_WEIGHT/2);
+/** Here's the thing....
+  A proper calendar has to have column lines that match up
+  The day name lines have to continue down to the day grid lines
+  They can be different sizes, but they have to be centered along the same point
+  
+  I wanted this calendar also to have a border around it
+  And no matter how thick the day grid or day name strokes were, the border would always take precedence
+  In other words there would be a straight border line from the month art, down through the day names and day grid
+    For example, if the day name and day grid strokeWeight were set at 20, but the calendar border were set at 1
+      The calendar would have a 1 pixel wide border all around
+      Even though the internal lines for the grid and names boxes would be pretty chonky
+  
+  To have both of the above criteria
+  I would have to adjust day grid or day name cell widths based off of their strokeWeight to hide the stroke in the border
+  But then text wouldn't be centered correctly
+  And the strokes were overlapping, appearing thicker than they should because the cells were wider than COL_SIZE but being x-translated by that variable
+  So I'd have to adjust the x-translate based off of the width adjustments
+  If I were to do that the columns would no longer adhere to the necessary continuously uniform column widths from day names to day grid
+  
+  So I had two options:
+    1) Require day name strokeWeight to be the same as day grid strokeWeight
+    2) "Fake" the strokeWeight by drawing lines over the original strokes, with the exceptions of the ones "covered" by the calendar border
+    
+  I opted for the latter option since I wanted complete freedom for this calendar
+  If I wanted day name strokeWeight 10x that of the day grid strokeWeight I wanted to be able to do that
+  
+  So do note when altering the below variables
+  As it appears you are altering direct strokeWeight of their rectangles
+  You are not
+  
+  This complicates things inside their respective class display functions a bit
+  But greatly simplifies their size and translate calls
+  
+  Phew... This was a PITA to figure out but I'm glad I did
+  I don't like hinky dink workarounds or "faking" code like this
+  But unfortunately in this case I believe it is necessary
+**/
+float DAY_GRID_STROKE_WEIGHT = 12;  
+float CALENDAR_BORDER_WEIGHT = 6;
+float CALENDAR_BORDER_BUFFER = CALENDAR_BORDER_WEIGHT/2;  // So strokeWeight lines up with pixels inside border to align all squares the same
+float DAY_NAME_OUTLINE_WEIGHT = 3;
+float DAY_NAME_OUTLINE_BUFFER = DAY_NAME_OUTLINE_WEIGHT/2;
 daily_box_class[] day_boxes;
+day_name_box_class[] day_names;
 
 // FONTS
 int MONTH_TEXT_SIZE = 60;
@@ -94,7 +132,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  //LOCAL_DATE = LOCAL_DATE.plusMonths(5);
+  LOCAL_DATE = LOCAL_DATE.plusMonths(1);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -126,13 +164,21 @@ void setup()
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
   // + (2 * DAY_ GRID_STROKE_WEIGHT/2) because the stroke occurs outside where the line for the squares is drawn
-  COL_SIZE = (width - (2 * CALENDAR_BORDER_WEIGHT) + (2 * DAY_GRID_STROKE_WEIGHT/2))/7;
+  COL_SIZE = (float(width) - (2 * CALENDAR_BORDER_WEIGHT))/7;
   
   // Initializing daily squares
   int square_amount = AMOUNT_OF_ROWS * 7;
   day_boxes = new daily_box_class[square_amount];
   for (int i = 0; i < square_amount; i++)
     day_boxes[i] = new daily_box_class();
+    
+  // Initializing weekday rectangles
+  day_names = new day_name_box_class[7];
+  for (int i = 0; i < 7; i++)
+  {
+    day_names[i] = new day_name_box_class();
+    day_names[i].day_name = WEEKDAYS[i];
+  }
 }
 
 void draw()
@@ -164,24 +210,31 @@ void weekday_names()
   
   push();
     // Border lines
-    strokeWeight(DAY_NAME_OUTLINE_WEIGHT);
-    translate(0, MONTH_BOX_HEIGHT);
-    line(0, 0, width, 0);
-    line(0, DAY_NAME_BOX_HEIGHT, width, DAY_NAME_BOX_HEIGHT);
+    //strokeWeight(DAY_NAME_OUTLINE_WEIGHT);
+    //translate(0, MONTH_BOX_HEIGHT);
+    //line(0, 0, width, 0);
+    //line(0, DAY_NAME_BOX_HEIGHT, width, DAY_NAME_BOX_HEIGHT);
     
-    // Actual day names 
-    textFont(body_text_bold);
-    textSize(14);
-    fill(0);
+    //// Actual day names 
+    //textFont(body_text_bold);
+    //textSize(14);
+    //fill(0);
 
-    float x;
+    //float x;
+    //for (int i = 0; i < 7; i++)
+    //{
+    //  x = CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2 + (i * COL_SIZE);
+    //  strokeWeight(DAY_GRID_STROKE_WEIGHT);
+    //  line(x, 0, x, DAY_NAME_BOX_HEIGHT);
+    //  // + width/14 to center text between lines
+    //  text(WEEKDAYS[i], x + COL_SIZE/2, (DAY_NAME_BOX_HEIGHT/2) - 2); 
+    //}
+    // - 0.5
+    translate(CALENDAR_BORDER_WEIGHT - 0.5, MONTH_BOX_HEIGHT);
     for (int i = 0; i < 7; i++)
     {
-      x = CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2 + (i * COL_SIZE);
-      strokeWeight(DAY_GRID_STROKE_WEIGHT);
-      line(x, 0, x, DAY_NAME_BOX_HEIGHT);
-      // + width/14 to center text between lines
-      text(WEEKDAYS[i], x + COL_SIZE/2, (DAY_NAME_BOX_HEIGHT/2) - 2); 
+      day_names[i].display();
+      translate(COL_SIZE, 0);
     }
   pop();
 }
@@ -213,10 +266,10 @@ void draw_daily_boxes()
         if (square_acc >= FIRST_DAY_OF_MONTH_COLUMN)
           day_acc++;
           
-        translate(COL_SIZE, 0);
+        translate(day_boxes[0].box_width, 0);
       }
       // Moving onto next week
-      translate(-(COL_SIZE * 7), ROW_SIZE);
+      translate(-(day_boxes[0].box_width * 7), day_boxes[0].box_height);
     }
   pop();
 }
