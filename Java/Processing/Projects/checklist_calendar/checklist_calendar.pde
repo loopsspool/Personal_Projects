@@ -65,10 +65,10 @@ float COL_SIZE;
   I don't like hinky dink workarounds or "faking" code like this
   But unfortunately in this case I believe it is necessary
 **/
-float DAY_GRID_STROKE_WEIGHT = 12;  
-float CALENDAR_BORDER_WEIGHT = 6;
+float DAY_GRID_STROKE_WEIGHT = 1;  
+float CALENDAR_BORDER_WEIGHT = 4;
 float CALENDAR_BORDER_BUFFER = CALENDAR_BORDER_WEIGHT/2;  // So strokeWeight lines up with pixels inside border to align all squares the same
-float DAY_NAME_OUTLINE_WEIGHT = 10;
+float DAY_NAME_OUTLINE_WEIGHT = 2;
 float DAY_NAME_OUTLINE_BUFFER = DAY_NAME_OUTLINE_WEIGHT/2;
 daily_box_class[] day_boxes;
 day_name_box_class[] day_names;
@@ -159,12 +159,13 @@ void setup()
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
 
-  // - DAY_GRID_STROKE_WEIGHT/2 at the end to blend in the last row bottom day grid line with the border
-  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2);
+  // CALENDAR_BORDER_WEIGHT - 0.5 to hide the default strokeWeight of 1 within the bottom border
+    // Also allows cell heights to be ROW_SIZE, not that +/- something
+  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_WEIGHT - 0.5);
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
   // CALENDAR_BORDER_WEIGHT - 0.5 to hide the default strokeWeight of 1 within the border
-    // Also allows cell sizes to be COL_SIZE, not that +/- something
+    // Also allows cell widths to be COL_SIZE, not that +/- something
   COL_SIZE = (float(width) - (2 * (CALENDAR_BORDER_WEIGHT - 0.5)))/7;
   
   // Initializing daily squares
@@ -210,27 +211,6 @@ void weekday_names()
   textFont(body_text_bold);
   
   push();
-    // Border lines
-    //strokeWeight(DAY_NAME_OUTLINE_WEIGHT);
-    //translate(0, MONTH_BOX_HEIGHT);
-    //line(0, 0, width, 0);
-    //line(0, DAY_NAME_BOX_HEIGHT, width, DAY_NAME_BOX_HEIGHT);
-    
-    //// Actual day names 
-    //textFont(body_text_bold);
-    //textSize(14);
-    //fill(0);
-
-    //float x;
-    //for (int i = 0; i < 7; i++)
-    //{
-    //  x = CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2 + (i * COL_SIZE);
-    //  strokeWeight(DAY_GRID_STROKE_WEIGHT);
-    //  line(x, 0, x, DAY_NAME_BOX_HEIGHT);
-    //  // + width/14 to center text between lines
-    //  text(WEEKDAYS[i], x + COL_SIZE/2, (DAY_NAME_BOX_HEIGHT/2) - 2); 
-    //}
-    // - 0.5
     translate(CALENDAR_BORDER_WEIGHT - 0.5, MONTH_BOX_HEIGHT);
     for (int i = 0; i < 7; i++)
     {
@@ -244,6 +224,7 @@ void draw_daily_boxes()
 {
   int square_acc = 0;
   int day_acc = 0;
+  int col_acc = 0;
   
   // If month starts on a Monday (first square), make it day 1
       // So square doesn't get greyed out & day number shows as 1
@@ -254,23 +235,27 @@ void draw_daily_boxes()
   push();
     // NOTE: Factor in that a rect with stroke will apply ONLY half the stroke in the upper left hand corner
       // Hence the stroke_weight adjuster at the end of the x & y translate
-    translate(CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER);
+    translate(CALENDAR_BORDER_WEIGHT - 0.5, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER);
 
     for (int y = 0; y < AMOUNT_OF_ROWS; y++)
     {
       for (int x = 0; x < 7; x++)
       {
-        day_boxes[square_acc].display(day_acc);
+        day_boxes[square_acc].col_number = col_acc;
+        day_boxes[square_acc].day_number = day_acc;
+        day_boxes[square_acc].display();
         
         // Moving onto next day
+        col_acc++;
         square_acc++;
         if (square_acc >= FIRST_DAY_OF_MONTH_COLUMN)
           day_acc++;
           
-        translate(day_boxes[0].box_width, 0);
+        translate(COL_SIZE, 0);
       }
       // Moving onto next week
-      translate(-(day_boxes[0].box_width * 7), day_boxes[0].box_height);
+      col_acc = 0;
+      translate(-(COL_SIZE * 7), ROW_SIZE);
     }
   pop();
 }

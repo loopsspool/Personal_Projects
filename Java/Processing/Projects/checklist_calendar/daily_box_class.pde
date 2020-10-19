@@ -2,29 +2,27 @@ public class daily_box_class
 {
   float stroke_weight = DAY_GRID_STROKE_WEIGHT;
 
-  float box_width = COL_SIZE + DAY_GRID_STROKE_WEIGHT/7;
-  float box_height = ROW_SIZE + DAY_GRID_STROKE_WEIGHT/AMOUNT_OF_ROWS;
+  float box_width = COL_SIZE;
+  float box_height = ROW_SIZE;
   int buffer_from_gridline_to_usable_space = 1;
   float inside_box_upper_left = stroke_weight/2 + buffer_from_gridline_to_usable_space;
   // 2 * buffer_from_gridline_to_usable_space because once for upper left corner, once for bottom right
   float inner_box_width = box_width - stroke_weight - (2 * buffer_from_gridline_to_usable_space);
   float inner_box_height = box_height - stroke_weight - (2 * buffer_from_gridline_to_usable_space);
   
-  int day_number = 0;
+  int day_number = -1;
+  int col_number = -1;
   String[] check_off_items = {"Do morning routine", 
                               "Be present", 
                               "Do thing you love", 
                               "Spend time w/ self", 
                               "Do list"};
 
-  void display(int day_num)
+  void display()
   {
     push();   
-      stroke(0);
-      strokeWeight(stroke_weight);
-      
-      day_number = day_num;
-      
+      noStroke();
+
       if (day_number == 0 || day_number > DAYS_IN_MONTH)
       {
         fill(280);
@@ -40,10 +38,26 @@ public class daily_box_class
         done_today_checkbox();
       }
       
+      // Box outline
+      stroke(0);
+      strokeWeight(stroke_weight);
+      line(0, 0, box_width, 0);  // Top line
+      line(0, box_height, box_width, box_height);  // Bottom line
+      if (col_number != 0)  // Draws for every cell except the first (so doesn't draw over border)
+        line(0, 0, 0, box_height);  // Left line
+      if (col_number != 6)  // Draws for every cell except the last (so doesn't draw over border)
+        line(box_width, 0, box_width, box_height);  // Right line
+      
+      
+      // TODO: When the borders get fairly large
+        // There's excess room on the left of the first column
+        // And the right of the last column
+        // This is due to the box expecting there's a thick grid line there
+        // When it's been omitted from those
       // INSIDE BOX TEST
-      noStroke();
-      fill(360, 100, 100);
-      rect(inside_box_upper_left, inside_box_upper_left, inner_box_width, inner_box_height);
+      //noStroke();
+      //fill(360, 100, 100);
+      //rect(inside_box_upper_left, inside_box_upper_left, inner_box_width, inner_box_height);
     
     pop();
   }
@@ -84,6 +98,7 @@ public class daily_box_class
         translate(0, y_translate);
         noFill();
         strokeWeight(1);
+        stroke(0);
         square(0, 0, size);
         textSize(size);
         textAlign(LEFT);
@@ -99,6 +114,7 @@ public class daily_box_class
       rectMode(CENTER);
       noFill();
       strokeWeight(1);
+      stroke(0);
       // Matches checkbox items square size
       float square_size = 9.4;
       // -1 on x and +8 on y to align with day numbers
