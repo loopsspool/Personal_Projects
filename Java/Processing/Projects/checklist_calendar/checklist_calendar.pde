@@ -232,39 +232,3 @@ void calendar_outline()
     line(0, height - CALENDAR_BORDER_BUFFER, width, height - CALENDAR_BORDER_BUFFER);  // BOTTOM
   pop();
 }
-
-void draw_text(font_class Font)
-{
-  push();
-    if (Font.is_bolded)
-      bold_font(Font);
-    else
-    {
-      Font.set_features();
-      Font.display();
-    }
-  pop();
-}
-
-void bold_font(font_class Font)
-{
-  push();
-    Font.set_features();
-    // "Bolds" the font a little -- since theres no bold versions of some fonts
-    float x_shift_divisor = 5;  // To utilize i as coordinate, small shifts in x
-    for (float i = 0; i < Font.bold_weight/x_shift_divisor; i += 1/x_shift_divisor)
-    {
-      translate(i, 0);
-      Font.display();
-    }
-  pop();
-}
-
-/** 
-TODO: Text effects: 
-  - 3D gradually increasing font size
-  - Text Fade in/out
-  + See what geomerative can do
-  
-  Maybe make its own tab?
-**/ 
