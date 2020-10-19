@@ -4,7 +4,7 @@ import processing.pdf.*;  // To convert to PDF
 import geomerative.*;  // For text outline
 
 // PDF Switcher
-boolean is_PDF = true;
+boolean is_PDF = false;
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -121,7 +121,8 @@ void setup()
   if ((DAYS_IN_MONTH == 28) && (FIRST_DAY_OF_MONTH_COLUMN == 0))
     AMOUNT_OF_ROWS = 4;
 
-  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + (CALENDAR_BORDER_WEIGHT - (DAY_GRID_STROKE_WEIGHT/2)));
+  // - DAY_GRID_STROKE_WEIGHT/2 at the end to blend in the last row bottom day grid line with the border
+  ROW_SIZE = height - (MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER + CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2);
   ROW_SIZE /= AMOUNT_OF_ROWS;
   
   // + (2 * DAY_ GRID_STROKE_WEIGHT/2) because the stroke occurs outside where the line for the squares is drawn
@@ -138,12 +139,8 @@ void draw()
 {
   month_art();
   month_art_cutoff();
-  //grid_lines();
   draw_daily_boxes();
   weekday_names();
-  //iterate_through_month("Numbers");
-  //iterate_through_month("Checklist");
-  //iterate_through_month("Grey Boxes");
   calendar_outline();
     
   if (is_PDF)
@@ -159,32 +156,6 @@ void month_art_cutoff()
     rect(0, MONTH_BOX_HEIGHT, width, height);
   pop();
 }
-
-//void grid_lines()
-//{
-//  push();
-//    strokeWeight(1);
-//    stroke(0);
-//    translate(0, MONTH_BOX_HEIGHT);
-//    // VERTICAL LINES
-//    float x;
-//    for (int i = 1; i < 7; i++)
-//    {
-//      x = i * COL_SIZE;
-//      line(x, 0, x, height);
-//    }
-    
-//    // HORIZONTAL LINES
-//    translate(0, DAY_NAME_BOX_HEIGHT);
-    
-//    float y;
-//    for (int i = 1; i < AMOUNT_OF_ROWS; i++)
-//    {
-//      y = i * ROW_SIZE;
-//      line(0, y, width, y);
-//    }
-//  pop();
-//}
 
 void weekday_names()
 {
@@ -227,8 +198,8 @@ void draw_daily_boxes()
     day_acc++;
     
   push();
-  // NOTE: Factor in that a rect with stroke will apply ONLY half the stroke in the upper left hand corner
-    // Hence the stroke_weight adjuster at the end of the x & y translate
+    // NOTE: Factor in that a rect with stroke will apply ONLY half the stroke in the upper left hand corner
+      // Hence the stroke_weight adjuster at the end of the x & y translate
     translate(CALENDAR_BORDER_WEIGHT - DAY_GRID_STROKE_WEIGHT/2, MONTH_BOX_HEIGHT + DAY_NAME_BOX_HEIGHT + DAY_NAME_OUTLINE_BUFFER);
 
     for (int y = 0; y < AMOUNT_OF_ROWS; y++)
@@ -248,121 +219,6 @@ void draw_daily_boxes()
       translate(-(COL_SIZE * 7), ROW_SIZE);
     }
   pop();
-}
-
-//void iterate_through_month(String doing)
-//{
-//  push();  
-    
-//    float x_translate_added = CALENDAR_BORDER_WEIGHT;  // This is to accurately realign when the y-axis moves down
-    
-//    for (int y_ = 0; y_ < AMOUNT_OF_ROWS; y_++)
-//    {
-//      for (int x_ = 0; x_ < 7; x_++)
-//      {
-//        switch(doing)
-//        {
-//          case "Grey Boxes":
-//            grey_out_non_month_days(day_acc);
-//            break;
-            
-//          case "Numbers":
-//            number_display(day_acc);
-//            break;
-            
-//          case "Checklist":
-//            daily_text();
-//            break;
-//        }
-        
-//        day_boxes[square_acc].display(x_, y_);
-        
-//        // Moving onto next day
-//        square_acc++;
-//        if (square_acc >= FIRST_DAY_OF_MONTH_COLUMN)
-//          day_acc++;
-          
-//        translate(COL_SIZE, 0);
-//        x_translate_added += COL_SIZE;
-//      }
-//      // Moving onto next week
-//      translate(-x_translate_added + CALENDAR_BORDER_WEIGHT, ROW_SIZE);
-//      x_translate_added = CALENDAR_BORDER_WEIGHT;  // Resetting x to beginning of week
-//    }
-//  pop();
-//}
-
-void number_display(int day_num)
-{ 
-  int x_buffer = 4;
-  int y_buffer = 8;
-  
-  push();
-    translate(x_buffer, y_buffer);
-    textAlign(LEFT, CENTER);
-    textFont(body_text_bold);
-    textSize(12);
-    stroke(0);
-    fill(0);
-    text(String.valueOf(day_num), 0, 0);
-  pop();
-}
-
-void grey_out_non_month_days(int day)
-{
-  push();
-    stroke(0);
-    fill(280);
-    if (day < 1)
-    {
-      // Greying out days before month start
-      rect(0, 0, COL_SIZE, ROW_SIZE);
-    }
-    if (day > DAYS_IN_MONTH)
-    {
-      // Greying out days after month ends
-        // + 1 on width so last square outline doesn't show
-      rect(0, 0, COL_SIZE + 1, ROW_SIZE);
-    }
-  pop();
-}
-
-void daily_text()
-{
-  textFont(body_text);
-  
-  push();
-    translate(4, 5.5);
-    bullet_point("Do morning routine");
-    bullet_point("Be present");
-    bullet_point("Do thing you love");
-    bullet_point("Spend time w/ self");
-    bullet_point("Do list");
-  pop();
-}
-
-void bullet_point(String text)
-{
-  float indent = 13;
-  float size = 9.4;
-  float y_translate = 0;
-  // Adjusting for rows of calendar so alignment doesn't look funky
-  // TODO: Align to liking
-  if (AMOUNT_OF_ROWS == 6)
-    y_translate = 11.7;
-  if (AMOUNT_OF_ROWS == 5)
-    y_translate = 14.5;
-  if (AMOUNT_OF_ROWS == 4)
-    y_translate = 18;
-
-  // No push/pop so translates will stack for bullet points
-  translate(0, y_translate);
-  square(0, 0, size);
-  textSize(size);
-  textAlign(LEFT);
-  fill(0);
-  text(text, indent, 0.9 * size);
-  noFill();  // Keep this here so following check-boxes aren't filled
 }
 
 void calendar_outline()
@@ -409,4 +265,6 @@ TODO: Text effects:
   - 3D gradually increasing font size
   - Text Fade in/out
   + See what geomerative can do
+  
+  Maybe make its own tab?
 **/ 
