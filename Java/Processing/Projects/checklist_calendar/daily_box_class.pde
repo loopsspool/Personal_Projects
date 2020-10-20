@@ -21,7 +21,13 @@ public class daily_box_class
   void display()
   {
     push();   
-      noStroke();
+      box();
+    pop();
+  }
+  
+  void box()
+  {
+    noStroke();
 
       if (day_number == 0 || day_number > DAYS_IN_MONTH)
       {
@@ -47,19 +53,6 @@ public class daily_box_class
         line(0, 0, 0, box_height);  // Left line
       if (col_number != 6)  // Draws for every cell except the last (so doesn't draw over border)
         line(box_width, 0, box_width, box_height);  // Right line
-      
-      
-      // TODO: When the borders get fairly large
-        // There's excess room on the left of the first column
-        // And the right of the last column
-        // This is due to the box expecting there's a thick grid line there
-        // When it's been omitted from those
-      // INSIDE BOX TEST
-      //noStroke();
-      //fill(360, 100, 100);
-      //rect(inside_box_upper_left, inside_box_upper_left, inner_box_width, inner_box_height);
-    
-    pop();
   }
   
   void numbers()
@@ -121,4 +114,18 @@ public class daily_box_class
       square(box_width - square_size - 1, square_size/4 + 8, square_size);
     pop();
   }
+}
+
+void tests()
+{
+      // TODO: When the borders get fairly large
+        // There's excess room on the left of the first column
+        // And the right of the last column
+        // This is due to the box expecting there's a thick grid line there
+        // When it's been omitted from those
+      // INSIDE BOX TEST
+      //noStroke();
+      //fill(360, 100, 100);
+      //rect(inside_box_upper_left, inside_box_upper_left, inner_box_width, inner_box_height);
+    
 }

@@ -206,10 +206,10 @@ void month_art_cutoff()
   pop();
 }
 
+// TODO: Maybe put this function and the weekday names list inside of the class?
+  // Same with daily boxes
 void weekday_names()
 {
-  textFont(body_text_bold);
-  
   push();
     translate(CALENDAR_BORDER_WEIGHT - 0.5, MONTH_BOX_HEIGHT);
     for (int i = 0; i < 7; i++)
