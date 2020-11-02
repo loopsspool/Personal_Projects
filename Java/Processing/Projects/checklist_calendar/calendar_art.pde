@@ -52,6 +52,9 @@ void draw_month_art()
       case "OCTOBER":
         october_art();
         break;
+      case "NOVEMBER":
+        november_art();
+        break;
     }
   pop();
 }
@@ -235,6 +238,37 @@ void october_art()
   image(month_banner, 0, 0);
 }
 
+void november_art()
+{
+  fill(200);
+  rect(0, 0, width, MONTH_BOX_HEIGHT);
+  
+  for (int i = 0; i < 300; i++)
+  {
+    stroke(random(220, 300));
+    float start_x = random(-50, width);
+    float start_y = random(-50, MONTH_BOX_HEIGHT);
+    float drop_length = random(10, 100);
+    line(start_x, start_y, start_x + drop_length, start_y + drop_length + random(-5));
+  }
+  
+  // MONTH NAME
+  font_class nov_font = new font_class();
+  
+  nov_font.font = default_month_font;
+  nov_font.size = MONTH_TEXT_SIZE;
+  nov_font.fill = color(0);
+  nov_font.text = MONTH_AND_YEAR;
+  nov_font.x = width/2;
+  nov_font.y = MONTH_BOX_HEIGHT/1.4;
+  nov_font.is_outlined = true;
+  nov_font.outline_color = color(360);
+  nov_font.outline_weight = .5;
+  nov_font.is_bolded = true;
+  nov_font.bold_weight = 6;
+  
+  draw_text(sept_font);
+}
 
 
   // CODE FOR ONLY DRAWING AROUND THE NAME, NOT FULL BANNER

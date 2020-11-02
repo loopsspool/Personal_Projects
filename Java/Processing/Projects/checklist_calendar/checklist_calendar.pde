@@ -4,7 +4,7 @@ import processing.pdf.*;  // To convert to PDF
 import geomerative.*;  // For text outline
 
 // PDF Switcher
-boolean is_PDF = true;
+boolean is_PDF = false;
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -66,7 +66,7 @@ float COL_SIZE;
   But unfortunately in this case I believe it is necessary
 **/
 float DAY_GRID_STROKE_WEIGHT = 1;  
-float CALENDAR_BORDER_WEIGHT = 4;
+float CALENDAR_BORDER_WEIGHT = 3;
 float CALENDAR_BORDER_BUFFER = CALENDAR_BORDER_WEIGHT/2;  // So strokeWeight lines up with pixels inside border to align all squares the same
 float DAY_NAME_OUTLINE_WEIGHT = 2;
 float DAY_NAME_OUTLINE_BUFFER = DAY_NAME_OUTLINE_WEIGHT/2;
@@ -132,7 +132,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  LOCAL_DATE = LOCAL_DATE.plusMonths(1);
+  //LOCAL_DATE = LOCAL_DATE.plusMonths(1);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();

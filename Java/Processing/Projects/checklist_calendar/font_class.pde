@@ -16,6 +16,12 @@ public class font_class
   boolean is_bolded = false;
   int bold_weight = 2;
   
+  boolean is_layered = false;
+  boolean layers_outlined = false;
+  int amount_of_layers = 0;
+  int[] layer_colors;
+  
+  
   void set_features()
   {
     font.setSize(size);
@@ -32,17 +38,27 @@ public class font_class
     translate(x, y);
   }
   
+  // TODO: Bring this out of the class or make all the effects part of the class
+  void set_layers(int[] layer_colors_)
+  {
+    amount_of_layers = layer_colors.length;
+    layer_colors = layer_colors_;
+  }
+  
   void display()
   {
     font.draw(text);
   }
 }
 
+// TODO: Make bold font more compatible with other styles
 void draw_text(font_class Font)
 {
   push();
     if (Font.is_bolded)
       bold_font(Font);
+    if (Font.is_layered)
+      layer_font(Font);
     else
     {
       Font.set_features();
@@ -65,11 +81,15 @@ void bold_font(font_class Font)
   pop();
 }
 
+void layer_font(font_class Font)
+{
+  
+}
+
 /** 
 TODO: Text effects: 
   - 3D gradually increasing font size
   - Text Fade in/out
   + See what geomerative can do
-  
-  Maybe make its own tab?
+
 **/ 
