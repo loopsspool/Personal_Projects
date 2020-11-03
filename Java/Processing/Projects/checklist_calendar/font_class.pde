@@ -1,3 +1,6 @@
+// TODO: check font height of year, see if it matches the month
+  // If not, increase until it does
+
 public class font_class
 {
   // FONT INFO
@@ -17,7 +20,7 @@ public class font_class
   int bold_weight = 2;
   
   boolean is_layered = false;
-  boolean layers_outlined = false;
+  boolean layers_are_outlined = false;
   int amount_of_layers = 0;
   int[] layer_colors;
   
@@ -51,7 +54,7 @@ public class font_class
   }
 }
 
-// TODO: Make bold font more compatible with other styles
+// TODO: Make this the class display?
 void draw_text(font_class Font)
 {
   push();
@@ -67,6 +70,7 @@ void draw_text(font_class Font)
   pop();
 }
 
+// TODO: Make bold font more compatible with other styles
 void bold_font(font_class Font)
 {
   push();
@@ -81,9 +85,29 @@ void bold_font(font_class Font)
   pop();
 }
 
+// TOFO: Select where the layers show
+  // e.g. left to right, diagonally, in a circle, etc
 void layer_font(font_class Font)
 {
-  
+  Font.set_layers(Font.layer_colors);
+  if (Font.layers_are_outlined)
+  {
+    strokeWeight(Font.outline_weight);
+    // TODO: add array for outline colors too
+    stroke(0);
+  }
+  else
+    noStroke();
+    
+  float layer_depth = 5;
+  float center_layers_adjuster = -(Font.layer_colors.length * layer_depth)/2;
+  translate(Font.x + center_layers_adjuster, Font.y + center_layers_adjuster - 5);
+  for (int i = 0; i < Font.layer_colors.length; i++)
+  {
+    fill(Font.layer_colors[i]);
+    translate(layer_depth, layer_depth);
+    Font.display();
+  }
 }
 
 /** 
