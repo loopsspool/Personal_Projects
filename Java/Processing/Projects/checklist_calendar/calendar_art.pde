@@ -254,20 +254,22 @@ void november_art()
   
   // MONTH NAME
   font_class nov_font = new font_class();
-  
-  nov_font.font = default_month_font;
+ 
+  nov_font.font = new RFont("data\\COOPBL.TTF", 60, RFont.CENTER);
   nov_font.size = MONTH_TEXT_SIZE;
   nov_font.fill = color(0);
   nov_font.text = MONTH_AND_YEAR;
   nov_font.x = width/2;
   nov_font.y = MONTH_BOX_HEIGHT/1.4;
   nov_font.is_outlined = true;
-  nov_font.outline_color = color(360);
-  nov_font.outline_weight = .5;
-  nov_font.is_bolded = true;
-  nov_font.bold_weight = 6;
+  nov_font.outline_color = color(0);
+  nov_font.outline_weight = 3;
+  nov_font.is_bolded = false;
+  nov_font.is_layered = true;
+  nov_font.layers_are_outlined = true;
+  nov_font.layer_colors = new int[] {color(0), color(119, 45, 84), color(288, 100, 90), color(189, 43, 94)};
   
-  draw_text(sept_font);
+  draw_text(nov_font);
 }
 
 
