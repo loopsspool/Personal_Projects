@@ -13,6 +13,7 @@ Javascript/p5/*
 !Javascript/p5/Photo Manipulation/
 Python/*
 !Python/PythonScripts/
+!Python/LEDs/
 R/*
 # Potential workaround to keep Rscripts
 !R/Scripts/
