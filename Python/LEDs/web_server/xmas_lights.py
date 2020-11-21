@@ -1,9 +1,17 @@
+import board
+import neopixel
 import light_effects
 import RPi.GPIO as GPIO
 from flask import Flask, render_template, request
 app = Flask(__name__)
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
+
+# number of LEDs
+num_of_leds = 150
+
+# initialize LED strip
+pixels = neopixel.NeoPixel(board.D18, num_of_leds)
 
 #define LED GPIO pin
 leds = 18
@@ -20,16 +28,18 @@ def index():
               'title' : 'Xmas lights!',
               #'led_status' : led_status
     }
-
 	return render_template('index.html', **templateData)
 	
-@app.route("/<action>")
-def action(action):
+@app.route("/", methods = ["GET", "POST"])
+def action():
+	print("Got here!")
+	#print(request.form["effects"], flush=True)
     # Reads action and acts
-	if action == "on":
-		GPIO.output(actuator, GPIO.HIGH)
-	if action == "off":
-		GPIO.output(actuator, GPIO.LOW)
+	effect = request.form["effects"]
+	if effect == "on":
+		pixels.fill((255, 0, 0))
+	if effect == "off":
+		pixels.fill((0, 0, 0))
     #if action == "effect":
     #    exec(open("test2.py").read())
 		     

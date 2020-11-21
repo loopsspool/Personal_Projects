@@ -6,5 +6,27 @@
    <body>
       <h1>Hello, World!</h1>
       <h2>The date and time on the server is: {{ time }}</h2>
+     
+      <form action = "/" method = "POST">
+         <label for = "effects">Effects:</label>
+
+         <select onchange="this.form.submit()" name = "effects" id = "effects">
+            <option value = "off">Off</option>
+            <option value = "on">On</option>
+         </select>
+
+         <script>
+            // This script keeps the dropdown selection the same after page refresh (list change)
+            const mySel = document.getElementById("effects"); 
+            mySel.addEventListener("change",function() { 
+               localStorage.setItem("selValue",this.value); // save it 
+            }); 
+            let val = localStorage.getItem("selValue"); 
+            if (val) mySel.value=val; // set the dropdown 
+            // trigger the change in case there are other events on the select 
+            // mySel.onchange();  
+         </script>
+      </form>
+      
    </body>
 </html>
