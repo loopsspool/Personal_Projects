@@ -4,28 +4,56 @@
       <link rel="stylesheet" href="../static/style.css/">
    </head>
    <body>
-      <h1>Hello, World!</h1>
-      <h2>The date and time on the server is: {{ time }}</h2>
-     
+
       <form action = "/" method = "POST">
          <label for = "effects">Effects:</label>
 
-         <select onchange="this.form.submit()" name = "effects" id = "effects">
+         <select name = "effects" id = "effects" onchange="this.form.submit()">
             <option value = "off">Off</option>
             <option value = "on">On</option>
          </select>
 
+         <label for = "color">Color:</label>
+         <div>
+            <input type = "color" name = "color" id = "color" value="#ff0000" onchange="this.form.submit()">
+         </div>
+
+         <label for = "brightness">Brightness:</label>
+         <div class = "slide_container">
+            <input type = "range" min = "0" max = "100" value = "50" class = "slider" name = "brightness" id = "brightness" onchange="this.form.submit()">
+         </div>
+
          <script>
-            // This script keeps the dropdown selection the same after page refresh (list change)
-            const mySel = document.getElementById("effects"); 
-            mySel.addEventListener("change",function() { 
-               localStorage.setItem("selValue",this.value); // save it 
-            }); 
-            let val = localStorage.getItem("selValue"); 
-            if (val) mySel.value=val; // set the dropdown 
-            // trigger the change in case there are other events on the select 
-            // mySel.onchange();  
+
+            // This script keeps any form selection the same after page refresh (change)
+            const effect_selector = document.getElementById("effects");
+            const color_selector = document.getElementById("color");
+            const brightness_slider = document.getElementById("brightness");
+
+            var form_elements = [
+               effect_selector,
+               color_selector,
+               brightness_slider
+            ];
+
+            var form_elements_storage_name = [
+               "effect selector",
+               "color_selector",
+               "brightness slider"
+            ];
+
+            for(let i = 0; i < form_elements.length; i++)
+            {
+               form_elements[i].addEventListener("change", function() {
+                  localStorage.setItem(form_elements_storage_name[i], this.value);  // Saves value
+               });
+               let val = localStorage.getItem(form_elements_storage_name[i]);
+               if (val) 
+                  form_elements[i].value = val; // Sets value
+            }
+
          </script>
+         
       </form>
       
    </body>
