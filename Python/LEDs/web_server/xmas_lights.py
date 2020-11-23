@@ -1,5 +1,7 @@
 import board
 import neopixel
+import time
+import random
 import light_effects
 import RPi.GPIO as GPIO
 from flask import Flask, render_template, request
@@ -11,7 +13,7 @@ GPIO.setwarnings(False)
 num_of_leds = 150
 
 # initialize LED strip
-pixels = neopixel.NeoPixel(board.D18, num_of_leds)
+pixels = neopixel.NeoPixel(board.D18, num_of_leds, auto_write = False)
 
 #define LED GPIO pin
 leds = 18
@@ -40,13 +42,21 @@ def action():
 	if effect == "on":
 		# Color[1], then color[0] because my lights are grb not rgb
 		pixels.fill((color[1] * brightness, color[0] * brightness, color[2] * brightness))
+		pixels.show()
+
 	if effect == "off":
 		pixels.fill((0, 0, 0))
-    #if action == "effect":
-    #    exec(open("test2.py").read())
-		     
-	#ledRedSts = GPIO.input(ledRed)
-   
+		pixels.show()
+	
+	if effect == "random":
+		# To have this infinite looping you need to enable multithreading so
+			# Running the code doesn't stop the webpage from loading
+		#while True:
+			for i in range (num_of_leds):
+				pixels[i] = (random.randrange(0, 255) * brightness, random.randrange(0, 255) * brightness, random.randrange(0, 255) * brightness)
+			pixels.show()
+			time.sleep(0.5)
+
 	templateData = {
               #'led_status' : led_status
 	}
