@@ -293,16 +293,19 @@ void december_art()
     y = random(0, MONTH_BOX_HEIGHT);
     snowflake_arms = int(random(5, 12));
     snowflake_fringes = int(random(2, 5));
-    snowflake_arm_length = random(20, 50);
+    snowflake_arm_length = random(5, 30);
     
     // Actually drawing the snowflake
-    // TODO: Fix push, pops so rotate can adjust appropriately for all arms
     month_banner.beginDraw();
       push();
         month_banner.stroke(0);
         month_banner.translate(x, y);
-        month_banner.rotate(radians(360/snowflake_arms));
-        month_banner.line(0, 0, 0, snowflake_arm_length);
+        month_banner.rotate(radians(random(100, 200)));
+        for (int i_ = 0; i_ < snowflake_arms; i_++)
+        {
+          month_banner.rotate(radians(360/snowflake_arms));
+          month_banner.line(0, 0, 0, snowflake_arm_length);
+        }
       pop();
     month_banner.endDraw();
     
