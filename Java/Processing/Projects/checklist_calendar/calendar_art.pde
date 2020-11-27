@@ -55,6 +55,9 @@ void draw_month_art()
       case "NOVEMBER":
         november_art();
         break;
+      case "DECEMBER":
+        december_art();
+        break;
     }
   pop();
 }
@@ -270,6 +273,41 @@ void november_art()
   nov_font.layer_colors = new int[] {color(0), color(119, 45, 84), color(288, 100, 90), color(189, 43, 94)};
   
   draw_text(nov_font);
+}
+
+void december_art()
+{
+  month_banner = createGraphics(width, int(MONTH_BOX_HEIGHT));
+  
+  int snowflake_count = 20;
+  int snowflake_arms = 0;
+  int snowflake_fringes = 0;
+  float snowflake_arm_length = 0;
+  float x = 0;
+  float y = 0;
+  
+  for (int i = 0; i < snowflake_count; i++)
+  {
+    // Initializing each snowflake
+    x = random(0, width);
+    y = random(0, MONTH_BOX_HEIGHT);
+    snowflake_arms = int(random(5, 12));
+    snowflake_fringes = int(random(2, 5));
+    snowflake_arm_length = random(20, 50);
+    
+    // Actually drawing the snowflake
+    // TODO: Fix push, pops so rotate can adjust appropriately for all arms
+    month_banner.beginDraw();
+      push();
+        month_banner.stroke(0);
+        month_banner.translate(x, y);
+        month_banner.rotate(radians(360/snowflake_arms));
+        month_banner.line(0, 0, 0, snowflake_arm_length);
+      pop();
+    month_banner.endDraw();
+    
+    image(month_banner, 0, 0);
+  }
 }
 
 
