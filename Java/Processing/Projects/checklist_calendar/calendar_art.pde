@@ -280,39 +280,112 @@ void december_art()
   month_banner = createGraphics(width, int(MONTH_BOX_HEIGHT));
   
   int snowflake_count = 20;
+  // Core features
   int snowflake_arms = 0;
-  int snowflake_fringes = 0;
+  float snowflake_arms_degrees = 0;
+  int snowflake_fingers = 0;
+  float snowflake_fingers_degrees = 0;
   float snowflake_arm_length = 0;
+  // Extra features
+  boolean has_webs = false;
+  float amount_of_webs = 0;
+  boolean has_hairs = false;
+  int amount_of_hairs = 0;
+  boolean has_ngon_base = false;
+  boolean has_multiple_ngons = false;
+  int amount_of_ngons = 0;
+  boolean has_star_base = false;
+  boolean has_multiple_stars = false;
+  int amount_of_stars = 0;
+  float base_distance = 0;  // Distance from origin where base is
   float x = 0;
   float y = 0;
   
-  for (int i = 0; i < snowflake_count; i++)
-  {
-    // Initializing each snowflake
-    x = random(0, width);
-    y = random(0, MONTH_BOX_HEIGHT);
-    snowflake_arms = int(random(5, 12));
-    snowflake_fringes = int(random(2, 5));
-    snowflake_arm_length = random(5, 30);
-    
-    // Actually drawing the snowflake
-    month_banner.beginDraw();
-      push();
+  month_banner.beginDraw();
+    for (int i = 0; i < snowflake_count; i++)
+    {
+      // Initializing each snowflake core features
+      x = random(0, width);
+      y = random(0, MONTH_BOX_HEIGHT);
+      snowflake_arms = int(random(5, 12));
+      snowflake_arms_degrees = radians(360/snowflake_arms);
+      snowflake_arm_length = random(5, 30);
+      snowflake_fingers = int(random(2, 5));
+      snowflake_fingers_degrees = radians(180/snowflake_fingers);
+      
+      // Initializing each snowflake extra features
+      // TODO: Implement these!
+      has_webs = random_boolean();
+      amount_of_webs = int(random(0, 5));
+      has_hairs = random_boolean();
+      amount_of_hairs = int(random(4, 12));
+      has_ngon_base = random_boolean();
+      has_multiple_ngons = random_boolean();
+      amount_of_ngons = int(random(1, 5));
+      has_star_base = random_boolean();
+      has_multiple_stars = random_boolean();
+      amount_of_stars = int(random(1, 5));
+      base_distance = random(5, 20);
+      
+      // Actually drawing the snowflake
+      month_banner.push();
         month_banner.stroke(0);
         month_banner.translate(x, y);
         month_banner.rotate(radians(random(100, 200)));
+        // Snowflake arms
         for (int i_ = 0; i_ < snowflake_arms; i_++)
         {
-          month_banner.rotate(radians(360/snowflake_arms));
+          month_banner.rotate(snowflake_arms_degrees);
           month_banner.line(0, 0, 0, snowflake_arm_length);
+            
+          // Snowflake "fingers"
+          month_banner.push();
+            month_banner.translate(0, snowflake_arm_length);
+            // Equal spacing of the fingers is dependent on the starting angle of the rotations
+              // This changes with how many fingers there are, so the below functionn calculates it
+            float finger_degree_initializer = radians(((snowflake_fingers - 1) * degrees(snowflake_fingers_degrees))/2 - 180);
+            // Initializes starting rotation point for fingers to build rotation
+            month_banner.rotate(finger_degree_initializer);
+            for (int i__ = 0; i__ < snowflake_fingers; i__++)
+            {
+              // Building rotation at each finger
+              month_banner.rotate(snowflake_fingers_degrees);
+              month_banner.line(0, 0, 0, 5);
+            }
+          month_banner.pop();
+          
+          // Snowflake webbing
+          month_banner.push();
+            month_banner.rotate(snowflake_arms_degrees/2);
+            // Starting at 1 so web lines aren't drawn at origin
+            for (int i___ = 1; i___ < amount_of_webs + 1; i___++)
+            {
+              // Using 4 and 3s for bases because those are perfect right triangles
+              // The webs between the arms create an isocoles triangle from the origin point
+                // But going from the middle of the arms this can be seen as two equal right triangle
+              float web_y = 4 * i___;
+              float web_x = 3 * i___;
+              
+              // I don't know why I have to multiply arm length by 1/2
+                // If I don't the webbing will extend on some well beyond the snowflake
+              if (web_y < (snowflake_arm_length * 1/2))
+              {
+                month_banner.translate(0, web_y);
+                month_banner.line(-web_x, 0, web_x, 0);
+              }
+            }
+          month_banner.pop();
         }
-      pop();
-    month_banner.endDraw();
-    
-    image(month_banner, 0, 0);
-  }
+      month_banner.pop();
+    }
+  month_banner.endDraw();
+  image(month_banner, 0, 0);
 }
 
+boolean random_boolean()
+{
+  return Math.random() < 0.5;
+}
 
   // CODE FOR ONLY DRAWING AROUND THE NAME, NOT FULL BANNER
   //noStroke();
