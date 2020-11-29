@@ -4,7 +4,7 @@ import processing.pdf.*;  // To convert to PDF
 import geomerative.*;  // For text outline
 
 // PDF Switcher
-boolean is_PDF = false;
+boolean is_PDF = true;
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};

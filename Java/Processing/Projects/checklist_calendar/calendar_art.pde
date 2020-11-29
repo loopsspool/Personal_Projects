@@ -277,8 +277,9 @@ void november_art()
 
 void december_art()
 {
+  // TODO: Convert this whole thing to a class... Shoulda done that in the first place
   // TODO: Restrict positioning to not overlap other snowflakes
-  month_banner = createGraphics(width, int(MONTH_BOX_HEIGHT));
+  month_banner = createGraphics(ceil(width * pixel_buffer_scale), ceil(MONTH_BOX_HEIGHT * pixel_buffer_scale));
   
   int snowflake_count = 20;
   // Core features
@@ -293,6 +294,7 @@ void december_art()
   boolean has_hairs = false;
   int amount_of_hairs = 0;
   boolean has_ngon_base = false;
+  boolean has_solid_fill = false;
   boolean has_multiple_ngons = false;
   int amount_of_ngons = 0;
   boolean has_star_base = false;
@@ -303,14 +305,23 @@ void december_art()
   float y = 0;
   
   month_banner.beginDraw();
+    month_banner.colorMode(HSB, 360, 100, 100, 100);
+    
+    month_banner.stroke(360);
+    month_banner.strokeWeight(4);
+    push();
+      month_banner.fill(202, 43, 100); // Blue sky
+      month_banner.rect(0, 0, width * pixel_buffer_scale, MONTH_BOX_HEIGHT * pixel_buffer_scale);
+    pop();
+    
     for (int i = 0; i < snowflake_count; i++)
     {
       // Initializing each snowflake core features
-      x = random(0, width);
-      y = random(0, MONTH_BOX_HEIGHT);
-      snowflake_arms = int(random(5, 12));
+      x = random(0, width * pixel_buffer_scale);
+      y = random(0, MONTH_BOX_HEIGHT * pixel_buffer_scale);
+      snowflake_arms = int(random(5, 10));
       snowflake_arms_degrees = radians(360/snowflake_arms);
-      snowflake_arm_length = random(5, 30);
+      snowflake_arm_length = random(5, 30) * pixel_buffer_scale;
       snowflake_fingers = int(random(2, 5));
       snowflake_fingers_degrees = radians(180/snowflake_fingers);
       
@@ -319,18 +330,18 @@ void december_art()
       has_webs = random_boolean();
       amount_of_webs = int(random(0, 5));
       has_hairs = random_boolean();
-      amount_of_hairs = int(random(4, 12));
+      amount_of_hairs = int(random(4, 9));
       has_ngon_base = random_boolean();
       has_multiple_ngons = random_boolean();
       amount_of_ngons = int(random(1, 5));
       has_star_base = random_boolean();
       has_multiple_stars = random_boolean();
       amount_of_stars = int(random(1, 5));
-      base_distance = random(5, 20);
+      base_distance = random(3, snowflake_arm_length/5);
       
       // Actually drawing the snowflake
       month_banner.push();
-        month_banner.stroke(0);
+        month_banner.stroke(360);
         month_banner.translate(x, y);
         month_banner.rotate(radians(random(100, 200)));
         // Snowflake arms
@@ -351,7 +362,7 @@ void december_art()
             {
               // Building rotation at each finger
               month_banner.rotate(snowflake_fingers_degrees);
-              month_banner.line(0, 0, 0, 5);
+              month_banner.line(0, 0, 0, 5 * pixel_buffer_scale);
             }
           month_banner.pop();
           
@@ -381,11 +392,13 @@ void december_art()
           month_banner.pop();
           
           // Snowflake hairs
+          // TODO: If snowflake looks too much a ball can adjust parameters (hair based off size?) here
           month_banner.push();
             if (has_hairs)
             {
               float hair_spacing = snowflake_arm_length/amount_of_hairs;
               float hair_y = hair_spacing;
+              float hair_length = random(3, 6) * pixel_buffer_scale;
               
               month_banner.push();
                 for (int m = 0; m < amount_of_hairs; m++)
@@ -393,19 +406,57 @@ void december_art()
                   month_banner.translate(0, hair_y);
                   month_banner.push();
                     month_banner.rotate(radians(-45));
-                    month_banner.line(0, 0, 0, 5);
+                    month_banner.line(0, 0, 0, hair_length);
                     month_banner.rotate(radians(90));
-                    month_banner.line(0, 0, 0, 5);
+                    month_banner.line(0, 0, 0, hair_length);
                   month_banner.pop();
                 }
               month_banner.pop();
+            }
+          month_banner.pop();
+
+          month_banner.push();
+            if (has_ngon_base)
+            {
+              // This is to prevent solid fill being randomized each arm construction
+                // So, only gets called once for whole snowflake
+              if (i == 0)
+                has_solid_fill = random_boolean();
+              
+              if (has_solid_fill)
+              {
+                month_banner.fill(202, 43, 100);
+              }
+              
+              if (!has_multiple_ngons)
+              {
+                month_banner.beginShape();
+                  // Keeping this at snowflake_arms + 2 draws over the final snowflake arm
+                    // That has a chance of drawing over the ngon
+                  for (int m_ = 1; m_ < snowflake_arms + 2; m_++)
+                  {
+                    float x_ = base_distance * sin(snowflake_arms_degrees * m_) * pixel_buffer_scale;
+                    float y_ = base_distance * cos(snowflake_arms_degrees * m_) * pixel_buffer_scale;
+                    
+                    month_banner.vertex(x_, y_);
+                  }
+                month_banner.endShape(CLOSE);
+              }
+              else
+              {
+                
+              }
             }
           month_banner.pop();
         }
       month_banner.pop();
     }
   month_banner.endDraw();
-  image(month_banner, 0, 0);
+  
+  push();
+    scale(1/pixel_buffer_scale, 1/pixel_buffer_scale);
+    image(month_banner, 0, 0);
+  pop();
 }
 
 boolean random_boolean()
