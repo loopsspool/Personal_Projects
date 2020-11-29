@@ -277,6 +277,7 @@ void november_art()
 
 void december_art()
 {
+  // TODO: Restrict positioning to not overlap other snowflakes
   month_banner = createGraphics(width, int(MONTH_BOX_HEIGHT));
   
   int snowflake_count = 20;
@@ -356,23 +357,48 @@ void december_art()
           
           // Snowflake webbing
           month_banner.push();
-            month_banner.rotate(snowflake_arms_degrees/2);
-            // Starting at 1 so web lines aren't drawn at origin
-            for (int i___ = 1; i___ < amount_of_webs + 1; i___++)
+            if (has_webs)
             {
-              // Using 4 and 3s for bases because those are perfect right triangles
-              // The webs between the arms create an isocoles triangle from the origin point
-                // But going from the middle of the arms this can be seen as two equal right triangle
-              float web_y = 4 * i___;
-              float web_x = 3 * i___;
-              
-              // I don't know why I have to multiply arm length by 1/2
-                // If I don't the webbing will extend on some well beyond the snowflake
-              if (web_y < (snowflake_arm_length * 1/2))
+              month_banner.rotate(snowflake_arms_degrees/2);
+              // Starting at 1 so web lines aren't drawn at origin
+              for (int i___ = 1; i___ < amount_of_webs + 1; i___++)
               {
-                month_banner.translate(0, web_y);
-                month_banner.line(-web_x, 0, web_x, 0);
+                // Using 4 and 3s for bases because those are perfect right triangles
+                // The webs between the arms create an isocoles triangle from the origin point
+                  // But going from the middle of the arms this can be seen as two equal right triangle
+                float web_y = 4 * i___;
+                float web_x = 3 * i___;
+                
+                // I don't know why I have to multiply arm length by 1/2
+                  // If I don't the webbing will extend on some well beyond the snowflake
+                if (web_y < (snowflake_arm_length * 1/2))
+                {
+                  month_banner.translate(0, web_y);
+                  month_banner.line(-web_x, 0, web_x, 0);
+                }
               }
+            }
+          month_banner.pop();
+          
+          // Snowflake hairs
+          month_banner.push();
+            if (has_hairs)
+            {
+              float hair_spacing = snowflake_arm_length/amount_of_hairs;
+              float hair_y = hair_spacing;
+              
+              month_banner.push();
+                for (int m = 0; m < amount_of_hairs; m++)
+                {
+                  month_banner.translate(0, hair_y);
+                  month_banner.push();
+                    month_banner.rotate(radians(-45));
+                    month_banner.line(0, 0, 0, 5);
+                    month_banner.rotate(radians(90));
+                    month_banner.line(0, 0, 0, 5);
+                  month_banner.pop();
+                }
+              month_banner.pop();
             }
           month_banner.pop();
         }

@@ -66,7 +66,7 @@ float COL_SIZE;
   But unfortunately in this case I believe it is necessary
 **/
 float DAY_GRID_STROKE_WEIGHT = 1;  
-float CALENDAR_BORDER_WEIGHT = 3;
+float CALENDAR_BORDER_WEIGHT = 4;
 float CALENDAR_BORDER_BUFFER = CALENDAR_BORDER_WEIGHT/2;  // So strokeWeight lines up with pixels inside border to align all squares the same
 float DAY_NAME_OUTLINE_WEIGHT = 2;
 float DAY_NAME_OUTLINE_BUFFER = DAY_NAME_OUTLINE_WEIGHT/2;
