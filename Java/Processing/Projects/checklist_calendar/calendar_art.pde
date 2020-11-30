@@ -288,11 +288,11 @@ void december_art()
     
     // Core features
     float random_rotation = radians(random(100, 300));
-    int snowflake_arms = int(random(5, 10));
-    float snowflake_arms_degrees = radians(360/snowflake_arms);
-    int snowflake_arm_length = int(random(5, 30) * pixel_buffer_scale);
-    int snowflake_fingers = int(random(2, 5));
-    float snowflake_fingers_degrees = radians(180/snowflake_fingers);
+    int amount_of_arms = int(random(5, 10));
+    float arm_degrees = radians(360/amount_of_arms);
+    int arm_length = int(random(5, 30) * pixel_buffer_scale);
+    int amount_of_fingers = int(random(2, 5));
+    float finger_degrees = radians(180/amount_of_fingers);
     
     // Extra features
     // TODO: Implement these!
@@ -307,7 +307,7 @@ void december_art()
     boolean has_star_base = random_boolean();
     boolean has_multiple_stars = random_boolean();
     int amount_of_stars = int(random(1, 5));
-    float base_distance = random(3, snowflake_arm_length/5);  // Distance from origin where base is
+    float base_distance = random(3, arm_length/5);  // Distance from origin where base is
     
     void set_positioning()
     {
@@ -318,23 +318,23 @@ void december_art()
     
     void arms()
     {
-      month_banner.line(0, 0, 0, snowflake_arm_length);
+      month_banner.line(0, 0, 0, arm_length);
     }
     
     void fingers()
     {
       month_banner.push();
-        month_banner.translate(0, snowflake_arm_length);
+        month_banner.translate(0, arm_length);
         // Centered positioning of the fingers is dependent on the starting angle of the rotations
           // This changes with how many fingers there are, so the below functionn calculates it
-        float finger_degree_initializer = radians(((snowflake_fingers - 1) * degrees(snowflake_fingers_degrees))/2 - 180);
+        float finger_degree_initializer = radians(((amount_of_fingers - 1) * degrees(finger_degrees))/2 - 180);
         // Initializes starting rotation point for fingers to build rotation
         month_banner.rotate(finger_degree_initializer);
         
-        for (int i = 0; i < snowflake_fingers; i++)
+        for (int i = 0; i < amount_of_fingers; i++)
         {
           // Building rotation at each finger
-          month_banner.rotate(snowflake_fingers_degrees);
+          month_banner.rotate(finger_degrees);
           month_banner.line(0, 0, 0, 5 * pixel_buffer_scale);
         }
       month_banner.pop();
@@ -346,12 +346,12 @@ void december_art()
         if (has_webs)
         {
           // Rotating in between the arms so lines across can be calculated cleanly
-          month_banner.rotate(snowflake_arms_degrees/2);
+          month_banner.rotate(arm_degrees/2);
           // Starting at 1 so web lines aren't drawn at origin (bc multiplied by 0
           for (int i = 1; i < amount_of_webs + 1; i++)
           {
             // To kind of equal out the webbing...
-              // Subtract 1 from snowflake_arm_length until % 16 == 0
+              // Subtract 1 from arm_length until % 16 == 0
               // Figure out how to find x (3/4 of y?)
             
             // Using 4 and 3s for bases because those are perfect right triangles
@@ -362,7 +362,7 @@ void december_art()
             
             // I don't know why I have to multiply arm length by 1/2
               // If I don't the webbing will extend on some well beyond the snowflake
-            if (web_y < (snowflake_arm_length * 1/2))
+            if (web_y < (arm_length * 1/2))
             {
               month_banner.translate(0, web_y);
               month_banner.line(-web_x, 0, web_x, 0);
@@ -379,7 +379,7 @@ void december_art()
       month_banner.push();
         if (has_hairs)
         {
-          float hair_spacing = snowflake_arm_length/amount_of_hairs;
+          float hair_spacing = arm_length/amount_of_hairs;
           // Initializes first hair distance from origin
           float hair_y = hair_spacing;
           float hair_length = random(3, 6) * pixel_buffer_scale;
@@ -412,12 +412,12 @@ void december_art()
           if (!has_multiple_ngons)
           {
             month_banner.beginShape();
-              // Keeping this at snowflake_arms + 2 draws over the final snowflake arm
+              // Keeping this at amount_of_arms + 2 draws over the final snowflake arm
                 // That has a chance of drawing over the ngon
-              for (int m_ = 1; m_ < snowflake_arms + 2; m_++)
+              for (int m_ = 1; m_ < amount_of_arms + 2; m_++)
               {
-                float x_ = base_distance * sin(snowflake_arms_degrees * m_) * pixel_buffer_scale;
-                float y_ = base_distance * cos(snowflake_arms_degrees * m_) * pixel_buffer_scale;
+                float x_ = base_distance * sin(arm_degrees * m_) * pixel_buffer_scale;
+                float y_ = base_distance * cos(arm_degrees * m_) * pixel_buffer_scale;
                 
                 month_banner.vertex(x_, y_);
               }
@@ -438,7 +438,41 @@ void december_art()
   
   for (int i = 0; i < snowflake_count; i++)
     snowflakes[i] = new Snowflake();
+    
+  ////////////////////////////////////////////////////////////////////////////////////
+  //////////// Maybe instead of this, add this in at snowflake creation ////////////
+  // For each snowflake created, make sure it doesn't fall within the box of any other previously created snowflakes 
+  ////////////////////////////////////////////////////////////////////////////////////
   
+  // Makes it so no snowflakes overlap
+  // Stores [upper left x, upper left y, lower right x, lower right y] of each snowflake
+  float[][] snowflake_position_boxes = new float[snowflakes.length][4];
+  for (int i = 0; i < snowflake_position_boxes.length; i++)
+  {
+    float upper_left_x = snowflakes[i].x - snowflakes[i].arm_length;
+    float upper_left_y = snowflakes[i].y - snowflakes[i].arm_length;
+    float lower_right_x = snowflakes[i].x + snowflakes[i].arm_length;
+    float lower_right_y = snowflakes[i].y + snowflakes[i].arm_length;
+    
+    snowflake_position_boxes[i][0] = upper_left_x;
+    snowflake_position_boxes[i][1] = upper_left_y;
+    snowflake_position_boxes[i][2] = lower_right_x;
+    snowflake_position_boxes[i][3] = lower_right_y;
+  }
+  // Comparing, and if they overlap, rewriting those values
+  for (int i = 0; i < snowflake_position_boxes.length; i++)
+  {
+    for (int i_ = 0; i_ < snowflake_position_boxes.length; i_++)
+    {
+      // This keeps the snowflake from comparing to itself, causing an infinite loop
+      if (i_ != i)
+      {
+      
+      }
+    }
+  }
+  
+  // Actually drawing the snowflakes
   month_banner.beginDraw();
     month_banner.colorMode(HSB, 360, 100, 100, 100);
     
@@ -455,10 +489,10 @@ void december_art()
       {
         month_banner.push();
         snowflakes[i].set_positioning();
-          for (int i_ = 0; i_ < snowflakes[i].snowflake_arms; i_++)
+          for (int i_ = 0; i_ < snowflakes[i].amount_of_arms; i_++)
           {
             // Rotates to each arm for each function
-            month_banner.rotate(snowflakes[i].snowflake_arms_degrees);
+            month_banner.rotate(snowflakes[i].arm_degrees);
             snowflakes[i].arms();
             snowflakes[i].fingers();
             snowflakes[i].webbing();
@@ -475,6 +509,7 @@ void december_art()
     scale(1/pixel_buffer_scale, 1/pixel_buffer_scale);
     image(month_banner, 0, 0);
   pop();
+  
 }
 
 boolean random_boolean()
