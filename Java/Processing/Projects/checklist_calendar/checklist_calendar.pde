@@ -4,7 +4,7 @@ import processing.pdf.*;  // To convert to PDF
 import geomerative.*;  // For text outline
 
 // PDF Switcher
-boolean is_PDF = true;
+boolean is_PDF = false;
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -132,7 +132,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  LOCAL_DATE = LOCAL_DATE.plusMonths(1);
+  //LOCAL_DATE = LOCAL_DATE.plusMonths(1);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();

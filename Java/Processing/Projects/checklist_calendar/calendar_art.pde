@@ -290,7 +290,9 @@ void december_art()
     float random_rotation = radians(random(100, 300));
     int amount_of_arms = int(random(5, 10));
     float arm_degrees = radians(360/amount_of_arms);
-    int arm_length = int(random(5, 30) * pixel_buffer_scale);
+    int arm_min = 5;
+    int arm_max = 15;
+    int arm_length = int(random(arm_min, arm_max) * pixel_buffer_scale);
     int amount_of_fingers = int(random(2, 5));
     float finger_degrees = radians(180/amount_of_fingers);
     
@@ -299,7 +301,7 @@ void december_art()
     boolean has_webs = random_boolean();
     int amount_of_webs = int(random(0, 5));
     boolean has_hairs = random_boolean();
-    int amount_of_hairs = int(random(4, 9));
+    int amount_of_hairs = int(random(3, 6));
     boolean has_ngon_base = random_boolean();
     boolean base_has_solid_fill = random_boolean();
     boolean has_multiple_ngons = random_boolean();
@@ -382,7 +384,7 @@ void december_art()
           float hair_spacing = arm_length/amount_of_hairs;
           // Initializes first hair distance from origin
           float hair_y = hair_spacing;
-          float hair_length = random(3, 6) * pixel_buffer_scale;
+          float hair_length = map(arm_length, arm_min, arm_max, 1, 4) * pixel_buffer_scale;
 
           // TODO: Change angle of hairs?
           for (int m = 0; m < amount_of_hairs; m++)
@@ -433,42 +435,33 @@ void december_art()
     
   }
   
-  int snowflake_count = 20;
+  int snowflake_count = 25;
   Snowflake[] snowflakes = new Snowflake[snowflake_count];
   
   for (int i = 0; i < snowflake_count; i++)
+  {
     snowflakes[i] = new Snowflake();
     
-  ////////////////////////////////////////////////////////////////////////////////////
-  //////////// Maybe instead of this, add this in at snowflake creation ////////////
-  // For each snowflake created, make sure it doesn't fall within the box of any other previously created snowflakes 
-  ////////////////////////////////////////////////////////////////////////////////////
-  
-  // Makes it so no snowflakes overlap
-  // Stores [upper left x, upper left y, lower right x, lower right y] of each snowflake
-  float[][] snowflake_position_boxes = new float[snowflakes.length][4];
-  for (int i = 0; i < snowflake_position_boxes.length; i++)
-  {
-    float upper_left_x = snowflakes[i].x - snowflakes[i].arm_length;
-    float upper_left_y = snowflakes[i].y - snowflakes[i].arm_length;
-    float lower_right_x = snowflakes[i].x + snowflakes[i].arm_length;
-    float lower_right_y = snowflakes[i].y + snowflakes[i].arm_length;
-    
-    snowflake_position_boxes[i][0] = upper_left_x;
-    snowflake_position_boxes[i][1] = upper_left_y;
-    snowflake_position_boxes[i][2] = lower_right_x;
-    snowflake_position_boxes[i][3] = lower_right_y;
-  }
-  // Comparing, and if they overlap, rewriting those values
-  for (int i = 0; i < snowflake_position_boxes.length; i++)
-  {
-    for (int i_ = 0; i_ < snowflake_position_boxes.length; i_++)
+    // Verifies no snowflakes overlap one another
+      // If this turns out so slow you can devise a grid for the banner with units as large as the biggest snowflake. 
+      // Snowflake positions will be selected on this grid and when one is theat square can no longer have the chance of being selected
+      // One snowflake per grid square. Once filled, that square cannot be chosen again
+    int i_ = i - 1;  // Checks the most recent snowflake
+    float snowflake_buffer = 15;
+    while (i_ >= 0)
     {
-      // This keeps the snowflake from comparing to itself, causing an infinite loop
-      if (i_ != i)
+      // If the distance between the origin of the two snowflakes is smaller than the sum of their radius
+        // Give then new coordinates
+      if (dist(snowflakes[i].x, snowflakes[i].y, snowflakes[i_].x, snowflakes[i_].y) < (snowflakes[i].arm_length + snowflakes[i_].arm_length + snowflake_buffer))
       {
-      
+        // Resets coordinates
+        snowflakes[i].x = random(0, width * pixel_buffer_scale);
+        snowflakes[i].y = random(0, MONTH_BOX_HEIGHT * pixel_buffer_scale);
+        // Resets index to most recent element to re-check all made snowflakes with new coordinates
+        i_ = i - 1;
       }
+      else
+        i_ -= 1;  // Checks next snowflake coordinates
     }
   }
   
@@ -484,7 +477,7 @@ void december_art()
 
       // SNOWFLAKE DRAWING
       month_banner.stroke(360);
-      month_banner.strokeWeight(4);
+      month_banner.strokeWeight(3);
       for (int i = 0; i < snowflakes.length; i++)
       {
         month_banner.push();
