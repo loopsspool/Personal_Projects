@@ -303,11 +303,10 @@ void december_art()
     boolean has_hairs = random_boolean();
     int amount_of_hairs = int(random(3, 6));
     // If bases screw up arm or hair display try:
-      // a) making the base not exceed the length of the arm
-      // b) not closing the shape at endShape
-    boolean has_ngon_base = random_boolean();
+      // Make sure it is only drawing 1 arm at a time, not the whole element each arm loop
+    boolean has_ngon_base = true;
     boolean base_has_solid_fill = random_boolean();
-    boolean has_multiple_ngons = random_boolean();
+    boolean has_multiple_ngons = true;
     int ngons_min = 2;
     int ngons_max = 5;
     int amount_of_ngons = int(random(ngons_min, ngons_max));
@@ -315,6 +314,7 @@ void december_art()
     boolean has_multiple_stars = random_boolean();
     int amount_of_stars = int(random(1, 5));
     float base_distance = random(3, arm_length/5);  // Distance from origin where base is
+    // TODO: Zig zags through snowflake?
     
     void set_positioning()
     {
@@ -406,8 +406,16 @@ void december_art()
       month_banner.pop();
     }
     
-    void ngon_base()
-    {
+    // These arrays are necessary for running the for loop on snowflake construction
+    // They store the vertex for each arm instead of drawing the ngon each loop
+      // This was due to simplifying each function so it wouldn't have to loop for each element
+        // But if it complicates things this much more... I may reconsider
+    // * 2 to account for both x & y storage of vertex
+    float[] ngon_base_vertices = new float[amount_of_arms * 2];
+    float[] multiple_ngon_base_vertices = new float[amount_of_arms * amount_of_ngons * 2];
+    int coor_acc = 0;
+    void ngon_base(int arm_acc)
+    { 
       month_banner.push();
         if (has_ngon_base)
         {
@@ -416,44 +424,64 @@ void december_art()
           else 
             month_banner.noFill();
           
+          // This will occassionaly create ngons with vertices in between arms instead of on the arms
+            // It's kind of cool so this bug is now a feautre B)
           if (!has_multiple_ngons)
           {
-            month_banner.beginShape();
-              // Keeping this at amount_of_arms + 2 draws over the final snowflake arm
-                // That has a chance of drawing over the ngon
-              for (int i = 1; i < amount_of_arms + 2; i++)
-              {
-                float ngon_vertex_x = base_distance * sin(arm_degrees * i) * pixel_buffer_scale;
-                float ngon_vertex_y = base_distance * cos(arm_degrees * i) * pixel_buffer_scale;
-                
-                month_banner.vertex(ngon_vertex_x, ngon_vertex_y);
-              }
-            month_banner.endShape(CLOSE);
+            // arm_acc + 1 so things inside trig don't get multiplied by 0
+            float ngon_vertex_x = base_distance * sin(arm_degrees * (arm_acc)) * pixel_buffer_scale;
+            float ngon_vertex_y = base_distance * cos(arm_degrees * (arm_acc)) * pixel_buffer_scale;
+            
+            ngon_base_vertices[coor_acc] = ngon_vertex_x;
+            coor_acc++;
+            ngon_base_vertices[coor_acc] = ngon_vertex_y;
+            coor_acc++;
+            
+            if (arm_acc == amount_of_arms - 1)
+            {
+              month_banner.beginShape();
+                // i += 2 because it's reaading coordinate pairs
+                for (int i = 0; i < ngon_base_vertices.length; i += 2)
+                  month_banner.vertex(ngon_base_vertices[i], ngon_base_vertices[i+1]);
+              month_banner.endShape(CLOSE);
+            }
           }
           else
           {
-            // TODO: Occasionally this will seem to delete an arm for some reason?
-            
             // Solid fill multiple ngons just creates a huge ngon shaped snowflake
             base_has_solid_fill = false;
             
-            month_banner.push();
-              // - arm_length/3 so ngon doesn't exceed snowflake
-              float ngon_spacing = (arm_length / amount_of_ngons) - (arm_length/5);
+            // - arm_length/5 so ngon doesn't exceed snowflake
+            float ngon_spacing = (arm_length / (amount_of_ngons * 2.5));
+            println(amount_of_arms, amount_of_ngons);
+            for (int i = 0; i < amount_of_ngons; i++)
+            {
+              // This allows correct index spacing for each polygon
+              int ngon_index = (i * amount_of_arms * 2) + (arm_acc * 2);
+              
+              // i + 1 so the x, y coordinates don't just equal 0 for the first polygon
+              // arm_acc + 1 for the same reason
+              float ngon_vertex_x = ((i + 1) * ngon_spacing) * sin(arm_degrees * (arm_acc + 1)) * pixel_buffer_scale;
+              float ngon_vertex_y = ((i + 1) * ngon_spacing) * cos(arm_degrees * (arm_acc + 1)) * pixel_buffer_scale;
+              
+              multiple_ngon_base_vertices[ngon_index] = ngon_vertex_x;
+              multiple_ngon_base_vertices[ngon_index + 1] = ngon_vertex_y;  
+            }
+            
+            if (arm_acc == amount_of_arms - 1)
+            {
               for (int i = 0; i < amount_of_ngons; i++)
-              {
+              { 
                 month_banner.beginShape();
-
-                  for (int i_ = 1; i_ < amount_of_arms + 1; i_++)
+                  for (int i_ = 0; i_ < amount_of_arms; i_ += 1)
                   {
-                    float ngon_vertex_x = (i * ngon_spacing) * sin(arm_degrees * i_) * pixel_buffer_scale;
-                    float ngon_vertex_y = (i * ngon_spacing) * cos(arm_degrees * i_) * pixel_buffer_scale;
-                    
-                    month_banner.vertex(ngon_vertex_x, ngon_vertex_y);
+                    // This allows correct index spacing for each polygon
+                    int ngon_index = (i * amount_of_arms * 2) + (i_ * 2);
+                    month_banner.vertex(multiple_ngon_base_vertices[ngon_index], multiple_ngon_base_vertices[ngon_index + 1]);
                   }
-                month_banner.endShape();
+                month_banner.endShape(CLOSE);
               }
-            month_banner.pop();
+            }
           }
         }
       month_banner.pop();
@@ -473,7 +501,7 @@ void december_art()
       // Snowflake positions will be selected on this grid and when one is theat square can no longer have the chance of being selected
       // One snowflake per grid square. Once filled, that square cannot be chosen again
     int i_ = i - 1;  // Checks the most recent snowflake
-    float snowflake_buffer = 15;
+    float snowflake_buffer = 20;
     while (i_ >= 0)
     {
       // If the distance between the origin of the two snowflakes is smaller than the sum of their radius
@@ -507,7 +535,7 @@ void december_art()
       for (int i = 0; i < snowflakes.length; i++)
       {
         month_banner.push();
-        snowflakes[i].set_positioning();
+          snowflakes[i].set_positioning();
           for (int i_ = 0; i_ < snowflakes[i].amount_of_arms; i_++)
           {
             // Rotates to each arm for each function
@@ -516,7 +544,7 @@ void december_art()
             snowflakes[i].fingers();
             snowflakes[i].webbing();
             snowflakes[i].hairs();
-            snowflakes[i].ngon_base();
+            snowflakes[i].ngon_base(i_);  
           }
         month_banner.pop();
       }
