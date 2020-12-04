@@ -1,22 +1,23 @@
 <!DOCTYPE html>
    <head>
-      <title>{{ title }}</title>
       <link rel="stylesheet" href="../static/style.css/">
    </head>
    <body>
 
       <form action = "/" method = "POST">
-         <label for = "effects">Effects:</label>
 
+         <label for = "effects">Effects:</label>
          <select name = "effects" id = "effects" onchange="this.form.submit()">
             <option value = "off">Off</option>
             <option value = "on">On</option>
             <option value = "random">Random</option>
+            <option value = "Alternating colors">Alternating colors</option>
          </select>
 
-         <label for = "color">Color:</label>
-         <div>
-            <input type = "color" name = "color" id = "color" value="#ff0000" onchange="this.form.submit()">
+         <label for = "colors">Color:</label>
+         <div id = "colors">
+            <input type = "color" name = "color0" id = "color0" value="#ff0000" onchange="this.form.submit()">
+            <input type = "color" name = "color1" id = "color1" value="#ff0000" visibility="hidden" onchange="this.form.submit()">
          </div>
 
          <label for = "brightness">Brightness:</label>
@@ -25,21 +26,23 @@
          </div>
 
          <script>
-
             // This script keeps any form selection the same after page refresh (change)
             const effect_selector = document.getElementById("effects");
-            const color_selector = document.getElementById("color");
+            const color0 = document.getElementById("color0");
+            const color1 = document.getElementById("color1");
             const brightness_slider = document.getElementById("brightness");
 
             var form_elements = [
                effect_selector,
-               color_selector,
+               color0,
+               color1,
                brightness_slider
             ];
 
             var form_elements_storage_name = [
                "effect selector",
-               "color_selector",
+               "color0",
+               "color1",
                "brightness slider"
             ];
 
@@ -53,6 +56,17 @@
                   form_elements[i].value = val; // Sets value
             }
 
+            // This script shows multiple color selectors for the effect if needed
+            // Two colors
+            if (document.getElementById("effects").value == "Alternating colors")
+            {
+               color1.style.visibility = "visible";
+            }
+            else
+            {
+               color1.style.visibility = "hidden";
+            }
+            // Three colors
          </script>
          
       </form>
