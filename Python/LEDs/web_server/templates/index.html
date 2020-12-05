@@ -7,7 +7,7 @@
       <form action = "/" method = "POST">
 
          <label for = "effects">Effects:</label>
-         <select name = "effects" id = "effects" onchange="this.form.submit()">
+         <select name = "effects" id = "effects" onchange = "this.form.submit()">
             <option value = "off">Off</option>
             <option value = "on">On</option>
             <option value = "random">Random</option>
@@ -16,13 +16,17 @@
 
          <label for = "colors">Color:</label>
          <div id = "colors">
-            <input type = "color" name = "color0" id = "color0" value="#ff0000" onchange="this.form.submit()">
-            <input type = "color" name = "color1" id = "color1" value="#ff0000" visibility="hidden" onchange="this.form.submit()">
+            <input type = "color" name = "color0" id = "color0" value ="#ff0000" onchange = "this.form.submit()">
+            <input type = "color" name = "color1" id = "color1" value ="#ff0000" visibility = "hidden" onchange = "this.form.submit()">
          </div>
 
+         <label for = "mult brightnesses" id = "mult brightnesses label" style = "display:none;">Enable multiple brightnesses</label>
+         <input type = "checkbox" id = "mult brightnesses" name = "mult brightnesses" value = "mult brightnesses" style = "display:none;" onchange = "this.form.submit()">
+
          <label for = "brightness">Brightness:</label>
-         <div class = "slide_container">
-            <input type = "range" min = "0" max = "100" value = "50" class = "slider" name = "brightness" id = "brightness" onchange="this.form.submit()">
+         <div>
+            <input type = "range" min = "0" max = "100" value = "50" name = "brightness0" id = "brightness0" onchange="this.form.submit()">
+            <input type = "range" min = "0" max = "100" value = "50" name = "brightness1" id = "brightness1" style = "display:none;" onchange="this.form.submit()">
          </div>
 
          <script>
@@ -30,43 +34,92 @@
             const effect_selector = document.getElementById("effects");
             const color0 = document.getElementById("color0");
             const color1 = document.getElementById("color1");
-            const brightness_slider = document.getElementById("brightness");
+            const mult_brightnesses = document.getElementById("mult brightnesses");
+            const brightness0_slider = document.getElementById("brightness0");
+            const brightness1_slider = document.getElementById("brightness1");
 
             var form_elements = [
                effect_selector,
                color0,
                color1,
-               brightness_slider
+               mult_brightnesses,
+               brightness0_slider,
+               brightness1_slider
             ];
 
             var form_elements_storage_name = [
                "effect selector",
                "color0",
                "color1",
-               "brightness slider"
+               "mult brightnesses",
+               "brightness0 slider",
+               "brightness1 slider"
             ];
 
             for(let i = 0; i < form_elements.length; i++)
             {
+               // Saves value
                form_elements[i].addEventListener("change", function() {
-                  localStorage.setItem(form_elements_storage_name[i], this.value);  // Saves value
+                  // Since checkboxes don't have a value attribute, must use checked attribute
+                  if (form_elements_storage_name[i] == "mult brightnesses")
+                     localStorage.setItem(form_elements_storage_name[i], this.checked);
+                  else
+                     localStorage.setItem(form_elements_storage_name[i], this.value);
                });
+
+               // Sets value
                let val = localStorage.getItem(form_elements_storage_name[i]);
                if (val) 
-                  form_elements[i].value = val; // Sets value
+               {
+                  // Since localStorage stores values only as strings
+                  // Boolean values must be converted from a string back to boolean
+                     // to be assigned to a checkbox checked attribute
+                  if (form_elements_storage_name[i] == "mult brightnesses")
+                     form_elements[i].checked = (val == 'true');
+                  else
+                     form_elements[i].value = val; 
+               }
             }
+
+
+            var effect_color_amounts = {
+               "Alternating colors": 2
+            };
+
+            var has_mult_brightnesses = mult_brightnesses.checked
+            var mult_brightnesses_label = document.getElementById("mult brightnesses label");
 
             // This script shows multiple color selectors for the effect if needed
             // Two colors
-            if (document.getElementById("effects").value == "Alternating colors")
+            switch (effect_color_amounts[effect_selector.value])
             {
-               color1.style.visibility = "visible";
+               case 1:
+                  color1.style.visibility = "hidden";
+                  mult_brightnesses.style = "display:none;";
+                  mult_brightnesses_label.style = "display:none;";
+                  break;
+               
+               case 2:
+                  color1.style.visibility = "visible";
+                  mult_brightnesses_label.style = "display:inline;";
+                  mult_brightnesses.style = "display:inline;";
+
+                  if (has_mult_brightnesses == true)
+                     brightness1_slider.style = "display:inline;";
+                  else
+                     brightness1_slider.style = "display:none;";
+
+                  break;
+
+               case 3:
+                  break;
+
+               default:
+                  color1.style.visibility = "hidden";
+                  mult_brightnesses.style = "display:none;";
+                  mult_brightnesses_label.style = "display:none;";
+                  break;
             }
-            else
-            {
-               color1.style.visibility = "hidden";
-            }
-            // Three colors
          </script>
          
       </form>

@@ -43,7 +43,7 @@ def action():
     # Reads action and acts
 	effect = request.form["effects"]
 	# TODO: Change brightness for each color?
-	brightness = float(request.form["brightness"])/100
+	brightness = float(request.form["brightness0"])/100
 	color0 = hex_to_grb(request.form["color0"])
 	# This is to debug what keys are actually posted currently to the form
 	#print(request.form)

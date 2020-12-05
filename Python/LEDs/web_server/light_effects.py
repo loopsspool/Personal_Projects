@@ -20,9 +20,10 @@ def alternating_colors (color0, color1, b):
         strip[i + 1] = colors[1]
     strip.show()
 
+# TODO: Maybe find a better way to apply brightness than globals?
+    # Goal was to reduce lines to minimum at the beginning of each function
 def apply_brightness(*arg):
     for i in range(len(arg)):
-        print(brightness)
         g = arg[i][0] * brightness
         r = arg[i][1] * brightness
         b = arg[i][2] * brightness
