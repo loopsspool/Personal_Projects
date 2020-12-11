@@ -5,6 +5,8 @@ import random
 from light_effects import *
 import RPi.GPIO as GPIO
 from flask import Flask, render_template, request
+import threading
+import queue
 app = Flask(__name__)
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -38,7 +40,7 @@ default_form_values = {
 # Brightness array used to store potential multiple brightnesses
 # So colors can be updated accordingly
 # 10 zeros just so I don't have to adjust size each time I add a brightness slider
-brightness_arr = [0] * 10
+brightness_arr = [0.1] * 10
 
 # Amount of colors dictionary
 effect_color_amounts = {
@@ -48,13 +50,37 @@ effect_color_amounts = {
 	"Random": 2
 }
 
+# TODO: Test with another looping effect and running them back to back
+def looping_effects_analyzer(looping_effect, other_effect):
+	# Locks the thread if it is not in use
+	#with looping_lock:
+	looping_effect_name = looping_effect.get()
+
+	if looping_effect_name == "Random":
+		random_colors(other_effect)
+
+# TODO: ... There are 5 (2 non daemon looping) threads created with the below, none of them dummy threads?
+looping_effects = ["Random"]
+looping_effect_queue = queue.Queue()
+other_effect_queue = queue.Queue()
+# TODO: Doesn't work still... FUCK
+#looping_lock = threading.Lock()
+#looping_lock.acquire()
+thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_effect_queue, other_effect_queue,))
+thread.start()
+# print(threading.active_count())
+# print(threading.enumerate())
+# print("Thread alive:", thread.is_alive())
+
 @app.route("/", methods = ["GET", "POST"])
 def action():
 	if request.method == 'POST':
 		# Copies form values to be used outside this function
 		global form_data
 		form_data = request.form.copy()
-		# Grabbing all necessary initial form elements
+		# Making effect global so light_effects script can access it
+			# Mainly for infinite looping functions
+		global effect
 		effect = get_value("effect")
 		
 		# This is a workaround since the checkbox unchecked won't POST data
@@ -82,10 +108,21 @@ def action():
 			if (has_mult_brightness):
 				brightness1 = float(get_value("brightness1"))/100
 				brightness_arr[1] = brightness1
-				print(brightness_arr)
 				color1 = apply_brightness(color1, 1)
 			else:
 				color1 = apply_brightness(color1)
+
+		if effect in looping_effects:
+			looping_effect_queue.put_nowait(effect)
+			other_effect_queue.queue.clear()
+			#try:
+			#	looping_lock.release()
+			#except:
+			#	pass
+		else:
+			other_effect_queue.queue.clear()
+			other_effect_queue.put_nowait(effect)
+			#looping_lock.acquire()
 
 		if effect == "On":
 			strip.fill((color0[0], color0[1], color0[2]))
@@ -94,15 +131,6 @@ def action():
 		if effect == "Off":
 			strip.fill((0, 0, 0))
 			strip.show()
-		
-		if effect == "Random":
-			# To have this infinite looping you need to enable multithreading so
-				# Running the code doesn't stop the webpage from loading
-			while True:
-				for i in range (num_of_leds):
-					strip[i] = (random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255))
-				strip.show()
-				time.sleep(0.5)
 
 		if effect == "Alternating colors":
 			alternating_colors(color0, color1)
@@ -132,7 +160,6 @@ def get_value(element_name):
 
 def apply_brightness(color, brightness_index = 0):
 	brightness = brightness_arr[brightness_index]
-	print(brightness)
 	g = color[0] * brightness
 	r = color[1] * brightness
 	b = color[2] * brightness
@@ -140,4 +167,4 @@ def apply_brightness(color, brightness_index = 0):
 	return color_w_brightness
 
 if __name__ == "__main__":
-   app.run(host='0.0.0.0', port=80, threaded = True) 
+   app.run(host='0.0.0.0', port=80, debug = True, threaded = True) 
