@@ -7,7 +7,7 @@ from flask import Flask, render_template, request
 import threading
 import queue
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder = '', static_folder = '', static_url_path = '')
 
 # Workaround for form elements not yet being initialized into form.request
 # Won't work with HTML onload because all code files are validated first
