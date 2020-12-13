@@ -39,7 +39,7 @@ default_form_values = {
 
 # Brightness array used to store potential multiple brightnesses
 # So colors can be updated accordingly
-# 10 zeros just so I don't have to adjust size each time I add a brightness slider
+# 10 0.1's just so I don't have to adjust size each time I add a brightness slider
 brightness_arr = [0.1] * 10
 
 # Amount of colors dictionary
@@ -51,31 +51,31 @@ effect_color_amounts = {
 }
 
 # TODO: Test with another looping effect and running them back to back
-def looping_effects_analyzer(looping_effect, other_effect):
-	# Locks the thread if it is not in use
-	#with looping_lock:
-	looping_effect_name = looping_effect.get()
+def looping_effects_analyzer(looping_effect, looping_event, brightness_arr):
+	# This wait blocks the below code until a selected looping effect triggers it to run
+	looping_event.wait()
 
-	if looping_effect_name == "Random":
-		random_colors(other_effect)
+	# This while loop keeps the thread alive when it is idle
+	# Otherwise when the looping event is set to false, it will exit out of its while loop in the effect function
+		# Return to this thread function, see there are no more commands
+			# And it will die, not to be revived
+	# So in other words, don't delete this while loop lol
+	while True:
+		looping_effect_name = looping_effect.get()
 
-# TODO: ... There are 5 (2 non daemon looping) threads created with the below, none of them dummy threads?
+		if looping_effect_name == "Random":
+			random_colors(looping_event, brightness_arr)
+
 looping_effects = ["Random"]
 looping_effect_queue = queue.Queue()
-other_effect_queue = queue.Queue()
-# TODO: Doesn't work still... FUCK
-#looping_lock = threading.Lock()
-#looping_lock.acquire()
-thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_effect_queue, other_effect_queue,))
-thread.start()
-# print(threading.active_count())
-# print(threading.enumerate())
-# print("Thread alive:", thread.is_alive())
+looping_event = threading.Event()
+thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_effect_queue, looping_event, brightness_arr,))
 
 @app.route("/", methods = ["GET", "POST"])
 def action():
 	if request.method == 'POST':
-		# Copies form values to be used outside this function
+		# Copies form values to be used outside this function (in getting values)
+			# Form data is local to the app route, so by copying it it can be exported
 		global form_data
 		form_data = request.form.copy()
 		# Making effect global so light_effects script can access it
@@ -114,15 +114,9 @@ def action():
 
 		if effect in looping_effects:
 			looping_effect_queue.put_nowait(effect)
-			other_effect_queue.queue.clear()
-			#try:
-			#	looping_lock.release()
-			#except:
-			#	pass
+			looping_event.set()
 		else:
-			other_effect_queue.queue.clear()
-			other_effect_queue.put_nowait(effect)
-			#looping_lock.acquire()
+			looping_event.clear()
 
 		if effect == "On":
 			strip.fill((color0[0], color0[1], color0[2]))
@@ -148,7 +142,7 @@ def hex_to_grb(hex):
 	grb = (rgb[1], rgb[0], rgb[2])	# Trades r & g values to create grb tuple
 	return grb
 
-# This is a workaround for form elements that haven't yet been initialized by a form submit
+# This is a workaround for form elements that haven't yet been initialized by a form submit causing a key error
 def get_value(element_name):
 	val = 0
 	try:
@@ -167,4 +161,5 @@ def apply_brightness(color, brightness_index = 0):
 	return color_w_brightness
 
 if __name__ == "__main__":
-   app.run(host='0.0.0.0', port=80, debug = True, threaded = True) 
+	thread.start()
+	app.run(host='0.0.0.0', port=80, debug = True, threaded = True)
