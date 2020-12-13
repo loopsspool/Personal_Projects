@@ -43,19 +43,13 @@ color_arr = [hex_to_grb("#FF4614")] * 10
 effect_color_amounts = {
 	"Off": 1,
 	"Single color": 1,
-	"Alternating colors": 2,
-	"Random": 1
-}
-
-effect_max_brightness_amounts = {
-	"Off": 1,
-	"Single color": 1,
-	"Alternating colors": 2,
+	"Static alternating colors": 2,
+	"Animated alternating colors": 2,
 	"Random": 1
 }
 
 # TODO: Test with another looping effect and running them back to back
-def looping_effects_analyzer(looping_effect, looping_event, brightness_arr):
+def looping_effects_analyzer(looping_effect_queue, looping_event, static_effect_queue, color_arr, brightness_arr):
 	# This wait blocks the below code until a selected looping effect triggers it to run
 	looping_event.wait()
 
@@ -65,15 +59,19 @@ def looping_effects_analyzer(looping_effect, looping_event, brightness_arr):
 			# And it will die, not to be revived
 	# So in other words, don't delete this while loop lol
 	while True:
-		looping_effect_name = looping_effect.get()
+		looping_effect_name = looping_effect_queue.get()
 
 		if looping_effect_name == "Random":
-			random_colors(looping_event, brightness_arr)
+			random_colors(brightness_arr, looping_effect_queue, static_effect_queue)
 
-looping_effects = ["Random"]
-looping_effect_queue = queue.Queue()
+		if looping_effect_name == "Animated alternating colors":
+			animated_alternating_colors(color_arr, looping_effect_queue, static_effect_queue)
+
+looping_effects = ["Random", "Animated alternating colors"]
 looping_event = threading.Event()
-thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_effect_queue, looping_event, brightness_arr,))
+looping_effect_queue = queue.Queue()
+static_effect_queue = queue.Queue()
+thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_effect_queue, looping_event, static_effect_queue, color_arr, brightness_arr,))
 
 @app.route("/", methods = ["GET", "POST"])
 def action():
@@ -105,10 +103,12 @@ def action():
 		do_effect()
 
 		if effect in looping_effects:
+			static_effect_queue.queue.clear()
 			looping_effect_queue.put_nowait(effect)
 			looping_event.set()
 		else:
 			looping_event.clear()
+			static_effect_queue.put(effect)
 
 
 		return render_template('index.html')
@@ -134,7 +134,7 @@ def get_colors():
 
 def get_brightnesses():
 	if has_mult_brightnesses:
-		for i in range(effect_max_brightness_amounts[effect]):
+		for i in range(effect_color_amounts[effect]):
 			b = "brightness"
 			b += str(i)
 			brightness_arr[i] = float(get_value(b))/100
@@ -161,7 +161,7 @@ def do_effect():
 	if effect == "Off":
 		off()
 
-	if effect == "Alternating colors":
+	if effect == "Static alternating colors":
 		alternating_colors(color_arr)
 
 if __name__ == "__main__":

@@ -10,9 +10,18 @@
          <br>
          <select name = "effect" id = "effect" onchange = "this.form.submit()">
             <option value = "Off">Off</option>
-            <option value = "Single color">Single color</option>
-            <option value = "Random">Random</option>
-            <option value = "Alternating colors">Alternating colors</option>
+            <option value = "" disabled></option>
+
+            <optgroup label = "Static Effects">
+               <option value = "Single color">Single color</option>
+               <option value = "Static alternating colors">Alternating colors</option>
+            </optgroup>
+            <option value = "" disabled></option>
+
+            <optgroup label = "Animated Effects">
+               <option value = "Animated alternating colors">Alternating colors</option>
+               <option value = "Random">Random</option>
+            </optgroup>
          </select>
          <br>
          <br>
@@ -96,7 +105,8 @@
             var effect_color_amounts = {
                "Off": 1,
                "Single color": 1,
-               "Alternating colors": 2,
+               "Static alternating colors": 2,
+               "Animated alternating colors": 2,
                "Random": 2
             };
 
