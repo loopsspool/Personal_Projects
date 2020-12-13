@@ -18,7 +18,7 @@ default_form_values = {
 	"effect": "Single color",
 	"color0": "#FF4614",
 	"color1": "#FF4614",
-	"mult brightnesses": False,
+	"mult brightnesses checkbox": False,
 	"brightness0": 50,
 	"brightness1": 50,
 	"brightness2": 50
@@ -90,7 +90,7 @@ def action():
 		global has_mult_brightnesses
 		try:
 			# Converts string "True" to boolean True
-			has_mult_brightnesses = (request.form["mult brightnesses"] == "True")
+			has_mult_brightnesses = (request.form["mult brightnesses checkbox"] == "True")
 		except:
 			has_mult_brightnesses = False
 
