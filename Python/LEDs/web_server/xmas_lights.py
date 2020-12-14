@@ -7,6 +7,9 @@ from flask import Flask, render_template, request
 import threading
 import queue
 
+# TODO: Move all functions to main_functions.py and import them
+	# Just for cleanliness' sake
+
 app = Flask(__name__, template_folder = '', static_folder = '', static_url_path = '')
 
 # Workaround for form elements not yet being initialized into form.request
@@ -45,6 +48,7 @@ effect_color_amounts = {
 	"Single color": 1,
 	"Static alternating colors": 2,
 	"Animated alternating colors": 2,
+	"Twinkle": 1,
 	"Random": 1
 }
 
@@ -67,7 +71,10 @@ def looping_effects_analyzer(looping_effect_queue, looping_event, static_effect_
 		if looping_effect_name == "Animated alternating colors":
 			animated_alternating_colors(color_arr, looping_effect_queue, static_effect_queue)
 
-looping_effects = ["Random", "Animated alternating colors"]
+		if looping_effect_name == "Twinkle":
+			twinkle(color_arr, looping_effect_queue, static_effect_queue)
+
+looping_effects = ["Random", "Animated alternating colors", "Twinkle"]
 looping_event = threading.Event()
 looping_effect_queue = queue.Queue()
 static_effect_queue = queue.Queue()
