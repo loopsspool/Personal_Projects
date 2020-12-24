@@ -47,11 +47,20 @@
             <input type = "range" min = "0" max = "100" value = "50" name = "brightness1" id = "brightness1" style = "display:none;" onchange="this.form.submit()">
             <input type = "range" min = "0" max = "100" value = "50" name = "brightness2" id = "brightness2"  style = "display:none;" onchange="this.form.submit()">
          </div>
+         <br>
+
+         <label for = "animated speed slider" id = "animated speed slider label" name = "animated speed slider label" style = "display:none;">Animated Effect Speed</label>
+         <br>
+         <div>
+            <input type = "range" min = "0" max = "100" value = "50" name = "animated speed slider" id = "animated speed slider" style = "display:none;" onchange="this.form.submit()">
+         </div>
+
 
          <script>
             const effect = document.getElementById("effect");
             const color0 = document.getElementById("color0");
             const color1 = document.getElementById("color1");
+            const animated_speed_slider = document.getElementById("animated speed slider");
             const mult_brightnesses_checkbox = document.getElementById("mult brightnesses checkbox");
             const brightness0 = document.getElementById("brightness0");
             const brightness1 = document.getElementById("brightness1");
@@ -61,6 +70,7 @@
                effect,
                color0,
                color1,
+               animated_speed_slider,
                mult_brightnesses_checkbox,
                brightness0,
                brightness1,
@@ -71,6 +81,7 @@
                "effect",
                "color0",
                "color1",
+               "animated speed slider",
                "mult brightnesses checkbox",
                "brightness0",
                "brightness1",
@@ -113,9 +124,16 @@
                "Random": 2
             };
 
-            var has_mult_brightnesses = mult_brightnesses_checkbox.checked
+            var animated_effects = [
+               "Animated alternating colors",
+               "Twinkle",
+               "Random"
+            ];
+
+            var has_mult_brightnesses = mult_brightnesses_checkbox.checked;
             var mult_brightnesses_checkbox_label = document.getElementById("mult brightnesses checkbox label");
             var colors_label = document.getElementById("colors label");
+            var animated_speed_label = document.getElementById("animated speed slider label");
 
             // This script shows multiple color selectors for the effect if needed
             switch (effect_color_amounts[effect.value])
@@ -124,7 +142,7 @@
                   colors_label.style = "display:inline;";
                   color1.style.visibility = "hidden";
                   mult_brightnesses_checkbox.style = "display:none;";
-                  mult_brightnesses__checkbox_label.style = "display:none;";
+                  mult_brightnesses_checkbox_label.style = "display:none;";
                   break;
                
                case 2:
@@ -151,6 +169,20 @@
                   break;
             }
 
+            // Twinkle not included for some reason?
+            if (animated_effects.includes(effect.value))
+            {
+               animated_speed_label.style = "display:inline;";
+               animated_speed_slider.style = "display:inline;";
+            }
+            else
+            {
+               animated_speed_label.style = "display:none;";
+               animated_speed_slider.style = "display:none;";
+            }
+
+            // TODO: Put this as 0 into the dictionary for effect colors
+               // Then just add a 0 case
             if (effect.value == "Random")
             {
                colors_label.style = "display:none;";
