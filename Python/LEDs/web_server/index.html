@@ -33,6 +33,18 @@
          <div id = "colors">
             <input type = "color" name = "color0" id = "color0" value = "#FF4614" onchange = "this.form.submit()">
             <input type = "color" name = "color1" id = "color1" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color2" id = "color2" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color3" id = "color3" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color4" id = "color4" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color5" id = "color5" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color6" id = "color6" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color7" id = "color7" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color8" id = "color8" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color9" id = "color9" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+
+            <input type = "button" value = "Add color" id = "add color" name = "add color">
+            <input type = "button" value = "Remove color" id = "remove color" name = "remove color">
+            <input type = "number" value = 1 min = 1 max = 10 id = "amount of colors" name = "amount of colors" style = "display:none;">
          </div>
          <br>
 
@@ -57,17 +69,66 @@
 
 
          <script>
+            var form = document.getElementById("led settings");
+
+            // This is a workaround to update amount of colors localStorage
+            // Fires onchange event when changing value through js .value =
+            var changed = new Event('change');
+
+            const add_color_button = document.getElementById("add color");
+            const remove_color_button = document.getElementById("remove color");
+            const amount_of_colors = document.getElementById("amount of colors");
+
+            add_color_button.addEventListener('click', inc_color);
+            remove_color_button.addEventListener('click', dec_color);
+
+            function inc_color()
+            {
+               num = parseInt(amount_of_colors.value);
+               if (num < amount_of_colors.max)
+               {
+                  num++;
+                  amount_of_colors.value = num;
+                  amount_of_colors.dispatchEvent(changed);
+                  form.submit();
+               }
+            }
+
+            function dec_color()
+            {
+               num = parseInt(amount_of_colors.value);
+               if (num > amount_of_colors.min)
+               {
+                  num--;
+                  amount_of_colors.value = num;
+                  amount_of_colors.dispatchEvent(changed);
+                  form.submit();
+               }
+            }
+
+
             const effect = document.getElementById("effect");
             const color0 = document.getElementById("color0");
             const color1 = document.getElementById("color1");
+            const color2 = document.getElementById("color1");
+            const color3 = document.getElementById("color0");
+            const color4 = document.getElementById("color1");
+            const color5 = document.getElementById("color1");
+            const color6 = document.getElementById("color0");
+            const color7 = document.getElementById("color1");
+            const color8 = document.getElementById("color1");
+            const color9 = document.getElementById("color1");
             const animated_speed_slider = document.getElementById("animated speed slider");
             const mult_brightnesses_checkbox = document.getElementById("mult brightnesses checkbox");
             const brightness0 = document.getElementById("brightness0");
             const brightness1 = document.getElementById("brightness1");
             const brightness2 = document.getElementById("brightness2");
 
+            console.log(document.getElementById("led settings").elements);
+
             var form_elements = [
                effect,
+               amount_of_colors,
                color0,
                color1,
                animated_speed_slider,
@@ -79,6 +140,7 @@
 
             var form_elements_storage_name = [
                "effect",
+               "amount of colors",
                "color0",
                "color1",
                "animated speed slider",
@@ -192,6 +254,11 @@
                mult_brightnesses_checkbox_label.style = "display:none;";
                brightness1.style = "display:none;";
             }
+
+            // if (amount_of_colors.value == 2)
+            //    color1.style.visibility = "visible";
+            // else
+            //     color1.style.visibility = "hidden";
          </script>
          
       </form>
