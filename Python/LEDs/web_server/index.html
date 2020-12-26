@@ -42,8 +42,8 @@
             <input type = "color" name = "color8" id = "color8" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
             <input type = "color" name = "color9" id = "color9" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
 
-            <input type = "button" value = "Add color" id = "add color" name = "add color">
-            <input type = "button" value = "Remove color" id = "remove color" name = "remove color">
+            <input type = "button" value = "Add color" id = "add color button" name = "add color button">
+            <input type = "button" value = "Remove color" id = "remove color button" name = "remove color button">
             <input type = "number" value = 1 min = 1 max = 10 id = "amount of colors" name = "amount of colors" style = "display:none;">
          </div>
          <br>
@@ -69,107 +69,68 @@
 
 
          <script>
-            var form = document.getElementById("led settings");
+            const form = document.getElementById("led settings");
+            const form_elements = form.elements;
 
             // This is a workaround to update amount of colors localStorage
-            // Fires onchange event when changing value through js .value =
+            // Fires change event when changing value through js .value =
             var changed = new Event('change');
 
-            const add_color_button = document.getElementById("add color");
-            const remove_color_button = document.getElementById("remove color");
-            const amount_of_colors = document.getElementById("amount of colors");
-
-            add_color_button.addEventListener('click', inc_color);
-            remove_color_button.addEventListener('click', dec_color);
+            // Keeps track of amount of colors
+            form_elements["add color button"].addEventListener('click', inc_color);
+            form_elements["remove color button"].addEventListener('click', dec_color);
 
             function inc_color()
             {
-               num = parseInt(amount_of_colors.value);
-               if (num < amount_of_colors.max)
+               num = parseInt(form_elements["amount of colors"].value);
+               if (num < form_elements["amount of colors"].max)
                {
                   num++;
-                  amount_of_colors.value = num;
-                  amount_of_colors.dispatchEvent(changed);
+                  form_elements["amount of colors"].value = num;
+                  form_elements["amount of colors"].dispatchEvent(changed);
                   form.submit();
                }
             }
 
             function dec_color()
             {
-               num = parseInt(amount_of_colors.value);
-               if (num > amount_of_colors.min)
+               num = parseInt(form_elements["amount of colors"].value);
+               if (num > form_elements["amount of colors"].min)
                {
                   num--;
-                  amount_of_colors.value = num;
-                  amount_of_colors.dispatchEvent(changed);
+                  form_elements["amount of colors"].value = num;
+                  form_elements["amount of colors"].dispatchEvent(changed);
                   form.submit();
                }
             }
 
-
-            const effect = document.getElementById("effect");
-            const color0 = document.getElementById("color0");
-            const color1 = document.getElementById("color1");
-            const color2 = document.getElementById("color1");
-            const color3 = document.getElementById("color0");
-            const color4 = document.getElementById("color1");
-            const color5 = document.getElementById("color1");
-            const color6 = document.getElementById("color0");
-            const color7 = document.getElementById("color1");
-            const color8 = document.getElementById("color1");
-            const color9 = document.getElementById("color1");
-            const animated_speed_slider = document.getElementById("animated speed slider");
-            const mult_brightnesses_checkbox = document.getElementById("mult brightnesses checkbox");
-            const brightness0 = document.getElementById("brightness0");
-            const brightness1 = document.getElementById("brightness1");
-            const brightness2 = document.getElementById("brightness2");
-
-            console.log(document.getElementById("led settings").elements);
-
-            var form_elements = [
-               effect,
-               amount_of_colors,
-               color0,
-               color1,
-               animated_speed_slider,
-               mult_brightnesses_checkbox,
-               brightness0,
-               brightness1,
-               brightness2
-            ];
-
-            var form_elements_storage_name = [
-               "effect",
-               "amount of colors",
-               "color0",
-               "color1",
-               "animated speed slider",
-               "mult brightnesses checkbox",
-               "brightness0",
-               "brightness1",
-               "brightness2"
-            ];
-
-            // Saves form values across refreshes
+            // Saves form values across refreshes/form submits
             for(let i = 0; i < form_elements.length; i++)
             {
+               // Skips the add/remove color buttons since they don't need a change event listener
+               if (form_elements[i].id == "add color" ||
+                   form_elements[i].id == "remove color")
+               {
+                  continue;
+               }
+
                // Saves value
                form_elements[i].addEventListener("change", function() {
                   // Since checkboxes don't have a value attribute, must use checked attribute
-                  if (form_elements_storage_name[i] == "mult brightnesses checkbox")
-                     localStorage.setItem(form_elements_storage_name[i], this.checked);
+                  if (form_elements[i].id == "mult brightnesses checkbox")
+                     localStorage.setItem(form_elements[i].id, this.checked);
                   else
-                     localStorage.setItem(form_elements_storage_name[i], this.value);
+                     localStorage.setItem(form_elements[i].id, this.value);
                });
 
                // Sets value
-               let val = localStorage.getItem(form_elements_storage_name[i]);
+               let val = localStorage.getItem(form_elements[i].id);
                if (val) 
                {
                   // Since localStorage stores values only as strings
                   // Boolean values must be converted from a string back to boolean
                      // to be assigned to a checkbox checked attribute
-                  if (form_elements_storage_name[i] == "mult brightnesses checkbox")
+                  if (form_elements[i].id == "mult brightnesses checkbox")
                      form_elements[i].checked = (val == 'true');
                   else
                      form_elements[i].value = val; 
@@ -192,31 +153,31 @@
                "Random"
             ];
 
-            var has_mult_brightnesses = mult_brightnesses_checkbox.checked;
-            var mult_brightnesses_checkbox_label = document.getElementById("mult brightnesses checkbox label");
-            var colors_label = document.getElementById("colors label");
-            var animated_speed_label = document.getElementById("animated speed slider label");
+            var has_mult_brightnesses = form_elements["mult brightnesses checkbox"].checked;
+            var labels = document.getElementsByTagName('LABEL');
 
+            // TODO: Change this based off of amount of colors
+               // Also certain functions
             // This script shows multiple color selectors for the effect if needed
-            switch (effect_color_amounts[effect.value])
+            switch (effect_color_amounts[form_elements["effect"].value])
             {
                case 1:
-                  colors_label.style = "display:inline;";
-                  color1.style.visibility = "hidden";
-                  mult_brightnesses_checkbox.style = "display:none;";
-                  mult_brightnesses_checkbox_label.style = "display:none;";
+                  labels["colors label"].style = "display:inline;";
+                  form_elements["color1"].style.visibility = "hidden";
+                  form_elements["mult brightnesses checkbox"].style = "display:none;";
+                  labels["mult brightnesses checkbox label"].style = "display:none;";
                   break;
                
                case 2:
-                  colors_label.style = "display:inline;";
-                  color1.style.visibility = "visible";
-                  mult_brightnesses_checkbox_label.style = "display:inline;";
-                  mult_brightnesses_checkbox.style = "display:inline;";
+                  labels["colors label"].style = "display:inline;";
+                  form_elements["color1"].style.visibility = "visible";
+                  labels["mult brightnesses checkbox label"].style = "display:inline;";
+                  form_elements["mult brightnesses checkbox"].style = "display:inline;";
 
                   if (has_mult_brightnesses == true)
-                     brightness1.style = "display:inline;";
+                     form_elements["brightness1"].style = "display:inline;";
                   else
-                     brightness1.style = "display:none;";
+                     form_elements["brightness1"].style = "display:none;";
 
                   break;
 
@@ -224,41 +185,36 @@
                   break;
 
                default:
-                  colors_label.style = "display:inline;";
-                  color1.style.visibility = "hidden";
-                  mult_brightnesses_checkbox.style = "display:none;";
-                  mult_brightnesses_checkbox_label.style = "display:none;";
+                  labels["colors label"].style = "display:inline;";
+                  form_elements["color1"].style.visibility = "hidden";
+                  form_elements["mult brightnesses checkbox"].style = "display:none;";
+                  labels["mult brightnesses checkbox label"].style = "display:none;";
                   break;
             }
 
-            // Twinkle not included for some reason?
-            if (animated_effects.includes(effect.value))
+            if (animated_effects.includes(form_elements["effect"].value))
             {
-               animated_speed_label.style = "display:inline;";
-               animated_speed_slider.style = "display:inline;";
+               labels["animated speed slider label"].style = "display:inline;";
+               form_elements["animated speed slider"].style = "display:inline;";
             }
             else
             {
-               animated_speed_label.style = "display:none;";
-               animated_speed_slider.style = "display:none;";
+               labels["animated speed slider label"].style = "display:none;";
+               form_elements["animated speed slider"].style = "display:none;";
             }
 
             // TODO: Put this as 0 into the dictionary for effect colors
                // Then just add a 0 case
-            if (effect.value == "Random")
+            if (form_elements["effect"].value == "Random")
             {
-               colors_label.style = "display:none;";
-               color0.style.visibility = "hidden";
-               color1.style.visibility = "hidden";
-               mult_brightnesses_checkbox.style = "display:none;";
-               mult_brightnesses_checkbox_label.style = "display:none;";
-               brightness1.style = "display:none;";
+               labels["colors label"].style = "display:none;";
+               form_elements["color0"].style.visibility = "hidden";
+               form_elements["color1"].style.visibility = "hidden";
+               form_elements["mult brightnesses checkbox"].style = "display:none;";
+               labels["mult brightnesses checkbox label"].style = "display:none;";
+               form_elements["brightness1"].style = "display:none;";
             }
 
-            // if (amount_of_colors.value == 2)
-            //    color1.style.visibility = "visible";
-            // else
-            //     color1.style.visibility = "hidden";
          </script>
          
       </form>
