@@ -32,19 +32,19 @@
          <br>
          <div id = "colors">
             <input type = "color" name = "color0" id = "color0" value = "#FF4614" onchange = "this.form.submit()">
-            <input type = "color" name = "color1" id = "color1" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
-            <input type = "color" name = "color2" id = "color2" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
-            <input type = "color" name = "color3" id = "color3" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
-            <input type = "color" name = "color4" id = "color4" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
-            <input type = "color" name = "color5" id = "color5" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
-            <input type = "color" name = "color6" id = "color6" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
-            <input type = "color" name = "color7" id = "color7" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
-            <input type = "color" name = "color8" id = "color8" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
-            <input type = "color" name = "color9" id = "color9" value = "#FF4614" visibility = "hidden" onchange = "this.form.submit()">
+            <input type = "color" name = "color1" id = "color1" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
+            <input type = "color" name = "color2" id = "color2" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
+            <input type = "color" name = "color3" id = "color3" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
+            <input type = "color" name = "color4" id = "color4" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
+            <input type = "color" name = "color5" id = "color5" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
+            <input type = "color" name = "color6" id = "color6" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
+            <input type = "color" name = "color7" id = "color7" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
+            <input type = "color" name = "color8" id = "color8" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
+            <input type = "color" name = "color9" id = "color9" value = "#FF4614" style = "display:none;" onchange = "this.form.submit()">
 
             <input type = "button" value = "Add color" id = "add color button" name = "add color button">
             <input type = "button" value = "Remove color" id = "remove color button" name = "remove color button">
-            <input type = "number" value = 1 min = 1 max = 10 id = "amount of colors" name = "amount of colors" style = "display:none;">
+            <input type = "number" defaultValue = 1 value = 1 min = 1 max = 10 id = "amount of colors" name = "amount of colors" style = "display:none;">
          </div>
          <br>
 
@@ -53,7 +53,7 @@
          <br>
          <br>
 
-         <label for = "brightness">Brightness:</label>
+         <label for = "brightness" id = "brightness label" name = "brightness label">Brightness:</label>
          <div>
             <input type = "range" min = "0" max = "100" value = "50" name = "brightness0" id = "brightness0" onchange="this.form.submit()">
             <input type = "range" min = "0" max = "100" value = "50" name = "brightness1" id = "brightness1" style = "display:none;" onchange="this.form.submit()">
@@ -71,6 +71,36 @@
          <script>
             const form = document.getElementById("led settings");
             const form_elements = form.elements;
+            const colors = document.querySelectorAll('input[type=color]');
+            var labels = document.getElementsByTagName('LABEL');
+
+            function hide(...elements)
+            {
+               for (let i = 0; i < elements.length; i++)
+               {
+                  if (elements[i].constructor === NodeList)
+                  {
+                     for (let node of elements[i])
+                        node.style = "display:none;";
+                  }
+                  else
+                     elements[i].style = "display:none;";
+               }
+            }
+
+            function show(...elements)
+            {
+               for (let i = 0; i < elements.length; i++)
+               {
+                  if (elements[i].constructor === NodeList)
+                  {
+                     for (let node of elements[i])
+                        node.style = "display:none;";
+                  }
+                  else
+                     elements[i].style = "display:inline;";
+               }
+            }
 
             // This is a workaround to update amount of colors localStorage
             // Fires change event when changing value through js .value =
@@ -137,15 +167,20 @@
                }
             }
 
-
+            ///////////////////   SHOWING ELEMENTS  ///////////////////
             var effect_color_amounts = {
-               "Off": 1,
+               "Off": 0,
                "Single color": 1,
                "Static alternating colors": 2,
                "Animated alternating colors": 2,
                "Twinkle": 1,
                "Random": 2
             };
+
+            var no_color_effects = [
+               "Off",
+               "Random"
+            ];
 
             var animated_effects = [
                "Animated alternating colors",
@@ -154,7 +189,38 @@
             ];
 
             var has_mult_brightnesses = form_elements["mult brightnesses checkbox"].checked;
-            var labels = document.getElementsByTagName('LABEL');
+
+            // Shows number of colors
+            // Yet another workaround...
+            // Can't be put in add/remove color button functions because form submit removes styling
+            // Using localStorage because of accessing the value of amount of colors wasn't working
+               // Something to do with value element and value property/ value = defaultValue/ etc
+            let val = localStorage.getItem(form_elements["amount of colors"].id);
+            if (val) 
+            {
+               for (let i = 0; i < parseInt(val); i++)
+                  show(colors[i]);
+            }
+
+            // TODO: Finish filling these out for current effects
+            // TODO: Maybe implement a hide all except function for node lists and HTML collections
+            if (no_color_effects.includes(form_elements["effect"].value))
+            {
+               // Hides color elements
+               hide(colors);
+               hide(labels["colors label"],
+                    form_elements["add color button"],
+                    form_elements["remove color button"]);
+
+               if (form_elements["effect"].value == "Off")
+               {
+                  hide(labels["brightness label"],
+                       form_elements["brightness0"]);
+               }
+
+               // Hides brightness elements
+
+            }
 
             // TODO: Change this based off of amount of colors
                // Also certain functions
@@ -163,14 +229,14 @@
             {
                case 1:
                   labels["colors label"].style = "display:inline;";
-                  form_elements["color1"].style.visibility = "hidden";
+                  //form_elements["color1"].style.visibility = "hidden";
                   form_elements["mult brightnesses checkbox"].style = "display:none;";
                   labels["mult brightnesses checkbox label"].style = "display:none;";
                   break;
                
                case 2:
                   labels["colors label"].style = "display:inline;";
-                  form_elements["color1"].style.visibility = "visible";
+                  //form_elements["color1"].style.visibility = "visible";
                   labels["mult brightnesses checkbox label"].style = "display:inline;";
                   form_elements["mult brightnesses checkbox"].style = "display:inline;";
 
@@ -185,8 +251,8 @@
                   break;
 
                default:
-                  labels["colors label"].style = "display:inline;";
-                  form_elements["color1"].style.visibility = "hidden";
+                  //labels["colors label"].style = "display:inline;";
+                  //form_elements["color1"].style.visibility = "hidden";
                   form_elements["mult brightnesses checkbox"].style = "display:none;";
                   labels["mult brightnesses checkbox label"].style = "display:none;";
                   break;
