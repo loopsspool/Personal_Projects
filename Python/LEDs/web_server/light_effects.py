@@ -10,10 +10,10 @@ strip = neopixel.NeoPixel(board.D18, num_of_leds, auto_write = False)
     # Must be a global to accurately store timing data across changes
 amount = 0.5
 
-def set_amount(animated_effect_speed_queue):
+def set_amount(queue_dict):
     global amount
     # 1 - to make slider go from slow to fast
-    amount = 1 - float(animated_effect_speed_queue.get())/100
+    amount = 1 - float(queue_dict["animated effect speed queue"].get())/100
 
 
 ############################## STATIC FUNCTIONS ##############################
@@ -36,15 +36,15 @@ def alternating_colors(color_arr):
 
 ############################## ANIMATED FUNCTIONS ##############################
 
-def random_colors(brightness_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue):
+def random_colors(brightness_arr, queue_dict):
     
-    while looping_effect_queue.empty() and static_effect_queue.empty():
+    while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
         for i in range (num_of_leds):
             strip[i] = (random.randrange(0, 255) * brightness_arr[0], random.randrange(0, 255) * brightness_arr[0], random.randrange(0, 255) * brightness_arr[0])
         strip.show()
 
-        if not animated_effect_speed_queue.empty():
-            set_amount(animated_effect_speed_queue)
+        if not queue_dict["animated effect speed queue"].empty():
+            set_amount(queue_dict)
 
         global amount
         # Prevents stroke-inducing light changes
@@ -53,11 +53,11 @@ def random_colors(brightness_arr, animated_effect_speed_queue, looping_effect_qu
         else:
             time.sleep(amount)
 
-def animated_alternating_colors(color_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue):
+def animated_alternating_colors(color_arr, queue_dict):
     
     color0 = color_arr[0]
     color1 = color_arr[1]
-    while looping_effect_queue.empty() and static_effect_queue.empty():
+    while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
         for i in range(0, num_of_leds, 2):
             strip[i] = color0
             strip[i + 1] = color1
@@ -65,8 +65,8 @@ def animated_alternating_colors(color_arr, animated_effect_speed_queue, looping_
         strip.show()
         color0, color1 = color1, color0
 
-        if not animated_effect_speed_queue.empty():
-            set_amount(animated_effect_speed_queue)
+        if not queue_dict["animated effect speed queue"].empty():
+            set_amount(queue_dict)
 
         global amount
         # Prevents the change of colors occuring so fast the strip appears one color
@@ -76,7 +76,7 @@ def animated_alternating_colors(color_arr, animated_effect_speed_queue, looping_
             time.sleep(amount)
 
 
-def twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue):
+def twinkle(color_arr, queue_dict):
     brightness = [0] * num_of_leds
     brightness_direction = [0] * num_of_leds
     # Adjusting slider to an appropriate range for twinkle
@@ -88,10 +88,11 @@ def twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static
         brightness[i] = random.uniform(.1, ceil_brightness)
         brightness_direction[i] = random.random() < 0.5
     
-    while looping_effect_queue.empty() and static_effect_queue.empty():
-        if not animated_effect_speed_queue.empty():
-            amount = float(animated_effect_speed_queue.get())/1000
+    while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
+        if not queue_dict["animated effect speed queue"].empty():
+            amount = float(queue_dict["animated effect speed queue"].get())/1000
 
+        # So twinkle isn't so incredibly slow and "pixelated"
         if (amount < 0.008):
             amount = 0.008
 

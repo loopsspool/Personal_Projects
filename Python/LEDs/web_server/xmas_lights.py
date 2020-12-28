@@ -54,8 +54,7 @@ effect_color_amounts = {
 	"Random": 1
 }
 
-# TODO: Test with another looping effect and running them back to back
-def looping_effects_analyzer(looping_effect_queue, looping_event, animated_effect_speed_queue, static_effect_queue, color_arr, brightness_arr):
+def looping_effects_analyzer(looping_event, queue_dict, color_arr, brightness_arr):
 	# This wait blocks the below code until a selected looping effect triggers it to run
 	looping_event.wait()
 
@@ -65,24 +64,32 @@ def looping_effects_analyzer(looping_effect_queue, looping_event, animated_effec
 			# And it will die, not to be revived
 	# So in other words, don't delete this while loop lol
 	while True:
-		looping_effect_name = looping_effect_queue.get()
+		looping_effect_name = queue_dict["looping effect queue"].get()
 
 		if looping_effect_name == "Random":
-			random_colors(brightness_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue)
+			random_colors(brightness_arr, queue_dict)
 
 		if looping_effect_name == "Animated alternating colors":
-			animated_alternating_colors(color_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue)
+			animated_alternating_colors(color_arr, queue_dict)
 
 		if looping_effect_name == "Twinkle":
-			twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue)
+			twinkle(color_arr, queue_dict)
 
 looping_effects = ["Random", "Animated alternating colors", "Twinkle"]
 looping_event = threading.Event()
+# TODO: Maybe put all these queues into an array or something so I don't have to have a huge arg list
 looping_effect_queue = queue.Queue()
 static_effect_queue = queue.Queue()
+amount_of_colors_queue = queue.Queue()
 animated_effect_speed_queue = queue.Queue()
+queue_dict = {
+	"looping effect queue": looping_effect_queue,
+	"static effect queue": static_effect_queue,
+	"amount of colors queue": amount_of_colors_queue,
+	"animated effect speed queue": animated_effect_speed_queue
+}
 prev_effect_speed = default_form_values["animated speed slider"]
-thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_effect_queue, looping_event, animated_effect_speed_queue, static_effect_queue, color_arr, brightness_arr,))
+thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_event, queue_dict, color_arr, brightness_arr,))
 
 @app.route("/", methods = ["GET", "POST"])
 def action():
