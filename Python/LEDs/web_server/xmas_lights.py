@@ -19,6 +19,7 @@ app = Flask(__name__, template_folder = '', static_folder = '', static_url_path 
 # At which point the whole form submits and the elements will be loaded into form.request
 default_form_values = {
 	"effect": "Single color",
+	"amount of colors": 1,
 	"color0": "#FF4614",
 	"color1": "#FF4614",
 	"mult brightnesses checkbox": False,
@@ -54,7 +55,7 @@ effect_color_amounts = {
 }
 
 # TODO: Test with another looping effect and running them back to back
-def looping_effects_analyzer(looping_effect_queue, looping_event, animated_effect_speed, static_effect_queue, color_arr, brightness_arr):
+def looping_effects_analyzer(looping_effect_queue, looping_event, animated_effect_speed_queue, static_effect_queue, color_arr, brightness_arr):
 	# This wait blocks the below code until a selected looping effect triggers it to run
 	looping_event.wait()
 
@@ -67,21 +68,21 @@ def looping_effects_analyzer(looping_effect_queue, looping_event, animated_effec
 		looping_effect_name = looping_effect_queue.get()
 
 		if looping_effect_name == "Random":
-			random_colors(brightness_arr, animated_effect_speed, looping_effect_queue, static_effect_queue)
+			random_colors(brightness_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue)
 
 		if looping_effect_name == "Animated alternating colors":
-			animated_alternating_colors(color_arr, animated_effect_speed, looping_effect_queue, static_effect_queue)
+			animated_alternating_colors(color_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue)
 
 		if looping_effect_name == "Twinkle":
-			twinkle(color_arr, animated_effect_speed, looping_effect_queue, static_effect_queue)
+			twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue)
 
 looping_effects = ["Random", "Animated alternating colors", "Twinkle"]
 looping_event = threading.Event()
 looping_effect_queue = queue.Queue()
 static_effect_queue = queue.Queue()
-animated_effect_speed = queue.Queue()
+animated_effect_speed_queue = queue.Queue()
 prev_effect_speed = default_form_values["animated speed slider"]
-thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_effect_queue, looping_event, animated_effect_speed, static_effect_queue, color_arr, brightness_arr,))
+thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_effect_queue, looping_event, animated_effect_speed_queue, static_effect_queue, color_arr, brightness_arr,))
 
 @app.route("/", methods = ["GET", "POST"])
 def action():
@@ -93,6 +94,8 @@ def action():
 
 		global effect
 		effect = get_value("effect")
+
+		#print(get_value("amount of colors"))
 		
 		# This is a workaround since the checkbox unchecked won't POST data
 			# aka wont show up in request dict and will throw an error
@@ -123,8 +126,7 @@ def action():
 		current_effect_speed = get_value("animated speed slider")
 		global prev_effect_speed
 		if not current_effect_speed == prev_effect_speed:
-			print("add2q")
-			animated_effect_speed.put_nowait(current_effect_speed)
+			animated_effect_speed_queue.put_nowait(current_effect_speed)
 			prev_effect_speed = current_effect_speed
 
 		return render_template('index.html')
