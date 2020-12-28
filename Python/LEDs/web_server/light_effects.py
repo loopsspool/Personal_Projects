@@ -47,7 +47,11 @@ def random_colors(brightness_arr, animated_effect_speed_queue, looping_effect_qu
             set_amount(animated_effect_speed_queue)
 
         global amount
-        time.sleep(amount)
+        # Prevents stroke-inducing light changes
+        if (amount < 0.07):
+            time.sleep(0.07)
+        else:
+            time.sleep(amount)
 
 def animated_alternating_colors(color_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue):
     
@@ -65,7 +69,7 @@ def animated_alternating_colors(color_arr, animated_effect_speed_queue, looping_
             set_amount(animated_effect_speed_queue)
 
         global amount
-        print(amount)
+        # Prevents the change of colors occuring so fast the strip appears one color
         if (amount < 0.07):
             time.sleep(0.07)
         else:
@@ -87,6 +91,9 @@ def twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static
     while looping_effect_queue.empty() and static_effect_queue.empty():
         if not animated_effect_speed_queue.empty():
             amount = float(animated_effect_speed_queue.get())/1000
+
+        if (amount < 0.008):
+            amount = 0.008
 
         for i in range(num_of_leds):
             # Checking bounds
