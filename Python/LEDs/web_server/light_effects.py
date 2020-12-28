@@ -65,7 +65,11 @@ def animated_alternating_colors(color_arr, animated_effect_speed_queue, looping_
             set_amount(animated_effect_speed_queue)
 
         global amount
-        time.sleep(amount)
+        print(amount)
+        if (amount < 0.07):
+            time.sleep(0.07)
+        else:
+            time.sleep(amount)
 
 
 def twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static_effect_queue):
@@ -73,7 +77,7 @@ def twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static
     brightness_direction = [0] * num_of_leds
     # Adjusting slider to an appropriate range for twinkle
     global amount
-    amount = amount/20
+    amount = (1 - amount)/10
     ceil_brightness = 0.8
     
     for i in range(num_of_leds):
@@ -82,7 +86,7 @@ def twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static
     
     while looping_effect_queue.empty() and static_effect_queue.empty():
         if not animated_effect_speed_queue.empty():
-            amount = float(animated_effect_speed_queue.get())/2000
+            amount = float(animated_effect_speed_queue.get())/1000
 
         for i in range(num_of_leds):
             # Checking bounds
@@ -107,4 +111,4 @@ def twinkle(color_arr, animated_effect_speed_queue, looping_effect_queue, static
     
     # Readjusting amount to an appropriate range for other animated functions
     # Happens when the while loop is broken out of
-    amount = amount * 20
+    amount = (1 - (amount * 10))
