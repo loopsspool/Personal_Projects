@@ -6,20 +6,27 @@ import math
 
 num_of_leds = 350
 strip = neopixel.NeoPixel(board.D18, num_of_leds, auto_write = False)
+amount_of_colors = 1
 # This controls the time sleep of animated functions
     # Must be a global to accurately store timing data across changes
-amount = 0.5
+sleep_amount = 0.5
 
-def set_amount(queue_dict):
-    global amount
+def set_sleep_amount(queue_dict):
+    global sleep_amount
     # 1 - to make slider go from slow to fast
-    amount = 1 - float(queue_dict["animated effect speed queue"].get())/100
+    sleep_amount = 1 - float(queue_dict["animated effect speed queue"].get())/100
 
 
 ############################## STATIC FUNCTIONS ##############################
 
-def single_color(color):
-    strip.fill(color)
+def single_color(color_arr, amount_of_colors):
+    for i in range(0, num_of_leds, amount_of_colors):
+        # Putting in each color
+        for n in range(amount_of_colors):
+            # But only if it's on the strip
+            if (i + n) < num_of_leds:
+                strip[i + n] = color_arr[n]
+
     strip.show()
 
 def off():
@@ -44,44 +51,50 @@ def random_colors(brightness_arr, queue_dict):
         strip.show()
 
         if not queue_dict["animated effect speed queue"].empty():
-            set_amount(queue_dict)
+            set_sleep_amount(queue_dict)
 
-        global amount
+        global sleep_amount
         # Prevents stroke-inducing light changes
-        if (amount < 0.07):
+        if (sleep_amount < 0.07):
             time.sleep(0.07)
         else:
-            time.sleep(amount)
+            time.sleep(sleep_amount)
 
 def animated_alternating_colors(color_arr, queue_dict):
     
-    color0 = color_arr[0]
-    color1 = color_arr[1]
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
-        for i in range(0, num_of_leds, 2):
-            strip[i] = color0
-            strip[i + 1] = color1
 
+        if not queue_dict["amount of colors queue"].empty():
+            global amount_of_colors
+            amount_of_colors = int(queue_dict["amount of colors queue"].get())
+
+        for i in range(0, num_of_leds, amount_of_colors):
+            # Putting in each color
+            for n in range(amount_of_colors):
+                # But only if it's on the strip
+                if (i + n) < num_of_leds:
+                    strip[i + n] = color_arr[n]
+
+        # TODO: Increment the colors so they're animated
         strip.show()
-        color0, color1 = color1, color0
 
         if not queue_dict["animated effect speed queue"].empty():
-            set_amount(queue_dict)
+            set_sleep_amount(queue_dict)
 
-        global amount
+        global sleep_amount
         # Prevents the change of colors occuring so fast the strip appears one color
-        if (amount < 0.07):
+        if (sleep_amount < 0.07):
             time.sleep(0.07)
         else:
-            time.sleep(amount)
+            time.sleep(sleep_amount)
 
 
 def twinkle(color_arr, queue_dict):
     brightness = [0] * num_of_leds
     brightness_direction = [0] * num_of_leds
     # Adjusting slider to an appropriate range for twinkle
-    global amount
-    amount = (1 - amount)/10
+    global sleep_amount
+    sleep_amount = (1 - sleep_amount)/10
     ceil_brightness = 0.8
     
     for i in range(num_of_leds):
@@ -90,24 +103,24 @@ def twinkle(color_arr, queue_dict):
     
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
         if not queue_dict["animated effect speed queue"].empty():
-            amount = float(queue_dict["animated effect speed queue"].get())/1000
+            sleep_amount = float(queue_dict["animated effect speed queue"].get())/1000
 
         # So twinkle isn't so incredibly slow and "pixelated"
-        if (amount < 0.008):
-            amount = 0.008
+        if (sleep_amount < 0.008):
+            sleep_amount = 0.008
 
         for i in range(num_of_leds):
             # Checking bounds
-            if (brightness[i] + amount) >= ceil_brightness:
+            if (brightness[i] + sleep_amount) >= ceil_brightness:
                 brightness_direction[i] = False
-            if (brightness[i] - amount) <= amount:
+            if (brightness[i] - sleep_amount) <= sleep_amount:
                 brightness_direction[i] = True
             
             # Incrementing pixel brightness
             if brightness_direction[i] == True:
-                brightness[i] += amount
+                brightness[i] += sleep_amount
             else:
-                brightness[i] -= amount
+                brightness[i] -= sleep_amount
 
             # Applying brightness
             g = math.ceil(color_arr[0][0] * brightness[i])
@@ -117,6 +130,6 @@ def twinkle(color_arr, queue_dict):
 
         strip.show()
     
-    # Readjusting amount to an appropriate range for other animated functions
+    # Readjusting sleep_amount to an appropriate range for other animated functions
     # Happens when the while loop is broken out of
-    amount = (1 - (amount * 10))
+    sleep_amount = (1 - (sleep_amount * 10))

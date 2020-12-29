@@ -18,10 +18,18 @@ app = Flask(__name__, template_folder = '', static_folder = '', static_url_path 
 # So default form values are used in a try except block until a form value is changed
 # At which point the whole form submits and the elements will be loaded into form.request
 default_form_values = {
-	"effect": "Single color",
+	"effect": "Color",
 	"amount of colors": 1,
 	"color0": "#FF4614",
 	"color1": "#FF4614",
+	"color2": "#FF4614",
+	"color3": "#FF4614",
+	"color4": "#FF4614",
+	"color5": "#FF4614",
+	"color6": "#FF4614",
+	"color7": "#FF4614",
+	"color8": "#FF4614",
+	"color9": "#FF4614",
 	"mult brightnesses checkbox": False,
 	"brightness0": 50,
 	"brightness1": 50,
@@ -77,7 +85,6 @@ def looping_effects_analyzer(looping_event, queue_dict, color_arr, brightness_ar
 
 looping_effects = ["Random", "Animated alternating colors", "Twinkle"]
 looping_event = threading.Event()
-# TODO: Maybe put all these queues into an array or something so I don't have to have a huge arg list
 looping_effect_queue = queue.Queue()
 static_effect_queue = queue.Queue()
 amount_of_colors_queue = queue.Queue()
@@ -88,6 +95,7 @@ queue_dict = {
 	"amount of colors queue": amount_of_colors_queue,
 	"animated effect speed queue": animated_effect_speed_queue
 }
+prev_color_amount = default_form_values["amount of colors"]
 prev_effect_speed = default_form_values["animated speed slider"]
 thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_event, queue_dict, color_arr, brightness_arr,))
 
@@ -130,11 +138,19 @@ def action():
 			looping_event.clear()
 			static_effect_queue.put(effect)
 
+		# Checking if certain elements have changed to notify the animated effect thread
 		current_effect_speed = get_value("animated speed slider")
 		global prev_effect_speed
 		if not current_effect_speed == prev_effect_speed:
 			animated_effect_speed_queue.put_nowait(current_effect_speed)
 			prev_effect_speed = current_effect_speed
+
+		current_color_amount = get_value("amount of colors")
+		global prev_color_amount
+		if not current_color_amount == prev_color_amount:
+			amount_of_colors_queue.queue.clear()
+			amount_of_colors_queue.put_nowait(current_color_amount)
+			prev_color_amount = current_color_amount
 
 		return render_template('index.html')
 	
@@ -152,14 +168,14 @@ def get_value(element_name):
 	return val
 
 def get_colors():
-	for i in range(effect_color_amounts[effect]):
+	for i in range(int(get_value("amount of colors"))):
 		col = "color"
 		col += str(i)
 		color_arr[i] = hex_to_grb(get_value(col))
 
 def get_brightnesses():
 	if has_mult_brightnesses:
-		for i in range(effect_color_amounts[effect]):
+		for i in range(int(get_value("amount of colors"))):
 			b = "brightness"
 			b += str(i)
 			brightness_arr[i] = float(get_value(b))/100
@@ -167,7 +183,7 @@ def get_brightnesses():
 		brightness_arr[0] = float(get_value("brightness0"))/100
 
 def apply_brightnesses():
-	for i in range(effect_color_amounts[effect]):
+	for i in range(int(get_value("amount of colors"))):
 
 		if has_mult_brightnesses:
 			b_index = i
@@ -180,8 +196,8 @@ def apply_brightnesses():
 		color_arr[i] = (g, r, b)
 
 def do_effect():
-	if effect == "Single color":
-		single_color(color_arr[0])
+	if effect == "Color":
+		single_color(color_arr, int(get_value("amount of colors")))
 
 	if effect == "Off":
 		off()
