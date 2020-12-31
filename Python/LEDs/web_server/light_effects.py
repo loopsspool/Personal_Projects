@@ -39,15 +39,16 @@ def single_color(color_arr, amount_of_colors):
 
 def random_colors(brightness_arr, queue_dict):
     
+    global sleep_amount
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
         for i in range (num_of_leds):
             strip[i] = (random.randrange(0, 255) * brightness_arr[0], random.randrange(0, 255) * brightness_arr[0], random.randrange(0, 255) * brightness_arr[0])
         strip.show()
 
+        # Checking if animated speed slider has changed
         if not queue_dict["animated effect speed queue"].empty():
             set_sleep_amount(queue_dict)
 
-        global sleep_amount
         # Prevents stroke-inducing light changes
         if (sleep_amount < 0.07):
             time.sleep(0.07)
@@ -57,11 +58,12 @@ def random_colors(brightness_arr, queue_dict):
 
 def animated_alternating_colors(color_arr, queue_dict):
     
+    global amount_of_colors
+    global sleep_amount
     color_acc = 0 # Color accumulator to animate the effect
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
 
         if not queue_dict["amount of colors queue"].empty():
-            global amount_of_colors
             amount_of_colors = int(queue_dict["amount of colors queue"].get())
 
         for i in range(0, num_of_leds, amount_of_colors):
@@ -79,7 +81,6 @@ def animated_alternating_colors(color_arr, queue_dict):
         if not queue_dict["animated effect speed queue"].empty():
             set_sleep_amount(queue_dict)
 
-        global sleep_amount
         # Prevents the change of colors occuring so fast the strip appears one color
         if (sleep_amount < 0.07):
             time.sleep(0.07)
@@ -99,11 +100,14 @@ def twinkle(color_arr, queue_dict):
     sleep_amount = (1 - sleep_amount)/10
     ceil_brightness = 0.8
     
+    # Initializing brightnesses and brightness direction
     for i in range(num_of_leds):
         brightness[i] = random.uniform(.1, ceil_brightness)
         brightness_direction[i] = random.random() < 0.5
     
+    global amount_of_colors
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
+        # Checking if animated speed slider has changed
         if not queue_dict["animated effect speed queue"].empty():
             sleep_amount = float(queue_dict["animated effect speed queue"].get())/1000
 
@@ -111,24 +115,32 @@ def twinkle(color_arr, queue_dict):
         if (sleep_amount < 0.008):
             sleep_amount = 0.008
 
-        for i in range(num_of_leds):
-            # Checking bounds
-            if (brightness[i] + sleep_amount) >= ceil_brightness:
-                brightness_direction[i] = False
-            if (brightness[i] - sleep_amount) <= sleep_amount:
-                brightness_direction[i] = True
-            
-            # Incrementing pixel brightness
-            if brightness_direction[i] == True:
-                brightness[i] += sleep_amount
-            else:
-                brightness[i] -= sleep_amount
+        # Checking if amount of colors has changed
+        if not queue_dict["amount of colors queue"].empty():
+            amount_of_colors = int(queue_dict["amount of colors queue"].get())
 
-            # Applying brightness
-            g = math.ceil(color_arr[0][0] * brightness[i])
-            r = math.ceil(color_arr[0][1] * brightness[i])
-            b = math.ceil(color_arr[0][2] * brightness[i])
-            strip[i] = (g, r, b)
+        for i in range(0, num_of_leds, amount_of_colors):
+            for n in range(amount_of_colors):
+                # If the pixel is on the strip
+                if (i + n) < num_of_leds:
+                        
+                    # Checking bounds
+                    if (brightness[i + n] + sleep_amount) >= ceil_brightness:
+                        brightness_direction[i + n] = False
+                    if (brightness[i + n] - sleep_amount) <= sleep_amount:
+                        brightness_direction[i + n] = True
+                    
+                    # Incrementing pixel brightness
+                    if brightness_direction[i + n] == True:
+                        brightness[i + n] += sleep_amount
+                    else:
+                        brightness[i + n] -= sleep_amount
+
+                    # Applying brightness and color
+                    g = math.ceil(color_arr[n][0] * brightness[i + n])
+                    r = math.ceil(color_arr[n][1] * brightness[i + n])
+                    b = math.ceil(color_arr[n][2] * brightness[i + n])
+                    strip[i + n] = (g, r, b)
 
         strip.show()
     
