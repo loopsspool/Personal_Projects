@@ -19,6 +19,11 @@ def set_sleep_amount(queue_dict):
 
 ############################## STATIC FUNCTIONS ##############################
 
+def off():
+    strip.fill((0, 0, 0))
+    strip.show()
+
+
 def single_color(color_arr, amount_of_colors):
     for i in range(0, num_of_leds, amount_of_colors):
         # Putting in each color
@@ -28,19 +33,6 @@ def single_color(color_arr, amount_of_colors):
                 strip[i + n] = color_arr[n]
 
     strip.show()
-
-
-def off():
-    strip.fill((0, 0, 0))
-    strip.show()
-
-
-def alternating_colors(color_arr):
-    for i in range(0, num_of_leds, 2):
-        strip[i] = color_arr[0]
-        strip[i + 1] = color_arr[1]
-    strip.show()
-
 
 
 ############################## ANIMATED FUNCTIONS ##############################

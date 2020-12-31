@@ -209,9 +209,6 @@ def do_effect():
 	if effect == "Off":
 		off()
 
-	if effect == "Static alternating colors":
-		alternating_colors(color_arr)
-
 def get_temp():
 	temp = os.popen('vcgencmd measure_temp').readline()
 	return(temp.replace("temp=", "").replace("/n",""))
