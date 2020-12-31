@@ -43,9 +43,19 @@
 
             <br>
 
-            <input type = "button" value = "Add color" id = "add color button" name = "add color button">
-            <input type = "button" value = "Remove color" id = "remove color button" name = "remove color button">
+            <input type = "button" value = "Add color" id = "add color button" name = "add color button" onclick = "inc_color()">
+            <input type = "button" value = "Remove color" id = "remove color button" name = "remove color button" onclick = "dec_color()">
             <input type = "number" defaultValue = 1 value = 1 min = 1 max = 10 id = "amount of colors" name = "amount of colors" style = "display:none;">
+
+            <br>
+            <label for = "mult color style" id = "mult color style label" name = "mult color style label">Multiple color style:</label>
+            <div id = "mult color style">
+               <input type = "radio" name = "mult color style" id = "alternating style" value = "alternating" checked = "checked" onclick = "alternating_radio()">
+               <label for = "alternating">Alternating</label>
+               <input type = "radio" name = "mult color style" id = "block style"  value = "block" onclick = "block_radio()">
+               <label for = "block">Block</label>
+            </div>
+
          </div>
          <br>
 
@@ -123,13 +133,10 @@
             }
 
             // This is a workaround to update amount of colors localStorage
-            // Fires change event when changing value through js .value =
+            // Fires change event when changing value through js
             var changed = new Event('change');
 
             // Keeps track of amount of colors
-            form_elements["add color button"].addEventListener('click', inc_color);
-            form_elements["remove color button"].addEventListener('click', dec_color);
-
             function inc_color()
             {
                num = parseInt(form_elements["amount of colors"].value);
@@ -154,6 +161,29 @@
                }
             }
 
+            // Since only one radio can be checked at a time
+            // And my localStorage triggers onchange, which would only be setting the one to true, while the others true
+               // The last radio defaults to true in that case
+            // These explicitly set one to true, the other to false, push both to localStorage, and submit the form
+            function alternating_radio()
+            {
+               form_elements["block style"].checked = false;
+               form_elements["alternating style"].checked = true;
+               form_elements["block style"].dispatchEvent(changed);
+               form_elements["alternating style"].dispatchEvent(changed);
+               form.submit();
+            }
+
+            function block_radio()
+            {
+               form_elements["alternating style"].checked = false;
+               form_elements["block style"].checked = true;
+               form_elements["block style"].dispatchEvent(changed);
+               form_elements["alternating style"].dispatchEvent(changed);
+               form.submit();
+            }
+
+            // TODO: Fix this to just add an event listener to each thing and not treat it as if it's in a for loop
             // Saves form values across refreshes/form submits
             for(let i = 0; i < form_elements.length; i++)
             {
@@ -167,8 +197,9 @@
                // Saves value
                form_elements[i].addEventListener("change", function() {
                   // Since checkboxes don't have a value attribute, must use checked attribute
-                  if (form_elements[i].id == "mult brightnesses checkbox")
-                     localStorage.setItem(form_elements[i].id, this.checked);
+                  if (form_elements[i].type === "checkbox" ||
+                      form_elements[i].type === "radio")
+                        localStorage.setItem(form_elements[i].id, this.checked);
                   else
                      localStorage.setItem(form_elements[i].id, this.value);
                });
@@ -179,9 +210,12 @@
                {
                   // Since localStorage stores values only as strings
                   // Boolean values must be converted from a string back to boolean
-                     // to be assigned to a checkbox checked attribute
-                  if (form_elements[i].id == "mult brightnesses checkbox")
+                     // to be assigned to a checked attribute
+                  if (form_elements[i].type === "checkbox" ||
+                      form_elements[i].type === "radio")
+                  {
                      form_elements[i].checked = (val == 'true');
+                  }
                   else
                      form_elements[i].value = val; 
                }
@@ -207,16 +241,22 @@
             let amount_of_colors = parseInt(localStorage.getItem(form_elements["amount of colors"].id));
             if (amount_of_colors) 
             {
+               // Shows multiple brightness information
                if (amount_of_colors > 1)
                {
                   show("mult brightnesses checkbox label");
                   show("mult brightnesses checkbox");
+                  show("mult color style label");
+                  show("mult color style");
                }
                else
                {
                   hide("mult brightnesses checkbox label");
                   hide("mult brightnesses checkbox");
+                  hide("mult color style label");
+                  hide("mult color style");
                }
+               // Shows colors and brightnesses
                for (let i = 0; i < amount_of_colors; i++)
                {
                   show(colors[i]);
@@ -225,10 +265,6 @@
                      show(brightnesses[i]);
                }
             }
-
-            // Special off call
-            if (form_elements["effect"].value == "Off")
-               hide_all_except("effect label", "effect");
       
             // Animated effects speed slider
             if (animated_effects.includes(form_elements["effect"].value))
@@ -241,6 +277,10 @@
                hide("animated speed slider label");
                hide("animated speed slider");
             }
+
+            // Off call
+            if (form_elements["effect"].value == "Off")
+               hide_all_except("effect label", "effect");
 
             // Random call
             // TODO: This will eventually be taken out when the Random effect is converted into a random button
