@@ -6,6 +6,7 @@ from light_effects import *
 from flask import Flask, render_template, request
 import threading
 import queue
+import os # For CPU temp
 
 # TODO: Move all functions to main_functions.py and import them
 	# Just for cleanliness' sake
@@ -34,12 +35,18 @@ default_form_values = {
 	"brightness0": 50,
 	"brightness1": 50,
 	"brightness2": 50,
+	"brightness3": 50,
+	"brightness4": 50,
+	"brightness5": 50,
+	"brightness6": 50,
+	"brightness7": 50,
+	"brightness8": 50,
+	"brightness9": 50,
 	"animated speed slider": 50
 	}
 
 # Brightness array used to store potential multiple brightnesses
 # So colors can be updated accordingly
-# 10 0.1's just so I don't have to adjust size each time I add a brightness slider
 brightness_arr = [0.1] * 10
 
 def hex_to_grb(hex):
@@ -109,8 +116,6 @@ def action():
 
 		global effect
 		effect = get_value("effect")
-
-		#print(get_value("amount of colors"))
 		
 		# This is a workaround since the checkbox unchecked won't POST data
 			# aka wont show up in request dict and will throw an error
@@ -152,10 +157,12 @@ def action():
 			amount_of_colors_queue.put_nowait(current_color_amount)
 			prev_color_amount = current_color_amount
 
-		return render_template('index.html')
+		pi_temp = get_temp()
+		return render_template('index.html', temp = pi_temp)
 	
 	else:
-		return render_template('index.html')
+		pi_temp = get_temp()
+		return render_template('index.html', temp = pi_temp)
 
 # This is a workaround for form elements that haven't yet been initialized by a form submit causing a key error
 def get_value(element_name):
@@ -204,6 +211,10 @@ def do_effect():
 
 	if effect == "Static alternating colors":
 		alternating_colors(color_arr)
+
+def get_temp():
+	temp = os.popen('vcgencmd measure_temp').readline()
+	return(temp.replace("temp=", "").replace("/n",""))
 
 if __name__ == "__main__":
 	thread.start()
