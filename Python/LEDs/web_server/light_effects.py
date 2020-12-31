@@ -5,7 +5,7 @@ import random
 import math
 
 num_of_leds = 350
-strip = neopixel.NeoPixel(board.D18, num_of_leds, auto_write = False)
+strip = neopixel.NeoPixel(board.D18, num_of_leds, auto_write = False, pixel_order = 'GRB')
 amount_of_colors = 1
 # This controls the time sleep of animated functions
     # Must be a global to accurately store timing data across changes
@@ -29,9 +29,11 @@ def single_color(color_arr, amount_of_colors):
 
     strip.show()
 
+
 def off():
     strip.fill((0, 0, 0))
     strip.show()
+
 
 def alternating_colors(color_arr):
     for i in range(0, num_of_leds, 2):
@@ -60,8 +62,10 @@ def random_colors(brightness_arr, queue_dict):
         else:
             time.sleep(sleep_amount)
 
+
 def animated_alternating_colors(color_arr, queue_dict):
     
+    color_acc = 0 # Color accumulator to animate the effect
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
 
         if not queue_dict["amount of colors queue"].empty():
@@ -73,9 +77,11 @@ def animated_alternating_colors(color_arr, queue_dict):
             for n in range(amount_of_colors):
                 # But only if it's on the strip
                 if (i + n) < num_of_leds:
-                    strip[i + n] = color_arr[n]
+                    strip[i + n] = color_arr[color_acc]
+                # But still adjust the color accumulator no matter what
+                color_acc += 1
+                color_acc %= amount_of_colors
 
-        # TODO: Increment the colors so they're animated
         strip.show()
 
         if not queue_dict["animated effect speed queue"].empty():
@@ -87,6 +93,10 @@ def animated_alternating_colors(color_arr, queue_dict):
             time.sleep(0.07)
         else:
             time.sleep(sleep_amount)
+
+        # Incrementing the accumulator to cause the animation effect
+        color_acc += 1
+        color_acc %= amount_of_colors
 
 
 def twinkle(color_arr, queue_dict):
