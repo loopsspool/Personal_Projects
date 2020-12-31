@@ -197,11 +197,11 @@
                // Saves value
                form_elements[i].addEventListener("change", function() {
                   // Since checkboxes don't have a value attribute, must use checked attribute
-                  if (form_elements[i].type === "checkbox" ||
-                      form_elements[i].type === "radio")
-                        localStorage.setItem(form_elements[i].id, this.checked);
+                  if (this.type === "checkbox" ||
+                      this.type === "radio")
+                        localStorage.setItem(this.id, this.checked);
                   else
-                     localStorage.setItem(form_elements[i].id, this.value);
+                     localStorage.setItem(this.id, this.value);
                });
 
                // Sets value

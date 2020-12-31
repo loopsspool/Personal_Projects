@@ -31,6 +31,7 @@ default_form_values = {
 	"color7": "#FF4614",
 	"color8": "#FF4614",
 	"color9": "#FF4614",
+	"mult color style": "alternating",
 	"mult brightnesses checkbox": False,
 	"brightness0": 50,
 	"brightness1": 50,
@@ -58,16 +59,6 @@ def hex_to_grb(hex):
 	return grb
 
 color_arr = [hex_to_grb("#FF4614")] * 10
-
-# Amount of colors dictionary
-effect_color_amounts = {
-	"Off": 1,
-	"Single color": 1,
-	"Static alternating colors": 2,
-	"Animated alternating colors": 2,
-	"Twinkle": 1,
-	"Random": 1
-}
 
 def looping_effects_analyzer(looping_event, queue_dict, color_arr, brightness_arr):
 	# This wait blocks the below code until a selected looping effect triggers it to run
@@ -128,7 +119,7 @@ def action():
 			has_mult_brightnesses = False
 
 		# This is to debug what keys are actually posted currently to the form
-		#print(request.form)
+		print(request.form)
 
 		get_colors()
 		get_brightnesses()
