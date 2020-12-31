@@ -244,17 +244,13 @@
                // Shows multiple brightness information
                if (amount_of_colors > 1)
                {
-                  show("mult brightnesses checkbox label");
-                  show("mult brightnesses checkbox");
-                  show("mult color style label");
-                  show("mult color style");
+                  show("mult brightnesses checkbox label", "mult brightnesses checkbox",
+                       "mult color style label", "mult color style");
                }
                else
                {
-                  hide("mult brightnesses checkbox label");
-                  hide("mult brightnesses checkbox");
-                  hide("mult color style label");
-                  hide("mult color style");
+                  hide("mult brightnesses checkbox label", "mult brightnesses checkbox",
+                       "mult color style label", "mult color style");
                }
                // Shows colors and brightnesses
                for (let i = 0; i < amount_of_colors; i++)
@@ -268,15 +264,9 @@
       
             // Animated effects speed slider
             if (animated_effects.includes(form_elements["effect"].value))
-            {
-               show("animated speed slider label");
-               show("animated speed slider");
-            }
+               show("animated speed slider label", "animated speed slider");
             else
-            {
-               hide("animated speed slider label");
-               hide("animated speed slider");
-            }
+               hide("animated speed slider label", "animated speed slider");
 
             // Off call
             if (form_elements["effect"].value == "Off")
@@ -294,6 +284,9 @@
                                "animated speed slider",
                               );
             }
+
+            // Temporarily hide
+            hide("mult color style", "mult color style label");
 
          </script>
          
