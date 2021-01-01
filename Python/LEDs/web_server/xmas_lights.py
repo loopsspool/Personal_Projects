@@ -88,14 +88,18 @@ looping_effect_queue = queue.Queue()
 static_effect_queue = queue.Queue()
 amount_of_colors_queue = queue.Queue()
 animated_effect_speed_queue = queue.Queue()
+block_size_queue = queue.Queue()
 queue_dict = {
 	"looping effect queue": looping_effect_queue,
 	"static effect queue": static_effect_queue,
 	"amount of colors queue": amount_of_colors_queue,
-	"animated effect speed queue": animated_effect_speed_queue
+	"animated effect speed queue": animated_effect_speed_queue,
+	"block size queue": block_size_queue
 }
 prev_color_amount = default_form_values["amount of colors"]
 prev_effect_speed = default_form_values["animated speed slider"]
+prev_mult_color_style = default_form_values["mult color style"]
+prev_block_size = default_form_values["block size"]
 thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_event, queue_dict, color_arr, brightness_arr,))
 
 @app.route("/", methods = ["GET", "POST"])
@@ -149,6 +153,30 @@ def action():
 			amount_of_colors_queue.put_nowait(current_color_amount)
 			prev_color_amount = current_color_amount
 
+		current_mult_color_style = get_value("mult color style")
+		current_block_size = get_value("block size")
+		global prev_mult_color_style
+		global prev_block_size
+		# If radio buttons have changed
+		if not current_mult_color_style == prev_mult_color_style:
+			# To alternating, block size = 1
+			if current_mult_color_style == "alternating":
+				prev_block_size = 1
+			# To block, block size = block
+			elif current_mult_color_style == "block":
+				prev_block_size = current_block_size
+
+			block_size_queue.queue.clear()
+			block_size_queue.put_nowait(prev_block_size)
+			prev_mult_color_style = current_mult_color_style
+
+		# Or if the radio was still on the block selection but block size changed
+		elif current_mult_color_style == prev_mult_color_style and current_mult_color_style == "block" and not current_block_size == prev_block_size:
+			block_size_queue.queue.clear()
+			block_size_queue.put_nowait(current_block_size)
+			prev_block_size = current_block_size
+
+
 		pi_temp = get_temp()
 		return render_template('index.html', temp = pi_temp)
 	
@@ -196,7 +224,7 @@ def apply_brightnesses():
 
 def do_effect():
 	if effect == "Color":
-		color(color_arr, int(get_value("amount of colors")), get_value("mult color style"), int(get_value("block size")))
+		color(color_arr, int(get_value("amount of colors")), int(get_value("block size")))
 
 	if effect == "Off":
 		off()

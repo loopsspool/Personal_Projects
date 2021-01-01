@@ -7,6 +7,7 @@ import math
 num_of_leds = 350
 strip = neopixel.NeoPixel(board.D18, num_of_leds, auto_write = False, pixel_order = 'GRB')
 amount_of_colors = 1
+block_size = 1
 # This controls the time sleep of animated functions
     # Must be a global to accurately store timing data across changes
 sleep_amount = 0.5
@@ -24,21 +25,18 @@ def off():
     strip.show()
 
 
-def color(color_arr, amount_of_colors, mult_color_style, block_size):
-    if (amount_of_colors > 1) and (mult_color_style == "block"):
-        pixel_spacing = block_size
-    else:
-        pixel_spacing = 1
+def color(color_arr, amount_of_colors, block_size):
     
     color_acc = 0
-    for i in range(0, num_of_leds, pixel_spacing):
+    for i in range(0, num_of_leds, block_size):
         # Putting in each color
-        color_acc += 1
-        color_acc %= amount_of_colors
-        for ii in range(pixel_spacing):
+        for ii in range(block_size):
             # But only if it's on the strip
             if (i + ii) < num_of_leds:
                 strip[i + ii] = color_arr[color_acc]
+        # Updating the color
+        color_acc += 1
+        color_acc %= amount_of_colors
 
     strip.show()
 
@@ -68,21 +66,28 @@ def animated_alternating_colors(color_arr, queue_dict):
     
     global amount_of_colors
     global sleep_amount
+    global block_size
     color_acc = 0 # Color accumulator to animate the effect
+    starter_acc = 0
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
 
+        # Checking for colors added/removed
         if not queue_dict["amount of colors queue"].empty():
             amount_of_colors = int(queue_dict["amount of colors queue"].get())
 
-        for i in range(0, num_of_leds, amount_of_colors):
+        # Checking for the style of multiple colors
+        if not queue_dict["block size queue"].empty():
+            block_size= int(queue_dict["block size queue"].get())
+
+        for i in range(0, num_of_leds, block_size):
             # Putting in each color
-            for n in range(amount_of_colors):
+            for ii in range(block_size):
                 # But only if it's on the strip
-                if (i + n) < num_of_leds:
-                    strip[i + n] = color_arr[color_acc]
-                # But still adjust the color accumulator no matter what
-                color_acc += 1
-                color_acc %= amount_of_colors
+                if (i + ii) < num_of_leds:
+                    strip[i + ii] = color_arr[color_acc]
+            # Updating the color
+            color_acc += 1
+            color_acc %= amount_of_colors
 
         strip.show()
 
@@ -96,8 +101,10 @@ def animated_alternating_colors(color_arr, queue_dict):
             time.sleep(sleep_amount)
 
         # Incrementing the accumulator to cause the animation effect
-        color_acc += 1
-        color_acc %= amount_of_colors
+        color_acc = 0
+        starter_acc += 1
+        starter_acc %= amount_of_colors
+        color_acc += starter_acc
 
 
 def twinkle(color_arr, queue_dict):
@@ -114,6 +121,7 @@ def twinkle(color_arr, queue_dict):
         brightness_direction[i] = random.random() < 0.5
     
     global amount_of_colors
+    global block_size
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
         # Checking if animated speed slider has changed
         if not queue_dict["animated effect speed queue"].empty():
@@ -127,28 +135,36 @@ def twinkle(color_arr, queue_dict):
         if not queue_dict["amount of colors queue"].empty():
             amount_of_colors = int(queue_dict["amount of colors queue"].get())
 
-        for i in range(0, num_of_leds, amount_of_colors):
-            for n in range(amount_of_colors):
+        # Checking for the style of multiple colors
+        if not queue_dict["block size queue"].empty():
+            block_size= int(queue_dict["block size queue"].get())
+
+        color_acc = 0
+        for i in range(0, num_of_leds, block_size):
+            for ii in range(block_size):
                 # If the pixel is on the strip
-                if (i + n) < num_of_leds:
+                if (i + ii) < num_of_leds:
                         
                     # Checking bounds
-                    if (brightness[i + n] + sleep_amount) >= ceil_brightness:
-                        brightness_direction[i + n] = False
-                    if (brightness[i + n] - sleep_amount) <= sleep_amount:
-                        brightness_direction[i + n] = True
+                    if (brightness[i + ii] + sleep_amount) >= ceil_brightness:
+                        brightness_direction[i + ii] = False
+                    if (brightness[i + ii] - sleep_amount) <= sleep_amount:
+                        brightness_direction[i + ii] = True
                     
                     # Incrementing pixel brightness
-                    if brightness_direction[i + n] == True:
-                        brightness[i + n] += sleep_amount
+                    if brightness_direction[i + ii] == True:
+                        brightness[i + ii] += sleep_amount
                     else:
-                        brightness[i + n] -= sleep_amount
+                        brightness[i + ii] -= sleep_amount
 
                     # Applying brightness and color
-                    g = math.ceil(color_arr[n][0] * brightness[i + n])
-                    r = math.ceil(color_arr[n][1] * brightness[i + n])
-                    b = math.ceil(color_arr[n][2] * brightness[i + n])
-                    strip[i + n] = (g, r, b)
+                    g = math.ceil(color_arr[color_acc][0] * brightness[i + ii])
+                    r = math.ceil(color_arr[color_acc][1] * brightness[i + ii])
+                    b = math.ceil(color_arr[color_acc][2] * brightness[i + ii])
+                    strip[i + ii] = (g, r, b)
+            # Updating the color
+            color_acc += 1
+            color_acc %= amount_of_colors
 
         strip.show()
     
