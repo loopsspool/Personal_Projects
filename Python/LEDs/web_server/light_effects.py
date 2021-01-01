@@ -24,13 +24,21 @@ def off():
     strip.show()
 
 
-def single_color(color_arr, amount_of_colors):
-    for i in range(0, num_of_leds, amount_of_colors):
+def color(color_arr, amount_of_colors, mult_color_style, block_size):
+    if (amount_of_colors > 1) and (mult_color_style == "block"):
+        pixel_spacing = block_size
+    else:
+        pixel_spacing = 1
+    
+    color_acc = 0
+    for i in range(0, num_of_leds, pixel_spacing):
         # Putting in each color
-        for n in range(amount_of_colors):
+        color_acc += 1
+        color_acc %= amount_of_colors
+        for ii in range(pixel_spacing):
             # But only if it's on the strip
-            if (i + n) < num_of_leds:
-                strip[i + n] = color_arr[n]
+            if (i + ii) < num_of_leds:
+                strip[i + ii] = color_arr[color_acc]
 
     strip.show()
 

@@ -54,6 +54,8 @@
                <label for = "alternating">Alternating</label>
                <input type = "radio" name = "mult color style" id = "block style"  value = "block" onclick = "block_radio()">
                <label for = "block">Block</label>
+
+               <input type = "number" defaultValue = 2 value = 2 min = 2 id = "block size" name = "block size" style = "display:none;" onchange = "this.form.submit()">
             </div>
 
          </div>
@@ -246,6 +248,11 @@
                {
                   show("mult brightnesses checkbox label", "mult brightnesses checkbox",
                        "mult color style label", "mult color style");
+                  if (form_elements["block style"].checked)
+                  {
+                     show("block size");
+                     document.getElementById("block size").max = Math.ceil(350/amount_of_colors);
+                  }
                }
                else
                {
@@ -286,7 +293,7 @@
             }
 
             // Temporarily hide
-            hide("mult color style", "mult color style label");
+            //hide("mult color style", "mult color style label");
 
          </script>
          

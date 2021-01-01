@@ -32,6 +32,7 @@ default_form_values = {
 	"color8": "#FF4614",
 	"color9": "#FF4614",
 	"mult color style": "alternating",
+	"block size": 1,
 	"mult brightnesses checkbox": False,
 	"brightness0": 50,
 	"brightness1": 50,
@@ -119,7 +120,7 @@ def action():
 			has_mult_brightnesses = False
 
 		# This is to debug what keys are actually posted currently to the form
-		print(request.form)
+		#print(request.form)
 
 		get_colors()
 		get_brightnesses()
@@ -195,7 +196,7 @@ def apply_brightnesses():
 
 def do_effect():
 	if effect == "Color":
-		single_color(color_arr, int(get_value("amount of colors")))
+		color(color_arr, int(get_value("amount of colors")), get_value("mult color style"), int(get_value("block size")))
 
 	if effect == "Off":
 		off()
