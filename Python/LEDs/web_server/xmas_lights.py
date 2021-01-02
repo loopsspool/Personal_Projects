@@ -7,11 +7,13 @@ from flask import Flask, render_template, request
 import threading
 import queue
 import os # For CPU temp
+import datetime
 
 # TODO: Move all functions to main_functions.py and import them
 	# Just for cleanliness' sake
 
 app = Flask(__name__, template_folder = '', static_folder = '', static_url_path = '')
+is_off_event = threading.Event()
 
 # Workaround for form elements not yet being initialized into form.request
 # Won't work with HTML onload because all code files are validated first
@@ -44,7 +46,9 @@ default_form_values = {
 	"brightness7": 50,
 	"brightness8": 50,
 	"brightness9": 50,
-	"animated speed slider": 50
+	"animated speed slider": 50,
+	"on time": 6,
+	"off time": 2
 	}
 
 # Brightness array used to store potential multiple brightnesses
@@ -60,6 +64,48 @@ def hex_to_grb(hex):
 	return grb
 
 color_arr = [hex_to_grb("#FF4614")] * 10
+
+def check_if_off(off, on, x):
+    if off <= on:
+        return off <= x < on
+    else:
+        return off < x or x <= on
+
+def time_check(on_time_queue, off_time_queue):
+	on_time = get_value("on time")
+	off_time = get_value("off time")
+	is_off = False
+	turning_on = False
+
+	while (True):
+		if not on_time_queue.empty():
+			on_time = int(on_time_queue.get())
+		if not off_time_queue.empty():
+			off_time = int(off_time_queue.get())
+
+		current_effect = get_value("effect")
+		is_off = check_if_off(off_time, on_time, datetime.datetime.now().hour)
+
+		if is_off:
+			is_off_event.set()
+			turning_on = False
+			if current_effect in looping_effects:
+				looping_event.clear()
+				static_effect_queue.put_nowait("bogus") # This is just to pull animated effects out of their inner while loop
+			off()
+		elif is_off == False and turning_on == False:
+			is_off_event.clear()
+			turning_on = True
+			if current_effect in looping_effects:
+				static_effect_queue.queue.clear()
+				looping_effect_queue.put_nowait(effect)
+				looping_event.set()
+			else:
+				do_effect()
+
+		time.sleep(10)	# Checks every 10 minutes 600
+
+		
 
 def looping_effects_analyzer(looping_event, queue_dict, color_arr, brightness_arr):
 	# This wait blocks the below code until a selected looping effect triggers it to run
@@ -96,11 +142,16 @@ queue_dict = {
 	"animated effect speed queue": animated_effect_speed_queue,
 	"block size queue": block_size_queue
 }
+on_time_queue = queue.Queue()
+off_time_queue = queue.Queue()
+prev_on_time = default_form_values["on time"]
+prev_off_time = default_form_values["off time"]
 prev_color_amount = default_form_values["amount of colors"]
 prev_effect_speed = default_form_values["animated speed slider"]
 prev_mult_color_style = default_form_values["mult color style"]
 prev_block_size = default_form_values["block size"]
-thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_event, queue_dict, color_arr, brightness_arr,))
+animated_effect_thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_event, queue_dict, color_arr, brightness_arr,))
+time_check_thread = threading.Thread(target = time_check, name = "time check thread", args = (on_time_queue, off_time_queue,), daemon = False)
 
 @app.route("/", methods = ["GET", "POST"])
 def action():
@@ -134,7 +185,8 @@ def action():
 		if effect in looping_effects:
 			static_effect_queue.queue.clear()
 			looping_effect_queue.put_nowait(effect)
-			looping_event.set()
+			if not is_off_event.is_set():
+				looping_event.set()
 		else:
 			looping_event.clear()
 			static_effect_queue.put(effect)
@@ -169,13 +221,26 @@ def action():
 			block_size_queue.queue.clear()
 			block_size_queue.put_nowait(prev_block_size)
 			prev_mult_color_style = current_mult_color_style
-
 		# Or if the radio was still on the block selection but block size changed
 		elif current_mult_color_style == prev_mult_color_style and current_mult_color_style == "block" and not current_block_size == prev_block_size:
 			block_size_queue.queue.clear()
 			block_size_queue.put_nowait(current_block_size)
 			prev_block_size = current_block_size
 
+		current_on_time = get_value("on time")
+		current_off_time = get_value("off time")
+		global prev_on_time
+		global prev_off_time
+		if not current_on_time == prev_on_time:
+			on_time_queue.queue.clear()
+			on_time_queue.put_nowait(current_on_time)
+			prev_on_time = current_on_time
+		if not current_off_time == prev_off_time:
+			off_time_queue.queue.clear()
+			off_time_queue.put_nowait(current_off_time)
+			prev_off_time = current_off_time
+
+		#print("thread alive:", threading.enumerate())
 
 		pi_temp = get_temp()
 		return render_template('index.html', temp = pi_temp)
@@ -223,6 +288,8 @@ def apply_brightnesses():
 		color_arr[i] = (g, r, b)
 
 def do_effect():
+	effect = get_value("effect")
+
 	if effect == "Color":
 		color(color_arr, int(get_value("amount of colors")), int(get_value("block size")))
 
@@ -234,5 +301,8 @@ def get_temp():
 	return(temp.replace("temp=", "").replace("/n",""))
 
 if __name__ == "__main__":
-	thread.start()
-	app.run(host='0.0.0.0', port=80, debug = True, threaded = True)
+	if not animated_effect_thread.is_alive():
+		animated_effect_thread.start()
+	if not time_check_thread.is_alive():
+		time_check_thread.start()
+	app.run(host='0.0.0.0', port=80, debug = True, threaded = True, use_reloader = False)	# Use reloader set to false to prevent multiple threads being created

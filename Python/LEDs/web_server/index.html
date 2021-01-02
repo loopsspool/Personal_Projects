@@ -87,7 +87,16 @@
             <input type = "range" min = "0" max = "100" value = "50" name = "animated speed slider" id = "animated speed slider" style = "display:none;" onchange="this.form.submit()">
          </div>
          <br>
-         <h4>Raspberry Pi temperature is: {{ temp }}</h4>
+         <h3 id = "timer notice" name = "timer notice" style = "display:none;">Lights are currently sleeping. Change the timer times to wake them up!</h3>
+         <br>
+         <label for = "timer" id = "timer label" name = "timer label">Timer:</label>
+         <br>
+         <!-- Number type because safari stupidly doesn't support time input -->
+         On hour: <input type = "number" id = "on time" name = "on time" min = 0 max = 23 defaultValue = 6 value = 6 onchange="this.form.submit()">
+         Off hour: <input type = "number" id = "off time" name = "off time" min = 0 max = 23 defaultValue = 2 value = 2 onchange="this.form.submit()">
+         <br>
+         <br>
+         Raspberry Pi temperature is: {{ temp }}
 
 
          <script>
@@ -292,8 +301,27 @@
                               );
             }
 
-            // Temporarily hide
-            //hide("mult color style", "mult color style label");
+
+            var current_hour = new Date().getHours();
+            let off_time = parseInt(localStorage.getItem(form_elements["off time"].id));
+            let on_time = parseInt(localStorage.getItem(form_elements["on time"].id));
+            if (on_time && off_time)
+            {
+               currently_off_time = false;
+               if (off_time <= on_time)
+                  currently_off_time = (off_time <= current_hour) && (current_hour < on_time);
+               else
+                  currently_off_time = (off_time < current_hour) || (current_hour <= on_time);
+
+               if (currently_off_time)
+               {
+                  hide_all_except("timer label", "on time", "off time");
+                  document.getElementsByTagName("h3")[0].style = "display:inline;";
+               }
+               else
+                  document.getElementsByTagName("h3")[0].style = "display:none;";;
+            }
+            show("timer label", "on time", "off time");
 
          </script>
          
