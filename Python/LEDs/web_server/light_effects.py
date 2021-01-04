@@ -7,7 +7,8 @@ import math
 num_of_leds = 350
 strip = neopixel.NeoPixel(board.D18, num_of_leds, auto_write = False, pixel_order = 'GRB')
 amount_of_colors = 1
-block_size = 1
+mult_color_style = "alternating"
+has_mult_block_sizes = False
 # This controls the time sleep of animated functions
     # Must be a global to accurately store timing data across changes
 sleep_amount = 0.5
@@ -25,18 +26,30 @@ def off():
     strip.show()
 
 
-def color(color_arr, amount_of_colors, block_size):
+def color(color_arr, amount_of_colors, mult_color_style, has_mult_block_sizes, block_size_arr):
     
     color_acc = 0
-    for i in range(0, num_of_leds, block_size):
+    i = 0
+    # Must be in while loop for dynamic stepping of iterator
+    while (i < num_of_leds):
+        # Setting block size
+        block_size = 1 # For alternating
+        if mult_color_style == "block":
+            if has_mult_block_sizes:
+                block_size = block_size_arr[color_acc]
+            else:
+                block_size = block_size_arr[0]
         # Putting in each color
         for ii in range(block_size):
             # But only if it's on the strip
             if (i + ii) < num_of_leds:
                 strip[i + ii] = color_arr[color_acc]
+        # Updating the iterator
+        i += block_size
         # Updating the color
         color_acc += 1
         color_acc %= amount_of_colors
+        
 
     strip.show()
 
@@ -62,11 +75,12 @@ def random_colors(brightness_arr, queue_dict):
             time.sleep(sleep_amount)
 
 
-def animated_alternating_colors(color_arr, queue_dict):
+def animated_alternating_colors(color_arr, block_size_arr, queue_dict):
     
     global amount_of_colors
     global sleep_amount
-    global block_size
+    global mult_color_style
+    global has_mult_block_sizes
     color_acc = 0 # Color accumulator to animate the effect
     starter_acc = 0
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
@@ -76,15 +90,30 @@ def animated_alternating_colors(color_arr, queue_dict):
             amount_of_colors = int(queue_dict["amount of colors queue"].get())
 
         # Checking for the style of multiple colors
-        if not queue_dict["block size queue"].empty():
-            block_size= int(queue_dict["block size queue"].get())
+        if not queue_dict["mult color style queue"].empty():
+            mult_color_style = queue_dict["mult color style queue"].get()
 
-        for i in range(0, num_of_leds, block_size):
+        # Checking if it has multiple block sizes
+        if not queue_dict["has mult block sizes queue"].empty():
+            has_mult_block_sizes = queue_dict["has mult block sizes queue"].get()
+
+        i = 0
+        # Must be in while loop for dynamic stepping of iterator
+        while (i < num_of_leds):
+            # Setting block size
+            block_size = 1 # For alternating
+            if mult_color_style == "block":
+                if has_mult_block_sizes:
+                    block_size = block_size_arr[color_acc]
+                else:
+                    block_size = block_size_arr[0]
             # Putting in each color
             for ii in range(block_size):
                 # But only if it's on the strip
                 if (i + ii) < num_of_leds:
                     strip[i + ii] = color_arr[color_acc]
+            # Updating the iterator
+            i += block_size
             # Updating the color
             color_acc += 1
             color_acc %= amount_of_colors
@@ -107,7 +136,7 @@ def animated_alternating_colors(color_arr, queue_dict):
         color_acc += starter_acc
 
 
-def twinkle(color_arr, queue_dict):
+def twinkle(color_arr, block_size_arr, queue_dict):
     brightness = [0] * num_of_leds
     brightness_direction = [0] * num_of_leds
     # Adjusting slider to an appropriate range for twinkle
@@ -121,7 +150,8 @@ def twinkle(color_arr, queue_dict):
         brightness_direction[i] = random.random() < 0.5
     
     global amount_of_colors
-    global block_size
+    global mult_color_style
+    global has_mult_block_sizes
     while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
         # Checking if animated speed slider has changed
         if not queue_dict["animated effect speed queue"].empty():
@@ -136,15 +166,27 @@ def twinkle(color_arr, queue_dict):
             amount_of_colors = int(queue_dict["amount of colors queue"].get())
 
         # Checking for the style of multiple colors
-        if not queue_dict["block size queue"].empty():
-            block_size= int(queue_dict["block size queue"].get())
+        if not queue_dict["mult color style queue"].empty():
+            mult_color_style = queue_dict["mult color style queue"].get()
+
+        # Checking if it has multiple block sizes
+        if not queue_dict["has mult block sizes queue"].empty():
+            has_mult_block_sizes = queue_dict["has mult block sizes queue"].get()
 
         color_acc = 0
-        for i in range(0, num_of_leds, block_size):
+        i = 0
+        while (i < num_of_leds):
+            # Setting block size
+            block_size = 1 # For alternating
+            if mult_color_style == "block":
+                if has_mult_block_sizes:
+                    block_size = block_size_arr[color_acc]
+                else:
+                    block_size = block_size_arr[0]
+            # Actually doing the colors
             for ii in range(block_size):
                 # If the pixel is on the strip
                 if (i + ii) < num_of_leds:
-                        
                     # Checking bounds
                     if (brightness[i + ii] + sleep_amount) >= ceil_brightness:
                         brightness_direction[i + ii] = False
@@ -162,6 +204,8 @@ def twinkle(color_arr, queue_dict):
                     r = math.ceil(color_arr[color_acc][1] * brightness[i + ii])
                     b = math.ceil(color_arr[color_acc][2] * brightness[i + ii])
                     strip[i + ii] = (g, r, b)
+            # Updating the accumulator
+            i += block_size
             # Updating the color
             color_acc += 1
             color_acc %= amount_of_colors

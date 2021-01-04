@@ -34,7 +34,17 @@ default_form_values = {
 	"color8": "#FF4614",
 	"color9": "#FF4614",
 	"mult color style": "alternating",
-	"block size": 1,
+	"mult block sizes checkbox": False,
+	"block size 0": 1,
+	"block size 1": 1,
+	"block size 2": 1,
+	"block size 3": 1,
+	"block size 4": 1,
+	"block size 5": 1,
+	"block size 6": 1,
+	"block size 7": 1,
+	"block size 8": 1,
+	"block size 9": 1,
 	"mult brightnesses checkbox": False,
 	"brightness0": 50,
 	"brightness1": 50,
@@ -54,6 +64,7 @@ default_form_values = {
 # Brightness array used to store potential multiple brightnesses
 # So colors can be updated accordingly
 brightness_arr = [0.1] * 10
+block_size_arr = [1] * 10
 
 def hex_to_grb(hex):
 	# Courtesy of: https://stackoverflow.com/questions/29643352/converting-hex-to-rgb-value-in-python
@@ -103,7 +114,7 @@ def time_check(on_time_queue, off_time_queue):
 			else:
 				do_effect()
 
-		time.sleep(10)	# Checks every 10 minutes 600
+		time.sleep(600)	# Checks every 10 minutes
 
 		
 
@@ -123,10 +134,10 @@ def looping_effects_analyzer(looping_event, queue_dict, color_arr, brightness_ar
 			random_colors(brightness_arr, queue_dict)
 
 		if looping_effect_name == "Animated alternating colors":
-			animated_alternating_colors(color_arr, queue_dict)
+			animated_alternating_colors(color_arr, block_size_arr, queue_dict)
 
 		if looping_effect_name == "Twinkle":
-			twinkle(color_arr, queue_dict)
+			twinkle(color_arr, block_size_arr, queue_dict)
 
 looping_effects = ["Random", "Animated alternating colors", "Twinkle"]
 looping_event = threading.Event()
@@ -134,13 +145,15 @@ looping_effect_queue = queue.Queue()
 static_effect_queue = queue.Queue()
 amount_of_colors_queue = queue.Queue()
 animated_effect_speed_queue = queue.Queue()
-block_size_queue = queue.Queue()
+mult_color_style_queue = queue.Queue()
+has_mult_block_sizes_queue = queue.Queue()
 queue_dict = {
 	"looping effect queue": looping_effect_queue,
 	"static effect queue": static_effect_queue,
 	"amount of colors queue": amount_of_colors_queue,
 	"animated effect speed queue": animated_effect_speed_queue,
-	"block size queue": block_size_queue
+	"mult color style queue": mult_color_style_queue,
+	"has mult block sizes queue": has_mult_block_sizes_queue
 }
 on_time_queue = queue.Queue()
 off_time_queue = queue.Queue()
@@ -149,7 +162,8 @@ prev_off_time = default_form_values["off time"]
 prev_color_amount = default_form_values["amount of colors"]
 prev_effect_speed = default_form_values["animated speed slider"]
 prev_mult_color_style = default_form_values["mult color style"]
-prev_block_size = default_form_values["block size"]
+prev_has_mult_block_sizes = default_form_values["mult block sizes checkbox"]
+# prev_block_size = default_form_values["block size"]
 animated_effect_thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_event, queue_dict, color_arr, brightness_arr,))
 time_check_thread = threading.Thread(target = time_check, name = "time check thread", args = (on_time_queue, off_time_queue,), daemon = False)
 
@@ -164,15 +178,10 @@ def action():
 		global effect
 		effect = get_value("effect")
 		
-		# This is a workaround since the checkbox unchecked won't POST data
-			# aka wont show up in request dict and will throw an error
-		# SO KEEP THIS AS REQUEST.FORM, NOT GET_VALUE
 		global has_mult_brightnesses
-		try:
-			# Converts string "True" to boolean True
-			has_mult_brightnesses = (request.form["mult brightnesses checkbox"] == "True")
-		except:
-			has_mult_brightnesses = False
+		global has_mult_block_sizes
+		has_mult_brightnesses = get_checkbox_value("mult brightnesses checkbox")
+		has_mult_block_sizes = get_checkbox_value("mult block sizes checkbox")
 
 		# This is to debug what keys are actually posted currently to the form
 		#print(request.form)
@@ -180,11 +189,15 @@ def action():
 		get_colors()
 		get_brightnesses()
 		apply_brightnesses()
-		do_effect()
+		get_block_sizes()
+		# Prevents effect change causing lights to temporarily be on when they should be off, according to the timer
+		if not is_off_event.is_set():
+			do_effect()
 
 		if effect in looping_effects:
 			static_effect_queue.queue.clear()
 			looping_effect_queue.put_nowait(effect)
+			# Prevents effect change causing lights to temporarily be on when they should be off, according to the timer
 			if not is_off_event.is_set():
 				looping_event.set()
 		else:
@@ -206,26 +219,21 @@ def action():
 			prev_color_amount = current_color_amount
 
 		current_mult_color_style = get_value("mult color style")
-		current_block_size = get_value("block size")
+		# current_block_size = get_value("block size")
 		global prev_mult_color_style
-		global prev_block_size
+		# global prev_block_size
 		# If radio buttons have changed
 		if not current_mult_color_style == prev_mult_color_style:
-			# To alternating, block size = 1
-			if current_mult_color_style == "alternating":
-				prev_block_size = 1
-			# To block, block size = block
-			elif current_mult_color_style == "block":
-				prev_block_size = current_block_size
-
-			block_size_queue.queue.clear()
-			block_size_queue.put_nowait(prev_block_size)
+			mult_color_style_queue.queue.clear()
+			mult_color_style_queue.put_nowait(current_mult_color_style)
 			prev_mult_color_style = current_mult_color_style
-		# Or if the radio was still on the block selection but block size changed
-		elif current_mult_color_style == prev_mult_color_style and current_mult_color_style == "block" and not current_block_size == prev_block_size:
-			block_size_queue.queue.clear()
-			block_size_queue.put_nowait(current_block_size)
-			prev_block_size = current_block_size
+
+		global prev_has_mult_block_sizes
+		# has_mult_block_sizes defined as global at its declaration
+		if not prev_has_mult_block_sizes == has_mult_block_sizes:
+			has_mult_block_sizes_queue.queue.clear()
+			has_mult_block_sizes_queue.put_nowait(has_mult_block_sizes)
+			prev_has_mult_block_sizes = has_mult_block_sizes
 
 		current_on_time = get_value("on time")
 		current_off_time = get_value("off time")
@@ -240,14 +248,26 @@ def action():
 			off_time_queue.put_nowait(current_off_time)
 			prev_off_time = current_off_time
 
-		#print("thread alive:", threading.enumerate())
-
 		pi_temp = get_temp()
 		return render_template('index.html', temp = pi_temp)
 	
 	else:
 		pi_temp = get_temp()
 		return render_template('index.html', temp = pi_temp)
+
+
+def get_checkbox_value(checkbox_id):
+	# This is a workaround since the checkbox unchecked won't POST data
+		# aka wont show up in request dict and will throw an error
+	# SO KEEP THIS AS REQUEST.FORM, NOT GET_VALUE
+	checkbox_value = False
+	try:
+		# Converts string "True" to boolean True
+		checkbox_value = (form_data[checkbox_id] == "True")
+	except:
+		checkbox_value = False
+	return checkbox_value
+
 
 # This is a workaround for form elements that haven't yet been initialized by a form submit causing a key error
 def get_value(element_name):
@@ -287,11 +307,21 @@ def apply_brightnesses():
 		b = color_arr[i][2] * brightness_arr[b_index]
 		color_arr[i] = (g, r, b)
 
+def get_block_sizes():
+	if has_mult_block_sizes:
+		for i in range(int(get_value("amount of colors"))):
+			# Keep the space after size!
+			bs = "block size "
+			bs += str(i)
+			block_size_arr[i] = int(get_value(bs))
+	else:
+		block_size_arr[0] = int(get_value("block size 0"))
+
 def do_effect():
 	effect = get_value("effect")
 
 	if effect == "Color":
-		color(color_arr, int(get_value("amount of colors")), int(get_value("block size")))
+		color(color_arr, int(get_value("amount of colors")), get_value("mult color style"), has_mult_block_sizes, block_size_arr)
 
 	if effect == "Off":
 		off()

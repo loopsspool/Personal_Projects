@@ -55,7 +55,23 @@
                <input type = "radio" name = "mult color style" id = "block style"  value = "block" onclick = "block_radio()">
                <label for = "block">Block</label>
 
-               <input type = "number" defaultValue = 2 value = 2 min = 2 id = "block size" name = "block size" style = "display:none;" onchange = "this.form.submit()">
+               <br>
+
+               <!-- Value for checkboxes is what's submitted when checked, not it's current state -->
+               <label for="mult block sizes checkbox" id="mult block sizes checkbox label" name="mult block sizes checkbox label">Enable multiple block sizes</label>
+               <input type = "checkbox" id="mult block sizes checkbox" name="mult block sizes checkbox" value="True" style="display:none;" onchange="this.form.submit()">
+               <div id = "block sizes" name = "block sizes">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 0" name = "block size 0" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 1" name = "block size 1" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 2" name = "block size 2" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 3" name = "block size 3" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 4" name = "block size 4" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 5" name = "block size 5" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 6" name = "block size 6" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 7" name = "block size 7" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 8" name = "block size 8" style = "display:none;" onchange = "this.form.submit()">
+                  <input type = "number" defaultValue = 2 value = 2 min = 1 id = "block size 9" name = "block size 9" style = "display:none;" onchange = "this.form.submit()">
+               </div>
             </div>
 
          </div>
@@ -103,6 +119,7 @@
             const form = document.getElementById("led settings");
             const form_elements = form.elements; // HTMLFormControlsCollection
             const colors = document.querySelectorAll('input[type=color]'); // NodeList
+            const block_sizes = document.getElementById('block sizes').children;  // HTMLCollection
             const brightnesses = document.getElementById('brightnesses').children;  // HTMLCollection
             const labels = document.getElementsByTagName('LABEL'); // HTMLCollection
 
@@ -182,6 +199,7 @@
                form_elements["alternating style"].checked = true;
                form_elements["block style"].dispatchEvent(changed);
                form_elements["alternating style"].dispatchEvent(changed);
+               //hide("mult block sizes checkbox label", "mult block sizes checkbox");
                form.submit();
             }
 
@@ -191,6 +209,7 @@
                form_elements["block style"].checked = true;
                form_elements["block style"].dispatchEvent(changed);
                form_elements["alternating style"].dispatchEvent(changed);
+               //show("mult block sizes checkbox label", "mult block sizes checkbox");
                form.submit();
             }
 
@@ -243,6 +262,7 @@
             ];
 
             var has_mult_brightnesses = form_elements["mult brightnesses checkbox"].checked;
+            var has_mult_block_sizes = form_elements["mult block sizes checkbox"].checked;
 
             // Shows number of colors and brightnesses
             // Yet another workaround...
@@ -250,23 +270,52 @@
             // Using localStorage because of accessing the value of amount of colors wasn't working
                // Something to do with value element and value property/ value = defaultValue/ etc
             let amount_of_colors = parseInt(localStorage.getItem(form_elements["amount of colors"].id));
+            // TODO: Put the mult block sizes in its own little thing
             if (amount_of_colors) 
             {
-               // Shows multiple brightness information
                if (amount_of_colors > 1)
                {
+                  // Shows multiple brightness and multiple color style information
                   show("mult brightnesses checkbox label", "mult brightnesses checkbox",
-                       "mult color style label", "mult color style");
+                       "mult color style label", "mult color style",
+                       "mult block sizes checkbox label", "mult block sizes checkbox");
+
+                  // Shows single or multiple block sizes
                   if (form_elements["block style"].checked)
                   {
-                     show("block size");
-                     document.getElementById("block size").max = Math.ceil(350/amount_of_colors);
+                     show("block size 0");
+                     document.getElementById("block size 0").max = Math.ceil(350/amount_of_colors);
+                     if (has_mult_block_sizes)
+                     {
+                        for (let i = 1; i < amount_of_colors; i++)
+                        {
+                           show(block_sizes[i]);
+                           block_sizes[i].max = Math.ceil(350/amount_of_colors);
+                        }
+                     }
+                     else
+                     {
+                        for (let i = 1; i < amount_of_colors; i++)
+                           hide(block_sizes[i]);
+                     }
+                  }
+                  else
+                  {
+                     hide("mult block sizes checkbox label", "mult block sizes checkbox");
+                     for (let i = 1; i < amount_of_colors; i++)
+                        hide(block_sizes[i]);
                   }
                }
+               // If amount of colors == 1
                else
                {
+                  // Hide all the stuff depending on multiple colors
                   hide("mult brightnesses checkbox label", "mult brightnesses checkbox",
-                       "mult color style label", "mult color style");
+                       "mult color style label", "mult color style",
+                       "mult block sizes checkbox label", "mult block sizes checkbox");
+                  
+                  for (let i = 0; i < amount_of_colors; i++)
+                     hide(block_sizes[i]);
                }
                // Shows colors and brightnesses
                for (let i = 0; i < amount_of_colors; i++)
