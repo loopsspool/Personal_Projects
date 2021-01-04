@@ -13,11 +13,6 @@ has_mult_block_sizes = False
     # Must be a global to accurately store timing data across changes
 sleep_amount = 0.5
 
-def set_sleep_amount(queue_dict):
-    global sleep_amount
-    # 1 - to make slider go from slow to fast
-    sleep_amount = 1 - float(queue_dict["animated effect speed queue"].get())/100
-
 
 ############################## STATIC FUNCTIONS ##############################
 
@@ -27,7 +22,6 @@ def off():
 
 
 def color(color_arr, amount_of_colors, mult_color_style, has_mult_block_sizes, block_size_arr):
-    
     color_acc = 0
     i = 0
     # Must be in while loop for dynamic stepping of iterator
@@ -57,9 +51,8 @@ def color(color_arr, amount_of_colors, mult_color_style, has_mult_block_sizes, b
 ############################## ANIMATED FUNCTIONS ##############################
 
 def random_colors(brightness_arr, queue_dict):
-    
     global sleep_amount
-    while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
+    while other_effect_isnt_chosen(queue_dict):
         for i in range (num_of_leds):
             strip[i] = (random.randrange(0, 255) * brightness_arr[0], random.randrange(0, 255) * brightness_arr[0], random.randrange(0, 255) * brightness_arr[0])
         strip.show()
@@ -76,26 +69,10 @@ def random_colors(brightness_arr, queue_dict):
 
 
 def animated_alternating_colors(color_arr, block_size_arr, queue_dict):
-    
-    global amount_of_colors
-    global sleep_amount
-    global mult_color_style
-    global has_mult_block_sizes
     color_acc = 0 # Color accumulator to animate the effect
     starter_acc = 0
-    while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
-
-        # Checking for colors added/removed
-        if not queue_dict["amount of colors queue"].empty():
-            amount_of_colors = int(queue_dict["amount of colors queue"].get())
-
-        # Checking for the style of multiple colors
-        if not queue_dict["mult color style queue"].empty():
-            mult_color_style = queue_dict["mult color style queue"].get()
-
-        # Checking if it has multiple block sizes
-        if not queue_dict["has mult block sizes queue"].empty():
-            has_mult_block_sizes = queue_dict["has mult block sizes queue"].get()
+    while other_effect_isnt_chosen(queue_dict):
+        check_queues(queue_dict)
 
         i = 0
         # Must be in while loop for dynamic stepping of iterator
@@ -120,16 +97,13 @@ def animated_alternating_colors(color_arr, block_size_arr, queue_dict):
 
         strip.show()
 
-        if not queue_dict["animated effect speed queue"].empty():
-            set_sleep_amount(queue_dict)
-
         # Prevents the change of colors occuring so fast the strip appears one color
         if (sleep_amount < 0.07):
             time.sleep(0.07)
         else:
             time.sleep(sleep_amount)
 
-        # Incrementing the accumulator to cause the animation effect
+        # Incrementing the color accumulator to cause the animation effect
         color_acc = 0
         starter_acc += 1
         starter_acc %= amount_of_colors
@@ -139,39 +113,32 @@ def animated_alternating_colors(color_arr, block_size_arr, queue_dict):
 def twinkle(color_arr, block_size_arr, queue_dict):
     brightness = [0] * num_of_leds
     brightness_direction = [0] * num_of_leds
-    # Adjusting slider to an appropriate range for twinkle
+    # Adjusting current slider position to an appropriate range for twinkle
     global sleep_amount
-    sleep_amount = (1 - sleep_amount)/10
-    ceil_brightness = 0.8
+    twinkle_v = (1 - sleep_amount)/15
+    prev_sleep_amount = sleep_amount
+    max_brightness = 1
     
     # Initializing brightnesses and brightness direction
     for i in range(num_of_leds):
-        brightness[i] = random.uniform(.1, ceil_brightness)
+        brightness[i] = random.uniform(.1, max_brightness)
         brightness_direction[i] = random.random() < 0.5
-    
-    global amount_of_colors
-    global mult_color_style
-    global has_mult_block_sizes
-    while queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty():
+
+    while other_effect_isnt_chosen(queue_dict):
+        check_queues(queue_dict)
+
         # Checking if animated speed slider has changed
-        if not queue_dict["animated effect speed queue"].empty():
-            sleep_amount = float(queue_dict["animated effect speed queue"].get())/1000
+        current_sleep_amount = sleep_amount
+        if not current_sleep_amount == prev_sleep_amount:
+            twinkle_v = (1 - current_sleep_amount)/15
+            prev_sleep_amount = current_sleep_amount
 
         # So twinkle isn't so incredibly slow and "pixelated"
-        if (sleep_amount < 0.008):
-            sleep_amount = 0.008
-
-        # Checking if amount of colors has changed
-        if not queue_dict["amount of colors queue"].empty():
-            amount_of_colors = int(queue_dict["amount of colors queue"].get())
-
-        # Checking for the style of multiple colors
-        if not queue_dict["mult color style queue"].empty():
-            mult_color_style = queue_dict["mult color style queue"].get()
-
-        # Checking if it has multiple block sizes
-        if not queue_dict["has mult block sizes queue"].empty():
-            has_mult_block_sizes = queue_dict["has mult block sizes queue"].get()
+        if twinkle_v < 0.008:
+            twinkle_v = 0.008
+        # Or too fast it diminishes the effect
+        if twinkle_v > 0.05:
+            twinkle_v = 0.05
 
         color_acc = 0
         i = 0
@@ -188,16 +155,16 @@ def twinkle(color_arr, block_size_arr, queue_dict):
                 # If the pixel is on the strip
                 if (i + ii) < num_of_leds:
                     # Checking bounds
-                    if (brightness[i + ii] + sleep_amount) >= ceil_brightness:
+                    if (brightness[i + ii] + twinkle_v) >= max_brightness:
                         brightness_direction[i + ii] = False
-                    if (brightness[i + ii] - sleep_amount) <= sleep_amount:
+                    if (brightness[i + ii] - twinkle_v) <= 0:
                         brightness_direction[i + ii] = True
                     
                     # Incrementing pixel brightness
                     if brightness_direction[i + ii] == True:
-                        brightness[i + ii] += sleep_amount
+                        brightness[i + ii] += twinkle_v
                     else:
-                        brightness[i + ii] -= sleep_amount
+                        brightness[i + ii] -= twinkle_v
 
                     # Applying brightness and color
                     g = math.ceil(color_arr[color_acc][0] * brightness[i + ii])
@@ -211,7 +178,33 @@ def twinkle(color_arr, block_size_arr, queue_dict):
             color_acc %= amount_of_colors
 
         strip.show()
-    
-    # Readjusting sleep_amount to an appropriate range for other animated functions
-    # Happens when the while loop is broken out of
-    sleep_amount = (1 - (sleep_amount * 10))
+
+
+def other_effect_isnt_chosen(queue_dict):
+    return (queue_dict["looping effect queue"].empty() and queue_dict["static effect queue"].empty())
+
+def check_queues(queue_dict):
+    # Checking for colors added/removed
+    global amount_of_colors
+    if not queue_dict["amount of colors queue"].empty():
+        amount_of_colors = int(queue_dict["amount of colors queue"].get())
+
+    # Checking for the style of multiple colors
+    global mult_color_style
+    if not queue_dict["mult color style queue"].empty():
+        mult_color_style = queue_dict["mult color style queue"].get()
+
+    # Checking if it has multiple block sizes
+    global has_mult_block_sizes
+    if not queue_dict["has mult block sizes queue"].empty():
+        has_mult_block_sizes = queue_dict["has mult block sizes queue"].get()
+
+    # Checking if animated speed has changed
+    global sleep_amount
+    if not queue_dict["animated effect speed queue"].empty():
+            set_sleep_amount(queue_dict)
+
+def set_sleep_amount(queue_dict):
+    global sleep_amount
+    # 1 - to make slider go from slow to fast
+    sleep_amount = 1 - float(queue_dict["animated effect speed queue"].get())/100
