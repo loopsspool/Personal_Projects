@@ -3,6 +3,7 @@ import neopixel
 import time
 import random
 import math
+import colorsys
 
 num_of_leds = 350
 strip = neopixel.NeoPixel(board.D18, num_of_leds, auto_write = False, pixel_order = 'GRB')
@@ -109,6 +110,45 @@ def animated_alternating_colors(color_arr, block_size_arr, queue_dict):
         starter_acc %= amount_of_colors
         color_acc += starter_acc
 
+def color_fade(color_arr, queue_dict):
+    color_acc = 0   # Keeps track of current color
+    is_adding = False   # Checks whether it should add or subtract accumulator, whichever is closest
+    current_color_hsv = grb_to_hsv(color_arr[color_acc])
+
+    # TODO: Also needs to account for saturation (which would be a difference divided by step)
+        # Factor in case of current color saturation being lower than next colors saturation
+    while other_effect_isnt_chosen(queue_dict):
+        check_queues(queue_dict)
+
+        # TODO: Adjust as needed for speed
+        step = 1 - sleep_amount
+        if amount_of_colors > 1:
+            next_color_hsv = grb_to_hsv(color_arr[(color_acc + 1) % amount_of_colors])
+
+            # TODO: Make it so:
+                # If hue is in the high 300s (>340?) and next hue is orange or yellow, add and modulo
+                # If hue is in low 0s and next hue is purple, pink, or dark blue (?) subtract it to 360 and the next color
+
+            # If hue of next color is greater than hue of current color, add through hues
+            if current_color_hsv[0] < next_color_hsv[0]:
+                is_adding = True
+            # Else subtract through hues
+            else:
+                is_adding = False
+
+            if not int(current_color_hsv[0]) == int(next_color_hsv[0]):
+                if is_adding:
+                    current_color_hsv = (current_color_hsv[0] + step, current_color_hsv[1], current_color_hsv[2])
+                else:
+                    current_color_hsv = (current_color_hsv[0] - step, current_color_hsv[1], current_color_hsv[2])
+            else:
+                color_acc += 1
+                color_acc %= amount_of_colors
+                current_color_hsv = grb_to_hsv(color_arr[color_acc])
+        
+        strip.fill(hsv_to_grb(current_color_hsv))
+        strip.show()
+
 
 def twinkle(color_arr, block_size_arr, queue_dict):
     brightness = [0] * num_of_leds
@@ -208,3 +248,36 @@ def set_sleep_amount(queue_dict):
     global sleep_amount
     # 1 - to make slider go from slow to fast
     sleep_amount = 1 - float(queue_dict["animated effect speed queue"].get())/100
+
+def grb_to_hsv(grb):
+    g = grb[0]/255
+    r = grb[1]/255
+    b = grb[2]/255
+    hsv = colorsys.rgb_to_hsv(r, g, b)
+    h = hsv[0] * 360
+    s = hsv[1] * 100
+    v = hsv[2] * 100
+    return (h, s, v)
+
+def hsv_to_grb(hsv):
+    h = hsv[0]/360
+    s = hsv[1]/100
+    v = hsv[2]/100
+    rgb = colorsys.hsv_to_rgb(h, s, v)
+    r = rgb[0] * 255
+    g = rgb[1] * 255
+    b = rgb[2] * 255
+    return (g, r, b)
+
+# Borrowed from https://stackoverflow.com/questions/1969240/mapping-a-range-of-values-to-another
+# Maps values from one range to another range
+def translate(value, leftMin, leftMax, rightMin, rightMax):
+    # Figure out how 'wide' each range is
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
+
+    # Convert the left range into a 0-1 range (float)
+    valueScaled = float(value - leftMin) / float(leftSpan)
+
+    # Convert the 0-1 range into a value in the right range.
+    return rightMin + (valueScaled * rightSpan)

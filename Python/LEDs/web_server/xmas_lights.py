@@ -11,6 +11,7 @@ import datetime
 
 # TODO: Move all functions to main_functions.py and import them
 	# Just for cleanliness' sake
+# TODO: Ever since adding timer thread, on page reload it goes to defaults, not current selection
 
 app = Flask(__name__, template_folder = '', static_folder = '', static_url_path = '')
 is_off_event = threading.Event()
@@ -102,13 +103,15 @@ def time_check(on_time_queue, off_time_queue):
 			turning_on = False
 			if current_effect in looping_effects:
 				looping_event.clear()
+				static_effect_queue.queue.clear()
 				static_effect_queue.put_nowait("bogus") # This is just to pull animated effects out of their inner while loop
 			off()
 		elif is_off == False and turning_on == False:
 			is_off_event.clear()
 			turning_on = True
+
+			static_effect_queue.queue.clear()	# Clears bogus call
 			if current_effect in looping_effects:
-				static_effect_queue.queue.clear()
 				looping_effect_queue.put_nowait(effect)
 				looping_event.set()
 			else:
@@ -136,10 +139,14 @@ def looping_effects_analyzer(looping_event, queue_dict, color_arr, brightness_ar
 		if looping_effect_name == "Animated alternating colors":
 			animated_alternating_colors(color_arr, block_size_arr, queue_dict)
 
+		if looping_effect_name == "Color fade":
+			color_fade(color_arr, queue_dict)
+
 		if looping_effect_name == "Twinkle":
 			twinkle(color_arr, block_size_arr, queue_dict)
 
-looping_effects = ["Random", "Animated alternating colors", "Twinkle"]
+
+looping_effects = ["Random", "Animated alternating colors", "Color fade", "Twinkle"]
 looping_event = threading.Event()
 looping_effect_queue = queue.Queue()
 static_effect_queue = queue.Queue()
@@ -147,6 +154,7 @@ amount_of_colors_queue = queue.Queue()
 animated_effect_speed_queue = queue.Queue()
 mult_color_style_queue = queue.Queue()
 has_mult_block_sizes_queue = queue.Queue()
+# TODO: Do an array dict too
 queue_dict = {
 	"looping effect queue": looping_effect_queue,
 	"static effect queue": static_effect_queue,
@@ -163,7 +171,6 @@ prev_color_amount = default_form_values["amount of colors"]
 prev_effect_speed = default_form_values["animated speed slider"]
 prev_mult_color_style = default_form_values["mult color style"]
 prev_has_mult_block_sizes = default_form_values["mult block sizes checkbox"]
-# prev_block_size = default_form_values["block size"]
 animated_effect_thread = threading.Thread(target = looping_effects_analyzer, name = "looping thread", args = (looping_event, queue_dict, color_arr, brightness_arr,))
 time_check_thread = threading.Thread(target = time_check, name = "time check thread", args = (on_time_queue, off_time_queue,), daemon = False)
 
