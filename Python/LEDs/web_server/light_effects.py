@@ -14,6 +14,7 @@ has_mult_block_sizes = False
     # Must be a global to accurately store timing data across changes
 sleep_amount = 0.5
 
+# NOTE: Functions will get called again every time the form is submitted
 
 ############################## STATIC FUNCTIONS ##############################
 
@@ -110,45 +111,61 @@ def animated_alternating_colors(color_arr, block_size_arr, queue_dict):
         starter_acc %= amount_of_colors
         color_acc += starter_acc
 
+# TODO: Because of the way this is written (steps dictating "speed")
+    # Colors closer together appear to move slower for the same speed as colors spaced farther apart
+    # Because they have more distance to cover in the same amount of steps
+    # SO ... Make this function work at a consistent speed regardless of the colors present
 def color_fade(color_arr, queue_dict):
     color_acc = 0   # Keeps track of current color
+    step_acc = 0
     is_adding = False   # Checks whether it should add or subtract accumulator, whichever is closest
-    current_color_hsv = grb_to_hsv(color_arr[color_acc])
+    current_color_hsv = grb_to_hsv(color_arr[0])
+    next_color_hsv = grb_to_hsv(color_arr[1])
+    # Figures out amount of steps based off animated speed change
+        # So hue, saturation, and value all get added proportionally
+    prev_animated_speed_slider_val = 1 - sleep_amount
+    step_min = 40
+    step_max = 200
+    steps = int(map_range(prev_animated_speed_slider_val, 0, 1, step_max, step_min))
 
-    # TODO: Also needs to account for saturation (which would be a difference divided by step)
-        # Factor in case of current color saturation being lower than next colors saturation
+    h_step = (next_color_hsv[0] - current_color_hsv[0])/steps
+    s_step = (next_color_hsv[1] - current_color_hsv[1])/steps
+    v_step = (next_color_hsv[2] - current_color_hsv[2])/steps
+
     while other_effect_isnt_chosen(queue_dict):
         check_queues(queue_dict)
 
-        # TODO: Adjust as needed for speed
-        step = 1 - sleep_amount
-        if amount_of_colors > 1:
-            next_color_hsv = grb_to_hsv(color_arr[(color_acc + 1) % amount_of_colors])
+        # Resets step range if animated speed slider was moved
+        current_animated_speed_slider_val = 1 - sleep_amount
+        if not current_animated_speed_slider_val == prev_animated_speed_slider_val:
+            steps = int(map_range(1 - sleep_amount, 0, 1, step_max, step_min))
+            h_step = (next_color_hsv[0] - current_color_hsv[0])/steps
+            s_step = (next_color_hsv[1] - current_color_hsv[1])/steps
+            v_step = (next_color_hsv[2] - current_color_hsv[2])/steps
+            prev_animated_speed_slider_val = current_animated_speed_slider_val
 
+        if amount_of_colors > 1:
             # TODO: Make it so:
                 # If hue is in the high 300s (>340?) and next hue is orange or yellow, add and modulo
                 # If hue is in low 0s and next hue is purple, pink, or dark blue (?) subtract it to 360 and the next color
 
-            # If hue of next color is greater than hue of current color, add through hues
-            if current_color_hsv[0] < next_color_hsv[0]:
-                is_adding = True
-            # Else subtract through hues
-            else:
-                is_adding = False
-
-            if not int(current_color_hsv[0]) == int(next_color_hsv[0]):
-                if is_adding:
-                    current_color_hsv = (current_color_hsv[0] + step, current_color_hsv[1], current_color_hsv[2])
-                else:
-                    current_color_hsv = (current_color_hsv[0] - step, current_color_hsv[1], current_color_hsv[2])
+            if not step_acc == steps + 1:
+                current_color_hsv = (current_color_hsv[0] + h_step, current_color_hsv[1] + s_step, current_color_hsv[2] + v_step)
+                step_acc += 1
+                strip.fill(hsv_to_grb(current_color_hsv))
+                strip.show()
             else:
                 color_acc += 1
                 color_acc %= amount_of_colors
                 current_color_hsv = grb_to_hsv(color_arr[color_acc])
-        
-        strip.fill(hsv_to_grb(current_color_hsv))
-        strip.show()
+                next_color_hsv = grb_to_hsv(color_arr[(color_acc + 1) % amount_of_colors])
+                h_step = (next_color_hsv[0] - current_color_hsv[0])/steps
+                s_step = (next_color_hsv[1] - current_color_hsv[1])/steps
+                v_step = (next_color_hsv[2] - current_color_hsv[2])/steps
+                step_acc = 0
 
+        
+        
 
 def twinkle(color_arr, block_size_arr, queue_dict):
     brightness = [0] * num_of_leds
@@ -269,15 +286,16 @@ def hsv_to_grb(hsv):
     b = rgb[2] * 255
     return (g, r, b)
 
+# TODO: Make this so ranges can get mapped from say 0-1 to 50-0
 # Borrowed from https://stackoverflow.com/questions/1969240/mapping-a-range-of-values-to-another
 # Maps values from one range to another range
-def translate(value, leftMin, leftMax, rightMin, rightMax):
+def map_range(value, istart, istop, ostart, ostop):
     # Figure out how 'wide' each range is
-    leftSpan = leftMax - leftMin
-    rightSpan = rightMax - rightMin
+    ispan = istop - istart
+    ospan = ostop - ostart
 
     # Convert the left range into a 0-1 range (float)
-    valueScaled = float(value - leftMin) / float(leftSpan)
+    value_scaled = float(value - istart) / float(ispan)
 
     # Convert the 0-1 range into a value in the right range.
-    return rightMin + (valueScaled * rightSpan)
+    return ostart + (value_scaled * ospan)
