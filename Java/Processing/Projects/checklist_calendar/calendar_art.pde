@@ -58,6 +58,9 @@ void draw_month_art()
       case "DECEMBER":
         december_art();
         break;
+       case "JANUARY":
+         january_art();
+         break;
     }
   pop();
 }
@@ -411,6 +414,9 @@ void december_art()
       // This was due to simplifying each function so it wouldn't have to loop for each element
         // But if it complicates things this much more... I may reconsider
     // * 2 to account for both x & y storage of vertex
+    // TODO: Honestly for simplicities sake, maybe just keep it how it was
+      // Running full ngon with arms loop inside ngon_base function
+      // And just put an if statement in the display loop to only run on the last iteration
     float[] ngon_base_vertices = new float[amount_of_arms * 2];
     float[] multiple_ngon_base_vertices = new float[amount_of_arms * amount_of_ngons * 2];
     int coor_acc = 0;
@@ -453,7 +459,6 @@ void december_art()
             
             // - arm_length/5 so ngon doesn't exceed snowflake
             float ngon_spacing = (arm_length / (amount_of_ngons * 2.5));
-            println(amount_of_arms, amount_of_ngons);
             for (int i = 0; i < amount_of_ngons; i++)
             {
               // This allows correct index spacing for each polygon
@@ -530,6 +535,7 @@ void december_art()
       month_banner.rect(0, 0, width * pixel_buffer_scale, MONTH_BOX_HEIGHT * pixel_buffer_scale);
 
       // SNOWFLAKE DRAWING
+      // TODO: Put inside class as a display function
       month_banner.stroke(360);
       month_banner.strokeWeight(3);
       for (int i = 0; i < snowflakes.length; i++)
@@ -557,11 +563,97 @@ void december_art()
     image(month_banner, 0, 0);
   pop();
   
+  // MONTH NAME
+  //font_class dec_font = new font_class();
+  
+  //dec_font.font = new RFont("data\\SNOWBALL.TTF", 60, RFont.CENTER);
+  //dec_font.size = MONTH_TEXT_SIZE;
+  //dec_font.fill = color(360);
+  //dec_font.text = MONTH_AND_YEAR;
+  //dec_font.x = width/2;
+  //dec_font.y = MONTH_BOX_HEIGHT/1.4;
+  //dec_font.is_outlined = true;
+  //dec_font.outline_color = color(0);
+  //dec_font.outline_weight = 1;
+  
+  //draw_text(dec_font);
+}
+
+void january_art()
+{
+  push();
+    noStroke();
+    // Background
+    fill(#744BFF);
+    rect(0, 0, width, MONTH_BOX_HEIGHT);
+    
+    // Moon
+    fill(color(39, 30, 100));
+    circle(80, 30, 15);
+    fill(#744BFF);
+    circle(82, 29, 14);
+    
+    // Mountains
+    int amount_of_vertices = 180;
+    float noise_acc = 0;
+    float x_acc = float(width)/amount_of_vertices;
+    float x = 0;
+    float y_ref = 60;  // Baseline refrence for y of mountains
+    float y_variation = 40;  // How much noise can change from the baseline
+    fill(#170F31);
+    beginShape();
+      vertex(0, MONTH_BOX_HEIGHT);  // Setting first vertex to lower left corner
+      for (int i = 0; i < amount_of_vertices; i++)
+      {
+        float y = map(noise(noise_acc), 0, 1, y_ref - y_variation, y_ref + y_variation);
+        vertex(x, y);
+        x += x_acc;
+        noise_acc += 0.05;
+      }
+      // Closing the shape so the color fills the bottom portion of the banner
+      vertex(width, MONTH_BOX_HEIGHT);
+      vertex(0, MONTH_BOX_HEIGHT);
+    endShape();
+    
+    // Changing calendar elements to go with the theme
+    change_day_color(#E7E0FF, #352F4B);
+    change_weekday_names_color(color(39, 30, 90));
+    
+    // MONTH NAME
+    font_class jan_font = new font_class();
+    
+    jan_font.font = new RFont("data\\LOVES.TTF", 60, RFont.CENTER);
+    jan_font.size = MONTH_TEXT_SIZE;
+    jan_font.fill = color(39, 4, 100);
+    jan_font.text = MONTH_AND_YEAR;
+    jan_font.x = width/2;
+    jan_font.y = MONTH_BOX_HEIGHT/1.4;
+    jan_font.is_bolded = true;
+    
+    draw_text(jan_font);
+  pop();
 }
 
 boolean random_boolean()
 {
   return Math.random() < 0.5;
+}
+
+void change_day_color(color day_col, color not_day_col)
+{
+  for (int i = 0; i < day_boxes.length; i++)
+  {
+    if (day_boxes[i].in_month)
+      day_boxes[i].day_color = day_col;
+    else
+      day_boxes[i].day_color = not_day_col;
+  }
+}
+
+void change_weekday_names_color(color col)
+{
+  for (int i = 0; i < day_names.length; i++)
+    day_names[i].weekday_color = col;
 }
 
   // CODE FOR ONLY DRAWING AROUND THE NAME, NOT FULL BANNER
