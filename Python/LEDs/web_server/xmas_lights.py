@@ -12,6 +12,7 @@ import datetime
 # TODO: Move all functions to main_functions.py and import them
 	# Just for cleanliness' sake
 # TODO: Ever since adding timer thread, on page reload it goes to defaults, not current selection
+# TODO: Lights won't always go directly off after color fade function was added
 
 app = Flask(__name__, template_folder = '', static_folder = '', static_url_path = '')
 is_off_event = threading.Event()

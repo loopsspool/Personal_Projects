@@ -284,6 +284,7 @@
                   // Shows single or multiple block sizes
                   if (form_elements["block style"].checked)
                   {
+                     // TODO: Base the 350 on the amount of leds somehow (hardcode?)
                      show("block size 0");
                      document.getElementById("block size 0").max = Math.ceil(350/amount_of_colors);
                      if (document.getElementById("block size 0").value > Math.ceil(350/amount_of_colors))
