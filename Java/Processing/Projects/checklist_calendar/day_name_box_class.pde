@@ -13,6 +13,7 @@ class day_name_box_class
   int text_size = 14;
   String day_name = "";
   int weekday_num = -1;
+  color weekday_color = #FFFFFF;
   
   void display()
   {
@@ -24,11 +25,12 @@ class day_name_box_class
   
   void box()
   {
-    noFill();
+    fill(weekday_color);
     noStroke();
     rect(0, 0, box_width, box_height);
 
     // Box outline
+    // Done this way so "border" doesn't come in on the weekday names because their outline was drawn inside the bordaer
     stroke(0);
     strokeWeight(stroke_weight);
     line(0, 0, box_width, 0);  // Top line

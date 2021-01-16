@@ -4,7 +4,8 @@ import processing.pdf.*;  // To convert to PDF
 import geomerative.*;  // For text outline
 
 // PDF Switcher
-boolean is_PDF = false;
+boolean is_PDF = true;
+// TODO: See if you can automatically open the pdf after playing
 
 // GENERAL DATE STUFF
 String[] WEEKDAYS = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
@@ -132,7 +133,7 @@ void setup()
   // DATE STUFF
   CURRENT_DATE = new Date();
   LOCAL_DATE = CURRENT_DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-  //LOCAL_DATE = LOCAL_DATE.plusMonths(1);
+  //LOCAL_DATE = LOCAL_DATE.plusMonths(-1);
   YEAR = LOCAL_DATE.getYear();
   MONTH = LOCAL_DATE.getMonthValue();
   DAY = LOCAL_DATE.getDayOfMonth();
@@ -172,7 +173,16 @@ void setup()
   int square_amount = AMOUNT_OF_ROWS * 7;
   day_boxes = new daily_box_class[square_amount];
   for (int i = 0; i < square_amount; i++)
+  {
     day_boxes[i] = new daily_box_class();
+    
+    // Setting their in_month property
+    // + FIRST_DAY_OF_MONTH_COLUMN because i is tracking box number, which will include initial greyed out boxes, so offset the end of the month check by that amount
+    if (i >= FIRST_DAY_OF_MONTH_COLUMN && i < (DAYS_IN_MONTH + FIRST_DAY_OF_MONTH_COLUMN))
+      day_boxes[i].in_month = true;
+    else
+      day_boxes[i].in_month = false;
+  }
     
   // Initializing weekday rectangles
   day_names = new day_name_box_class[7];

@@ -17,6 +17,8 @@ public class daily_box_class
                               "Do thing you love", 
                               "Spend time w/ self", 
                               "Do list"};
+  color day_color = #FFFFFF;
+  boolean in_month = false;
 
   void display()
   {
@@ -29,14 +31,20 @@ public class daily_box_class
   {
     noStroke();
 
+      // Grey out days not in month
       if (day_number == 0 || day_number > DAYS_IN_MONTH)
       {
-        fill(280);
+        // If day color is default white, make out of month boxes grey
+        if (day_color == #FFFFFF)
+          fill(280);
+        // But if the values been changed, shade them that color
+        else
+          fill(day_color);
         rect(0, 0, box_width, box_height);
       }
       else
       {
-        fill(360);
+        fill(day_color);
         rect(0, 0, box_width, box_height);
         
         numbers();
