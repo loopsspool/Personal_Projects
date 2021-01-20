@@ -587,6 +587,11 @@ void january_art()
     fill(#744BFF);
     rect(0, 0, width, MONTH_BOX_HEIGHT);
     
+    // Stars
+    fill(248, 13, 85);
+    for (int i = 0; i < 80; i++)
+      circle(random(width), random(MONTH_BOX_HEIGHT), 1);
+    
     // Moon
     fill(color(39, 30, 100));
     circle(80, 30, 15);
@@ -598,7 +603,7 @@ void january_art()
     float noise_acc = 0;
     float x_acc = float(width)/amount_of_vertices;
     float x = 0;
-    float y_ref = 60;  // Baseline refrence for y of mountains
+    float y_ref = 55;  // Baseline refrence for y of mountains
     float y_variation = 40;  // How much noise can change from the baseline
     fill(#170F31);
     beginShape();
