@@ -60,9 +60,12 @@ void draw_month_art()
       case "DECEMBER":
         december_art();
         break;
-     case "JANUARY":
-       january_art();
-       break;
+      case "JANUARY":
+        january_art();
+        break;
+      case "FEBRUARY":
+        february_art();
+        break;
     }
   pop();
 }
@@ -646,6 +649,30 @@ void january_art()
     jan_font.is_bolded = true;
     
     draw_text(jan_font);
+  pop();
+}
+
+void february_art()
+{
+  push();
+    // BACKGROUND
+    noStroke();
+    fill(#FFB2E3);
+    rect(0, 0, width, MONTH_BOX_HEIGHT);
+    
+    // Clouds
+    fill(360);
+    float x = 0;
+    float noise_acc = 0;
+    while (x < width)
+    {
+      float r = random(70);
+      float y_adj = map(noise(noise_acc), 0, 1, -30, 30);
+      float y = MONTH_BOX_HEIGHT + y_adj;
+      circle(x, y, r);
+      x += r/random(1.2, 3);
+      noise_acc += 0.03;
+    }
   pop();
 }
 
