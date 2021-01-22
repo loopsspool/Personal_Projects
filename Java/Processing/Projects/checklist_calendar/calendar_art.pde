@@ -9,6 +9,8 @@ float pixel_buffer_scale = 3;  // To retain image quality drawn on the buffer
 
 // IMAGES
 PImage leaf;
+PImage december_text;
+PImage december_2020_text;
 
 
 void month_art()
@@ -58,9 +60,9 @@ void draw_month_art()
       case "DECEMBER":
         december_art();
         break;
-       case "JANUARY":
-         january_art();
-         break;
+     case "JANUARY":
+       january_art();
+       break;
     }
   pop();
 }
@@ -564,19 +566,27 @@ void december_art()
   pop();
   
   // MONTH NAME
+  // These are the settings for the font but had to do a workaround since the snow on the font was transparent
   //font_class dec_font = new font_class();
-  
   //dec_font.font = new RFont("data\\SNOWBALL.TTF", 60, RFont.CENTER);
   //dec_font.size = MONTH_TEXT_SIZE;
-  //dec_font.fill = color(360);
+  //dec_font.fill = color(202, 12, 100);
   //dec_font.text = MONTH_AND_YEAR;
   //dec_font.x = width/2;
   //dec_font.y = MONTH_BOX_HEIGHT/1.4;
   //dec_font.is_outlined = true;
   //dec_font.outline_color = color(0);
-  //dec_font.outline_weight = 1;
-  
+  //dec_font.outline_weight = 2;
   //draw_text(dec_font);
+  
+  push();
+    december_text = loadImage("December.png");
+    december_2020_text = loadImage("December 2020.png");
+    scale(0.6);
+    // Weird additions because scale changes origin of image where it's going
+    image(december_text, width/2 - december_text.width/2.9, MONTH_BOX_HEIGHT/2.8);
+    image(december_2020_text, width/2 + december_2020_text.width + 80, MONTH_BOX_HEIGHT/2.8);
+  pop();
 }
 
 void january_art()
