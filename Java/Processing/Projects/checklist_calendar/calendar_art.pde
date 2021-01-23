@@ -657,22 +657,51 @@ void february_art()
   push();
     // BACKGROUND
     noStroke();
-    fill(#FFB2E3);
+    float bg_saturation = 30;
+    fill(322, bg_saturation, 100);
     rect(0, 0, width, MONTH_BOX_HEIGHT);
     
     // Clouds
     fill(360);
     float x = 0;
     float noise_acc = 0;
-    while (x < width)
+    int cloud_layers = 3;
+    for (int i = 0; i < cloud_layers; i++)
     {
-      float r = random(70);
-      float y_adj = map(noise(noise_acc), 0, 1, -30, 30);
-      float y = MONTH_BOX_HEIGHT + y_adj;
-      circle(x, y, r);
-      x += r/random(1.2, 3);
-      noise_acc += 0.03;
+      // Fading clouds from white into background
+      float cloud_saturation = map(i, 0, cloud_layers - 1, (4 * bg_saturation)/5, 0);
+      fill(322, cloud_saturation, 100);
+      // Moves cloud layers up
+      float y_layer_adj = i * 5;
+      while (x < width)
+      {
+        float r = random(70);
+        float y_noise_adj = map(noise(noise_acc), 0, 1, -30, 30);
+        float y = MONTH_BOX_HEIGHT + y_noise_adj + y_layer_adj;
+        circle(x, y, r);
+        x += r/random(1.2, 3);
+        noise_acc += 0.03;
+      }
+      x = 0;
+      noise_acc += 10;
     }
+    
+    // Changing calendar elements to go with the theme
+    //change_day_color(#E7E0FF, #352F4B);
+    change_weekday_names_color(color(352, 81, 100));
+    
+    // MONTH NAME
+    font_class feb_font = new font_class();
+    
+    feb_font.font = new RFont("data\\Valentine Things.ttf", 60, RFont.CENTER);
+    feb_font.size = MONTH_TEXT_SIZE;
+    feb_font.fill = color(color(352, 81, 70));
+    feb_font.text = MONTH_AND_YEAR;
+    feb_font.x = width/2;
+    feb_font.y = MONTH_BOX_HEIGHT/1.3;
+    
+    draw_text(feb_font);
+    
   pop();
 }
 
