@@ -13,12 +13,29 @@ def cell_value(row, col):
 
 
 # WEB DATA
-game_page = requests.get("https://www.wikidex.net/index.php?title=Categor%C3%ADa:Sprites_de_Pok%C3%A9mon_Oro&fileuntil=Skarmory+oro.png#mw-category-media")
-game_page_soup = BeautifulSoup(game_page.content, 'html.parser')
+sprite_page = requests.get("https://www.wikidex.net/wiki/Categor%C3%ADa:Sprites_de_Pok%C3%A9mon")
+sprite_page_soup = BeautifulSoup(sprite_page.content, 'html.parser')
 
-# TODO: Go through each gen & game? Or do self due to inconsistencies?
+game_sprites_link_table = sprite_page_soup.find("table")
+games_by_gen = []
+
+for games in game_sprites_link_table.findAll("td"):
+    games_by_gen.append(games)
+
+for i in range(len(games_by_gen)):
+    # Since arrays start at 0, 5th generation == i at 4
+    # So, less than 5th gen (4th iter) are where there are no static sprites
+    if (i < 4):
+        print(games_by_gen[i].findAll("a"), "\n\n")
+    # Seperates static and animated sprite pages
+    else:
+        for each in games_by_gen[i].findAll('b'):
+            if not each.text == '|':
+                print(each.text, "\n", each.find_next_siblings("a"), "\n\n")
+    #print(gen.findAll('b'))
+
 # TODO: Put below in a conditional to loop if true
-print(game_page_soup.find("a", string="página siguiente"))
+#print(game_page_soup.find("a", string="página siguiente"))
 # Gets pokemon name and number
 pokemon_name_number_dict = {}
 for i in range(2, 900):
@@ -32,7 +49,16 @@ for name in game_page_soup.find_all(class_="gallerytext"):
     # Doing by file extension because whitespace splits male/female, Mr.Mime, etc
     # TODO: Somehow find file extensions used? Or allow all to pass for split
         # Changes with game
-    pokemon_names.append(name.text.split(' espalda G1.png')[0])
+    for poke in pokemon_name_number_dict:
+        # TODO: Due to pokes like porygon, porgyon2, porygon-z
+            # A porygon iteration will match all 3 first
+            # So, either I create a list from the dictionary and knock off names as I go through
+            # OR, as I prefer, grab the suffix manually, hardcode it per game, split the string, then match it with the pokemon from excel
+        if poke in name.text and not "\(CV\)" in name.text:
+            #print(poke)
+            pokemon_names.append(poke)
+    #pokemon_names.append(name.text.split(' espalda G1.png')[0])
+#print(pokemon_names)
 # Removing preceding new line character from names
 for i in range(len(pokemon_names)):
     name = pokemon_names[i].split('\n')[1]
@@ -63,8 +89,8 @@ for sprite in game_page_soup.find_all(class_="gallerybox"):
 for i in range(len(pokemon_names)):
     # Excludes japanese versions 
     # TODO: Allow any file extension after the period
-    if re.search("\(CV\)\.png$", pokemon_names[i]):
-        print(pokemon_names[i])
+    if "\(CV\)" in pokemon_names[i]:
+        print(pokemon_names[i], "omitted bc japanese variant")
     else:
         pokemon_sprites_dict[pokemon_names[i]] = pokemon_img_link[i]
     # TODO: Change filename to accomodate for game
