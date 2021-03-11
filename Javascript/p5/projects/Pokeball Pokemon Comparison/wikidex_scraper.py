@@ -11,6 +11,18 @@ sheet = pokemon_info.sheet_by_index(0)
 def cell_value(row, col):
     return (sheet.cell_value(row, col))
 
+def isnt_empty(row, col):
+    return (str(cell_value(row, col)) != "")
+
+def is_empty(row, col):
+    return (cell_value(row, col) == empty_cell.value)
+
+# Returns column number from column name
+def get_col_number(col_name):
+    for col in range(sheet.ncols):
+        if (cell_value(1, col) == col_name):
+            return col
+
 
 # WEB DATA
 sprite_page = requests.get("https://www.wikidex.net/wiki/Categor%C3%ADa:Sprites_de_Pok%C3%A9mon")
@@ -122,13 +134,15 @@ def sprite_link_dict_entry(gen, link, animated = False):
             if back == True and shiny == True:
                 keyname = "Gen" + str(gen) + "-Back Static Shiny"
 
-    sprites_link_dict[keyname] = link
+    # Excludes Let's Go because there's not enough sprites to justify it's inclusion
+    # And Gen8 Shiny Back sprites because the page isn't uploaded yet
+    if not "Let's Go" in keyname and not keyname == "Gen8-Back Static Shiny":
+        sprites_link_dict[keyname] = "https://www.wikidex.net" + link.get("href")
 
 # Gets rows (games) of sprite link table
 for games in game_sprites_link_table.findAll("td"):
     games_by_gen.append(games)
 
-# TODO: Exclude Let's Go
 for i in range(len(games_by_gen)):
     current_gen = i + 1
     current_game = ""
@@ -152,72 +166,197 @@ for i in range(len(games_by_gen)):
                 for link in image_type.find_next_siblings("a"):
                     sprite_link_dict_entry(current_gen, link, is_animated)
 
-for k,v in sprites_link_dict.items():
-    print(k, ":", v, "\n")
+# for k,v in sprites_link_dict.items():
+#     print(k, ":", v, "\n\n")
 
-# No do-while loop in python, so running a while True loop with a break condition
-#while True:
-#print(game_page_soup.find("a", string="página siguiente"))
-# Gets pokemon name and number
-pokemon_name_number_dict = {}
+split_seperators_by_game = {
+    "Gen1 Red-Green": " V",
+    "Gen1 Red-Blue": " RA",
+    "Gen1 Yellow": " A",
+    "Gen1-Back": " espalda",
+    "Gen2 Gold": " oro",
+    "Gen2 Gold Shiny": " oro",
+    "Gen2 Silver": " plata",
+    "Gen2 Silver Shiny": " plata",
+    "Gen2 Crystal Animated": " cristal",
+    "Gen2 Crystal Animated Shiny": " cristal",
+    "Gen2-Back": " espalda",
+    "Gen2-Back Shiny": " espalda",
+    "Gen3 Ruby-Sapphire": " RZ",
+    "Gen3 Ruby-Sapphire Shiny": " RZ",
+    "Gen3 Emerald Static": " E",
+    "Gen3 Emerald Static Shiny": " E",
+    "Gen3 FireRed-LeafGreen": "RFVH",
+    "Gen3 FireRed-LeafGreen Shiny": "RFVH",
+    "Gen3-Back": " espalda",
+    "Gen3-Back Shiny": " espalda",
+    "Gen4 Diamond-Pearl Static": " DP",
+    "Gen4 Diamond-Pearl Static Shiny": " DP",
+    "Gen4 Platinum Static": " Pt",
+    "Gen4 Platinum Static Shiny": " Pt",
+    "Gen4 HGSS Static": " HGSS",
+    "Gen4 HGSS Static Shiny": " HGSS",
+    "Gen4-Back": " espalda",
+    "Gen4-Back Shiny": " espalda",
+    "Gen5 Black-White Static": " NB",
+    "Gen5 Black-White Static Shiny": " NB",
+    "Gen5 Black2-White2 Static": " N2B2",
+    "Gen5 Black2-White2 Static Shiny": " N2B2",
+    "Gen5-Back Static": " espalda",
+    "Gen5-Back Static Shiny": " espalda",
+    "Gen5 Black-White Animated": " NB",
+    "Gen5 Black-White Animated Shiny": " NB",
+    "Gen5 Black2-White2 Animated": " N2B2",
+    "Gen5 Black2-White2 Animated Shiny": " N2B2",
+    "Gen5-Back Animated": " espalda",
+    "Gen5-Back Animated Shiny": " espalda",
+    "Gen6 XY Static": " XY",
+    "Gen6 XY Static Shiny": " XY",
+    "Gen6 ORAS Static": "ROZA",
+    "Gen6 ORAS Static Shiny": " XY",
+    "Gen6-Back Static": " espalda",
+    "Gen6-Back Static Shiny": " espalda",
+    "Gen6 XY Animated": " XY",
+    "Gen6 XY Animated Shiny": " XY",
+    "Gen6 ORAS Animated": "ROZA",
+    "Gen6 ORAS Animated Shiny": " ROZA",
+    "Gen6-Back Animated": " espalda",
+    "Gen6-Back Animated Shiny": " espalda",
+    "Gen7 Sun-Moon Static": " SL",
+    "Gen7 Sun-Moon Static Shiny": " SL",
+    "Gen7 USUM Static": " USUL",
+    "Gen7 USUM Static Shiny": " USUL",
+    "Gen7-Back Static": " espalda",
+    "Gen7-Back Static Shiny": " espalda",
+    "Gen7 Sun-Moon Animated": " SL",
+    "Gen7 Sun-Moon Animated Shiny": " SL",
+    "Gen7 USUM Animated": " USUL",
+    "Gen7 USUM Animated Shiny": " USUL",
+    "Gen7-Back Animated": " espalda",
+    "Gen7-Back Animated Shiny": " espalda",
+    "Gen8 Sword-Shield Static": " EpEc",
+    "Gen8 Sword-Shield Static Shiny": " EpEc",
+    "Gen8-Back Static": " espalda",
+    "Gen8 Sword-Shield Animated": " EpEc",
+    "Gen8 Sword-Shield Animated Shiny": " EpEc",
+    "Gen8-Back Animated": " espalda",
+    "Gen8-Back Animated Shiny": " espalda"
+}
+# Gets pokemon info from excel sheet
+class Pokemon:
+    def __init__(self, name, number, gen, has_f_var, has_mega, has_giganta, reg_forms, has_type_forms, has_misc_forms):
+        self.name = name
+        self.number = number
+        self.gen = gen
+        self.has_f_var = has_f_var
+        self.has_mega = has_mega
+        self.has_giganta = has_giganta
+        self.reg_forms = reg_forms
+        self.has_type_forms = has_type_forms
+        self.has_misc_forms = has_misc_forms
+
+# Gets column numbers from spreadsheet
+name_col = get_col_number("Name")
+num_col = get_col_number("#")
+gen_col = get_col_number("Gen")
+f_col = get_col_number("Female Variation")
+mega_col = get_col_number("Mega")
+giganta_col = get_col_number("Gigantamax")
+reg_forms_col = get_col_number("Regional Forms")
+type_forms_col = get_col_number("Type Forms")
+misc_forms_col = get_col_number("Misc Forms")
+
+# Adds pokemon info from spreadsheet to object array
+pokedex = []
 for i in range(2, 900):
-    pokemon_name_number_dict[cell_value(i, 3)] = cell_value(i, 2)
+    name = cell_value(i, name_col)
+    num = cell_value(i, num_col)
+    gen = int(cell_value(i, gen_col))
+    has_f_var = isnt_empty(i, f_col)
+    has_mega = isnt_empty(i, mega_col)
+    has_giganta = isnt_empty(i, giganta_col)
+    reg_forms = cell_value(i, reg_forms_col)
+    has_type_forms = isnt_empty(i, type_forms_col)
+    has_misc_forms = isnt_empty(i, misc_forms_col)
 
-# Pokemon name : Sprite link
-pokemon_sprites_dict = {}
-# Gets pokemon names for each image
-pokemon_names = []
-for name in game_page_soup.find_all(class_="gallerytext"):
-    # Doing by file extension because whitespace splits male/female, Mr.Mime, etc
-    # TODO: Somehow find file extensions used? Or allow all to pass for split
-        # Changes with game
-    for poke in pokemon_name_number_dict:
-        # TODO: Due to pokes like porygon, porgyon2, porygon-z
-            # A porygon iteration will match all 3 first
-            # So, either I create a list from the dictionary and knock off names as I go through
-            # OR, as I prefer, grab the suffix manually, hardcode it per game, split the string, then match it with the pokemon from excel
-        if poke in name.text and not "\(CV\)" in name.text:
-            #print(poke)
-            pokemon_names.append(poke)
-    #pokemon_names.append(name.text.split(' espalda G1.png')[0])
-#print(pokemon_names)
-# Removing preceding new line character from names
-for i in range(len(pokemon_names)):
-    name = pokemon_names[i].split('\n')[1]
-    # Crude hardcode translation services, at your service
-    if "hembra" in name:
-        name = name.replace("hembra", "f")
-    if "macho" in name:
-        name = name.replace("macho", "m")
-    pokemon_names[i] = name
-# Adding pokedex number before name
-for i in range(len(pokemon_names)):
-    for poke, num in pokemon_name_number_dict.items():
-        if pokemon_names[i] == poke:
-            pokemon_names[i] = num + " " + pokemon_names[i]
-            break
-# Regex checker to make sure each name is formatted properly
-for name in pokemon_names:
-    if re.search("^\d\d\d\s[a-zA-Z]+", name):
-        continue
-    else:
-        print(name, "is not formatted correctly")
+    pokedex.append(Pokemon(name, num, gen, has_f_var, has_mega, has_giganta, reg_forms, has_type_forms, has_misc_forms))
 
-# Gets link to pokemon sprite image
-pokemon_img_link = []
-for sprite in game_page_soup.find_all(class_="gallerybox"):
-    pokemon_img_link.append(sprite.a.img["src"])
+# Prints out each pokemon's relevant info from spreadsheet
+# for i in range(len(pokedex)):
+#     print(vars(pokedex[i]))
 
-for i in range(len(pokemon_names)):
-    # Excludes japanese versions 
-    # TODO: Allow any file extension after the period
-    if "\(CV\)" in pokemon_names[i]:
-        print(pokemon_names[i], "omitted bc japanese variant")
-    else:
-        pokemon_sprites_dict[pokemon_names[i]] = pokemon_img_link[i]
-    # TODO: Change filename to accomodate for game
-    file_name = "Images/Pokemon/" + pokemon_names[i] + " Gen1-Back.png"
-    # Saves file
-    #urllib.request.urlretrieve(pokemon_img_link[i], file_name)
+# TODO: Maybe omit pokemon with form variations and I'll do them myself?
+    # Run a cross-check with database for pokes with form variations and exclude them from downloading
+        # Maybe also compile a list of excluded pokes for my own ease
+#for game_sprite, link in sprites_link_dict.items():
+    # Getting soup of the corresponding sprite page
+    # Loops through pages of sprites collecting image links to download
+    # No do-while loop in python, so running a while True loop with a break condition
+        # This break condition being if there is not a next page
+    # while True:
+    #     # Pokemon name : Sprite link
+    #     pokemon_sprites_dict = {}
+    #     # Gets pokemon names for each image
+    #     pokemon_names = []
+    #     # TODO: Check for hembra and macho in name BEFORE SPLIT
+    #       # these are after the game delimiter, so must be saved before split and added back after 
+    #     # TODO: If img begins with "Mega-" in shiny static ORAS use seperator ROZA, not XY
+    #     for name in game_sprite_page_soup.find_all(class_="gallerytext"):
+    #         # Doing by file extension because whitespace splits male/female, Mr.Mime, etc
+    #         # TODO: Somehow find file extensions used? Or allow all to pass for split
+    #             # Changes with game
+            
+    #         for poke in pokemon_name_number_dict:
+    #             # TODO: Due to pokes like porygon, porgyon2, porygon-z
+    #                 # A porygon iteration will match all 3 first
+    #                 # So, either I create a list from the dictionary and knock off names as I go through
+    #                 # OR, as I prefer, grab the suffix manually, hardcode it per game, split the string, then match it with the pokemon from excel
+    #             if poke in name.text and not "\(CV\)" in name.text:
+    #                 #print(poke)
+    #                 pokemon_names.append(poke)
+    #         #pokemon_names.append(name.text.split(' espalda G1.png')[0])
+    #     #print(pokemon_names)
+    #     # Removing preceding new line character from names
+    #     for i in range(len(pokemon_names)):
+    #         name = pokemon_names[i].split('\n')[1]
+    #         # Crude hardcode translation services, at your service
+    #         if "hembra" in name:
+    #             name = name.replace("hembra", "f")
+    #         if "macho" in name:
+    #             name = name.replace("macho", "m")
+    #         pokemon_names[i] = name
+    #     # Adding pokedex number before name
+    #     for i in range(len(pokemon_names)):
+    #         for poke, num in pokemon_name_number_dict.items():
+    #             if pokemon_names[i] == poke:
+    #                 pokemon_names[i] = num + " " + pokemon_names[i]
+    #                 break
+    #     # Regex checker to make sure each name is formatted properly
+    #     for name in pokemon_names:
+    #         if re.search("^\d\d\d\s[a-zA-Z]+", name):
+    #             continue
+    #         else:
+    #             print(name, "is not formatted correctly")
+
+    #     # Gets link to pokemon sprite image
+    #     pokemon_img_link = []
+    #     for sprite in game_page_soup.find_all(class_="gallerybox"):
+    #         pokemon_img_link.append(sprite.a.img["src"])
+
+    #     if game_sprite_page_soup.find("a", string="página siguiente") == None:
+    #         # Saves images locally
+    #         for i in range(len(pokemon_names)):
+    #             # Excludes japanese versions 
+    #             # TODO: Allow any file extension after the period
+    #             if "\(CV\)" in pokemon_names[i] or "3D" in pokemon_names[i]:
+    #                 print(pokemon_names[i], "omitted")
+    #             else:
+    #                 pokemon_sprites_dict[pokemon_names[i]] = pokemon_img_link[i]
+    #             # TODO: Change filename to accomodate for game
+    #             file_name = "Images/Pokemon/" + pokemon_names[i] + " Gen1-Back.png"
+    #         # Saves file
+    #         #urllib.request.urlretrieve(pokemon_img_link[i], file_name)
+    #         break
+    
 
 #print(pokemon_sprites_dict)
