@@ -31,20 +31,24 @@ def game_translate(s):
         return("Gold")
     if s == "Plata":
         return("Silver")
+    # Because crystal sprites are default animated from this site
+        # Will save first frame later for statics
     if s == "Cristal":
-        return("Crystal")
+        return("Crystal Animated")
     if s == "Rubí y Zafiro":
         return("Ruby-Sapphire")
+    # Because Emerald, DPP, HGSS sprites are default static on this site
+        # Will retrieve animated sprites from bulbagarden archives
     if s == "Esmeralda":
-        return("Emerald")
+        return("Emerald Static")
     if s == "Rojo Fuego y Verde Hoja":
         return("FireRed-LeafGreen")
     if s == "Diamante y Perla":
-        return("Diamond-Pearl")
+        return("Diamond-Pearl Static")
     if s == "Platino":
-        return("Platinum")
+        return("Platinum Static")
     if s == "Oro HeartGold y Plata SoulSilver":
-        return("HGSS")
+        return("HGSS Static")
     if s == "Negro y Blanco":
         return("Black-White")
     if s == "Negro y Blanco 2":
@@ -63,25 +67,64 @@ def game_translate(s):
         return("Sword-Shield")
 
 def get_game(a):
+    # From titles, not text, so shiny pokemon (who's text is V) can still get the game
     title = a["title"].split("Pokémon ", 1)[1]
     title = game_translate(title)
     return(title)
 
 sprites_link_dict = {}
-# Template for file naming
-# TODO: Will probably have to add animated and static as parameters when we get to gen5+
-def sprite_link_dict_entry(gen, game, link, back = False, shiny = False):
+# Template for file naming, also easy access to each game sprites link
+def sprite_link_dict_entry(gen, link, animated = False):
+    back = False
+    shiny = False
+
+    # Get game if link isn't to back sprites (since those are generationally recycled)
+    if not link.text == "E" and not link.text == "EV":
+        game = get_game(link)
+    # Getting shiny, back parameters
+    if link.text == "V":
+        shiny = True
+    if link.text == "E":
+        back = True
+    if link.text == "EV":
+        back = True
+        shiny = True
+
     keyname = ""
-    if back == False and shiny == False:
-        keyname = "Gen" + str(gen) + " " + game
-    if back == False and shiny == True:
-        keyname = "Gen" + str(gen) + " " + game + " Shiny"
-    if back == True and shiny == False:
-        keyname = "Gen" + str(gen) + "-Back"
-    if back == True and shiny == True:
-        keyname = "Gen" + str(gen) + "-Back Shiny"
+    # No animated sprites below gen 5 on this website
+        # Except for Crystal, which the tag was added in game_translate
+    if gen < 5:
+        if back == False and shiny == False:
+            keyname = "Gen" + str(gen) + " " + game
+        if back == False and shiny == True:
+            keyname = "Gen" + str(gen) + " " + game + " Shiny"
+        if back == True and shiny == False:
+            keyname = "Gen" + str(gen) + "-Back"
+        if back == True and shiny == True:
+            keyname = "Gen" + str(gen) + "-Back Shiny"
+    else:
+        if animated == True:
+            if back == False and shiny == False:
+                keyname = "Gen" + str(gen) + " " + game + " Animated"
+            if back == False and shiny == True:
+                keyname = "Gen" + str(gen) + " " + game + " Animated" + " Shiny"
+            if back == True and shiny == False:
+                keyname = "Gen" + str(gen) + "-Back" + " Animated"
+            if back == True and shiny == True:
+                keyname = "Gen" + str(gen) + "-Back Animated Shiny"
+        if animated == False:
+            if back == False and shiny == False:
+                keyname = "Gen" + str(gen) + " " + game + " Static"
+            if back == False and shiny == True:
+                keyname = "Gen" + str(gen) + " " + game + " Static" + " Shiny"
+            if back == True and shiny == False:
+                keyname = "Gen" + str(gen) + "-Back" + " Static"
+            if back == True and shiny == True:
+                keyname = "Gen" + str(gen) + "-Back Static Shiny"
+
     sprites_link_dict[keyname] = link
 
+# Gets rows (games) of sprite link table
 for games in game_sprites_link_table.findAll("td"):
     games_by_gen.append(games)
 
@@ -91,37 +134,29 @@ for i in range(len(games_by_gen)):
     current_game = ""
     # No animated sprites below gen5, so just get statics
     if (current_gen < 5):
-        # Grabbing links
+        # Grabbing links and adding them to the dict
         for link in games_by_gen[i].findAll("a"):
-            # Grabbing names for associated links
-            # Normal sprite 
-            if not link.text == "V" and not link.text == "E" and not link.text == "EV":
-                current_game = get_game(link)
-                sprite_link_dict_entry(current_gen, current_game, link)
-                #print(current_game, "sprite", link)
-            else:
-                if link.text == "V":
-                    #print(link.find_previous_sibling("a"))
-                    sprite_link_dict_entry(current_gen, current_game, link, shiny = True)
-                    #print(current_game, "shiny", link)
-                if link.text == "E":
-                    sprite_link_dict_entry(current_gen, current_game, link, back = True)
-                    #print("Gen" + str(current_gen) + "-Back", link)
-                if link.text == "EV":
-                    sprite_link_dict_entry(current_gen, current_game, link, back = True, shiny = True)
-                    #print("Gen" + str(current_gen) + "-Back shiny", link)
+            sprite_link_dict_entry(current_gen, link)
 
-    # Seperates static and animated sprite pages
+    # Seperates static and animated sprite pages gen 5 and above
     else:
-        for each in games_by_gen[i].findAll('b'):
-            if not each.text == '|':
-                print(each.text, "\n", each.find_next_siblings("a"), "\n\n")
-    #print(gen.findAll('b'))
+        for image_type in games_by_gen[i].findAll('b'):
+            # Excludes game seperators
+            if not image_type.text == '|':
+                # Gets animated or static
+                if image_type.text == "Estáticos:":
+                    is_animated = False
+                if image_type.text == "Animados:":
+                    is_animated = True
+                # Grabbing links and adding them to the dict
+                for link in image_type.find_next_siblings("a"):
+                    sprite_link_dict_entry(current_gen, link, is_animated)
 
 for k,v in sprites_link_dict.items():
-    print(k, ":", v)
+    print(k, ":", v, "\n")
 
-# TODO: Put below in a conditional to loop if true
+# No do-while loop in python, so running a while True loop with a break condition
+#while True:
 #print(game_page_soup.find("a", string="página siguiente"))
 # Gets pokemon name and number
 pokemon_name_number_dict = {}
