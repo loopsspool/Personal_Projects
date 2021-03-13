@@ -87,6 +87,49 @@ def get_game(a):
     title = game_translate(title)
     return(title)
 
+def type_form_translate_split():
+    global form
+    global split_name
+
+    if "?" in split_name:
+        form = "Question-Mark"
+    if "acero" in split_name:
+        form = " Steel"
+    if "agua" in split_name:
+        form = " Water"
+    if "bicho" in split_name:
+        form = " Bug"
+    if "dragón" in split_name:
+        form = " Dragon"
+    if "eléctrico" in split_name:
+        form = " Electric"
+    if "fantasma" in split_name:
+        form = " Ghost"
+    if "fuego" in split_name:
+        form = " Fire"
+    if "hielo" in split_name:
+        form = " Ice"
+    if "lucha" in split_name:
+        form = " Fighting"
+    if "planta" in split_name:
+        form = " Grass"
+    if "psíquico" in split_name:
+        form = " Pyschic"
+    if "roca" in split_name:
+        form = " Rock"
+    if "siniestro" in split_name:
+        form = " Dark"
+    if "tierra" in split_name:
+        form = " Ground"
+    if "veneno" in split_name:
+        form = " Posion"
+    if "volador" in split_name:
+        form = " Flying"
+    if "hada" in split_name:
+        form = " Fairy"
+    
+    split_name = split_name.split(" tipo")[0]
+
 sprites_link_dict = {}
 # Template for file naming, also easy access to each game sprites link
 def sprite_link_dict_entry(gen, link, animated = False):
@@ -339,6 +382,11 @@ for game, link in sprites_link_dict.items():
             # TODO: Maybe handle type forms? At least Arceus?
             # TODO: Definitely Unown too
             # TODO: Shaymin & Shellos Evos
+            # Cherrim
+            # Castform
+            # Deoxys
+            # Rotom
+            # Burmy +evos
                 # Pretty much any variations in earlier games should be taken care of
                     # Otherwise they compound over the generations (+shiny, animated, and back!)
             # Handling Mega evolutions
@@ -352,19 +400,157 @@ for game, link in sprites_link_dict.items():
                 if split_name.endswith("Y"):
                     mega = " MegaY"
                     split_name = split_name.split(" Y")[0]
+            # Handling Dynamax
+            dyna = ""
+            if split_name.endswith("Dinamax"):
+                dyna = " Dynamax"
+                split_name = split_name.split(" Dinamax")[0]
             # Handling Gigantamax
             giganta = ""
             if split_name.endswith("Gigamax"):
                 giganta = " Gigantamax"
-                split_name = split_name.split(" Gigamax")
+                split_name = split_name.split(" Gigamax")[0]
             # Handling regions
             region = ""
             if split_name.endswith("de Alola"):
                 region = " Alolan"
-                split_name = split_name.split(" de Alola")
+                split_name = split_name.split(" de Alola")[0]
             if split_name.endswith("de Galar"):
                 region = " Galarian"
-                split_name = split_name.split(" de Galar")
+                split_name = split_name.split(" de Galar")[0]
+
+            # Doing forms becuase accumulation over all generations, shiny, static/animated, and back sprites would easily get into the thousands
+            # TODO: Functionize conditions with globals
+            form = ""
+            # Pikachu (Cosplay)
+            # TODO: Get hats from bulbapedia or not at all?
+            if "Pikachu" in split_name and "Pikachu" != split_name:
+                if "aristócrata" in split_name:
+                    form = " Aristocrat"
+                    split_name = split_name.split(" aristócrata")[0]
+                # Not sure if this is the default cosplay image or what?
+                if "coqueta" in split_name:
+                    continue
+                if "enmascarada" in split_name:
+                    form = " libre"
+                    split_name = split_name.split(" enmascarada")[0]
+                if "erudita" in split_name:
+                    form = " PhD"
+                    split_name = split_name.split(" erudita")[0]
+                if "roquera" in split_name:
+                    form = " Rock Star"
+                    split_name = split_name.split(" roquera")[0]
+                if "superstar" in split_name:
+                    form = " Pop Star"
+                    split_name = split_name.split(" superstar")[0]
+            # Unown Characters
+            if "Unown" in split_name:
+                # Default sprite image for unown is Unown A, so skip in favor of A
+                if "Unown" == split_name:
+                    continue
+                # Get last character (Unown form)
+                form = " " + split_name[-1]
+                # This splices just Unown name (since ? and ! don't have spaces but the characters do)
+                split_name = split_name[0:5]
+                # Can't have question marks in file names on Windows
+                if form == " ?":
+                    form = " Q-Mark"
+            # Castform Weathers
+            if "Castform" in split_name:
+                if "lluvia" in split_name:
+                    form = " Rainy"
+                    split_name.split(" lluvia")[0]
+                if "nieve" in split_name:
+                    form = " Snowy"
+                    split_name.split(" nieve")[0]
+                if "sol" in split_name:
+                    form = " Sunny"
+                    split_name.split(" sol")[0]
+            # Primal Kyogre & Groudon
+            if "Kyogre" in split_name or "Groudon" in split_name:
+                if "primigenio" in split_name:
+                    form = " Primal"
+                    split_name = split_name.split(" primigenio")[0]
+            # Deoxys
+            if "Deoxys" in split_name and split_name != "Deoxys":
+                if "ataque" in split_name:
+                    form = " Attack"
+                    split_name = split_name.split(" ataque")[0]
+                if "defensa" in split_name:
+                    form = " Defense"
+                    split_name = split_name.split(" defensa")
+                if "velocidad" in split_name:
+                    form = " Speed"
+                    split_name = split_name.split(" velocidad")[0]
+            # Deoxys only available in FRLG as defense or attack form dependent on game
+                # Split must work fine for leading characters, but not trailing. Hence this workaround of sorts
+            if names[i].text.startswith("Deoxys defensa VH.png"):
+                form = " Defense"
+                split_name = split_name.split(" defensa")
+            # Burmy & Wormadam Cloaks
+            if "Burmy" in split_name or "Wormadam" in split_name:
+                if "planta" in split_name:
+                    form = " Plant Cloak"
+                    split_name = split_name.split(" planta")[0]
+                if "arena" in split_name:
+                    form = " Sandy Cloak"
+                    split_name = split_name.split(" arena")[0]
+                if "basura" in split_name:
+                    form = " Trash Cloak"
+                    split_name = split_name.split(" basura")[0]
+            # Cherrim
+            if "Cherrim" in split_name:
+                if "encapotado" in split_name:
+                    form = " Overcast"
+                    split_name = split_name.split("encapotado")[0]
+                if "soleado" in split_name:
+                    form = " Sunshine"
+                    split_name = split_name.split("soleado")[0]
+            # Shellos & Gastrodon East/West
+                # Done a lil differently since "este" (East) is contained in "oeste" (West)
+            if "Shellos" in split_name or "Gastrodon" in split_name:
+                if "oeste" in split_name:
+                    form = " West"
+                    split_name = split_name.split(" oeste")[0]
+                else:
+                    form = " East"
+                    split_name = split_name.split(" este")[0]
+            # Rotom Appliances
+            if "Rotom" in split_name and split_name != "Rotom":
+                if "calor" in split_name:
+                    form = " Heat"
+                    split_name = split_name.split(" calor")[0]
+                if "lavado" in split_name:
+                    form = " Wash"
+                    split_name = split_name.split(" lavado")[0]
+                if "frío" in split_name:
+                    form = " Frost"
+                    split_name = split_name.split(" frío")[0]
+                if "ventilador" in split_name:
+                    form = " Fan"
+                    split_name = split_name.split(" ventilador")[0]
+                if "corte" in split_name:
+                    form = " Mow"
+                    split_name = split_name.split(" corte")[0]
+            # Giratina
+            if "Giratina" in split_name:
+                if "modificada" in split_name:
+                    form = " Altered"
+                    split_name = split_name.split(" modificada")[0]
+                if "origen" in split_name:
+                    form = " Origin"
+                    split_name = split_name.split(" origen")[0]
+            # Shaymin
+            if "Shaymin" in split_name:
+                if "tierra" in split_name:
+                    form = " Land"
+                    split_name = split_name.split(" tierra")[0]
+                if "cielo" in split_name:
+                    form = " Sky"
+                    split_name = split_name.split(" cielo")[0]
+            # Arceus
+            if "Arceus" in split_name and split_name != "Arceus":
+                type_form_translate_split()
 
             # TODO: Combine BW & B2W2, 
             #               XY & ORAS, 
@@ -374,12 +560,15 @@ for game, link in sprites_link_dict.items():
             for poke in pokedex:
                 if poke.name == split_name:
                     match = True
-                    filename = poke.number + " " + poke.name + " " + game + gender + mega + giganta + region
+                    filename = poke.number + " " + poke.name + " " + game + gender + mega + dyna + giganta + form + region
                     # If the filename already exists (and it will for double sprites in DPP), add alt
-                    # TODO: Confirm this works lol
                     try:
                         dummy = pokemon_img_dict[filename + file_ext]
-                        filename += " alt"
+                        # Crystal apparently has different back sprites as other gen2 games
+                        if game == "Gen2-Back":
+                            filename += " Crystal"
+                        else:
+                            filename += " alt"
                     except:
                         dummy = "key doesn't exist yet, continue"
                     filename += file_ext
@@ -400,6 +589,7 @@ for game, link in sprites_link_dict.items():
         
         # If next game page exists, get its url to parse
         if game_page_soup.find("a", string="página siguiente") != None:
+            time.sleep(1.6)
             game_page = game_page_soup.find("a", string="página siguiente").get("href")
             game_page = requests.get("https://www.wikidex.net" + game_page)
             game_page_soup = BeautifulSoup(game_page.content, 'html.parser')
@@ -410,7 +600,7 @@ for game, link in sprites_link_dict.items():
             print(len(outlier_sprites), "outlier pokes: ", outlier_sprites)
             print("\n\n\n")
             #urllib.request.urlretrieve(pokemon_img_link[i], file_name)
-            time.sleep(10)
+            time.sleep(7)
             break
     
 
