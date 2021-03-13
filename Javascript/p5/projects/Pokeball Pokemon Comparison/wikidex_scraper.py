@@ -92,7 +92,7 @@ def type_form_translate_split():
     global split_name
 
     if "?" in split_name:
-        form = "Question-Mark"
+        form = " Question-Mark"
     if "acero" in split_name:
         form = " Steel"
     if "agua" in split_name:
@@ -333,6 +333,9 @@ for i in range(2, 900):
 
 outlier_sprites = []
 for game, link in sprites_link_dict.items():
+    # Running only specific games
+    if game != "Gen4 Diamond-Pearl Static":
+        continue
     # Getting soup of the corresponding sprite page
     game_page = requests.get(link)
     game_page_soup = BeautifulSoup(game_page.content, 'html.parser')
@@ -379,16 +382,7 @@ for game, link in sprites_link_dict.items():
                     split_name = split_name.replace("hembra", "f")
                 if gender == " m":
                     split_name = split_name.replace("macho", "m")
-            # TODO: Maybe handle type forms? At least Arceus?
-            # TODO: Definitely Unown too
-            # TODO: Shaymin & Shellos Evos
-            # Cherrim
-            # Castform
-            # Deoxys
-            # Rotom
-            # Burmy +evos
-                # Pretty much any variations in earlier games should be taken care of
-                    # Otherwise they compound over the generations (+shiny, animated, and back!)
+
             # Handling Mega evolutions
             mega = ""
             if split_name.startswith("Mega"):
@@ -443,6 +437,11 @@ for game, link in sprites_link_dict.items():
                 if "superstar" in split_name:
                     form = " Pop Star"
                     split_name = split_name.split(" superstar")[0]
+            # Spiky-eared Pichu
+            if "Pichu" in split_name and split_name != "Pichu":
+                if "picoreja" in split_name:
+                    form = "Spiky-eared"
+                    split_name = split_name.split(" picoreja")
             # Unown Characters
             if "Unown" in split_name:
                 # Default sprite image for unown is Unown A, so skip in favor of A
@@ -459,13 +458,13 @@ for game, link in sprites_link_dict.items():
             if "Castform" in split_name:
                 if "lluvia" in split_name:
                     form = " Rainy"
-                    split_name.split(" lluvia")[0]
+                    split_name = split_name.split(" lluvia")[0]
                 if "nieve" in split_name:
                     form = " Snowy"
-                    split_name.split(" nieve")[0]
+                    split_name = split_name.split(" nieve")[0]
                 if "sol" in split_name:
                     form = " Sunny"
-                    split_name.split(" sol")[0]
+                    split_name = split_name.split(" sol")[0]
             # Primal Kyogre & Groudon
             if "Kyogre" in split_name or "Groudon" in split_name:
                 if "primigenio" in split_name:
@@ -484,9 +483,11 @@ for game, link in sprites_link_dict.items():
                     split_name = split_name.split(" velocidad")[0]
             # Deoxys only available in FRLG as defense or attack form dependent on game
                 # Split must work fine for leading characters, but not trailing. Hence this workaround of sorts
-            if names[i].text.startswith("Deoxys defensa VH.png"):
+            # TODO: Something going on here
+            if names[i].text.startswith("\nDeoxys defensa"):
                 form = " Defense"
-                split_name = split_name.split(" defensa")
+                split_name = names[i].text.split(" defensa")[0]
+                split_name = split_name.split("\n")[1]
             # Burmy & Wormadam Cloaks
             if "Burmy" in split_name or "Wormadam" in split_name:
                 if "planta" in split_name:
@@ -502,10 +503,10 @@ for game, link in sprites_link_dict.items():
             if "Cherrim" in split_name:
                 if "encapotado" in split_name:
                     form = " Overcast"
-                    split_name = split_name.split("encapotado")[0]
+                    split_name = split_name.split(" encapotado")[0]
                 if "soleado" in split_name:
                     form = " Sunshine"
-                    split_name = split_name.split("soleado")[0]
+                    split_name = split_name.split(" soleado")[0]
             # Shellos & Gastrodon East/West
                 # Done a lil differently since "este" (East) is contained in "oeste" (West)
             if "Shellos" in split_name or "Gastrodon" in split_name:
@@ -568,18 +569,21 @@ for game, link in sprites_link_dict.items():
                         if game == "Gen2-Back":
                             filename += " Crystal"
                         else:
-                            filename += " alt"
+                            # Since alt images are shown first on this website, they will have the original filename
+                                # So, change the first file (alt) to alt filename, and keep the original filename for the second, actually original image
+                            pokemon_img_dict[filename + " alt" + file_ext] = pokemon_img_dict.pop(filename + file_ext)
                     except:
                         dummy = "key doesn't exist yet, continue"
+
                     filename += file_ext
                     pokemon_img_dict[filename] = imgs[i].a.img["src"]
                     # Saves first-frame statics as png from gif for Crystal & Emerald
+                        # TODO: THIS CONVERTS IT TO AN ANIMATED PNG (open in Chrome) -- WILL HAVE TO FIND ANOTHER WAY TO DO THIS
                     if game == "Gen2 Crystal Animated" or game == "Gen2 Crystal Animated Shiny" or game == "Gen3 Emerald Animated" or game == "Gen3 Emerald Animated Shiny":
                         filename = filename.replace("Animated", "Static")
                         filename = filename.replace(".gif", ".png")
                         pokemon_img_dict[filename] = imgs[i].a.img["src"]
-            # This is mainly for pokemon with different forms
-                # I will rewrite them by hand since it would take just as long as hardcoding each one
+            # This is to see what pokemon aren't formatted correctly
             if match == False:
                 outlier_sprites.append(names[i].text.split("\n")[1])
                 pokemon_img_dict[names[i].text.split("\n")[1]] = imgs[i].a.img["src"]
@@ -599,6 +603,7 @@ for game, link in sprites_link_dict.items():
                 print(k, ":", v)
             print(len(outlier_sprites), "outlier pokes: ", outlier_sprites)
             print("\n\n\n")
+            print("Done")
             #urllib.request.urlretrieve(pokemon_img_link[i], file_name)
             time.sleep(7)
             break
