@@ -527,7 +527,56 @@ for game, link in sprites_link_dict.items():
             else:
                 form_translate_split("Darmanitan", "daruma", "Zen")
 
+            # Deerling & Sawsbuck Seasons
+            form_translate_split("Deerling", "primavera", "Spring")
+            form_translate_split("Deerling", "verano", "Summer")
+            form_translate_split("Deerling", "otoño", "Autumn")
+            form_translate_split("Deerling", "invierno", "Winter")
+            form_translate_split("Sawsbuck", "primavera", "Spring")
+            form_translate_split("Sawsbuck", "verano", "Summer")
+            form_translate_split("Sawsbuck", "otoño", "Autumn")
+            form_translate_split("Sawsbuck", "invierno", "Winter")
+
+            # Forces of nature forms
+            form_translate_split("Tornadus", "avatar", "Incarnate")
+            form_translate_split("Tornadus", "tótem", "Therian")
+            form_translate_split("Thundurus", "avatar", "Incarnate")
+            form_translate_split("Thundurus", "tótem", "Therian")
+            form_translate_split("Landorus", "avatar", "Incarnate")
+            form_translate_split("Landorus", "tótem", "Therian")
+
+            # Kyurem Fusions
+            if "negro" in split_name:
+                if "activo" in split_name:
+                    form_translate_split("Kyurem", "negro activo", "Black Overdrive")
+                if "inactivo" in split_name:
+                    form_translate_split("Kyurem", "negro inactivo", "Black")
+                if split_name == "Kyurem negro":
+                    form_translate_split("Kyurem", "negro", "Black")
+            if "blanco" in split_name:
+                if "activo" in split_name:
+                    form_translate_split("Kyurem", "blanco activo", "White Overdrive")
+                if "inactivo" in split_name:
+                    form_translate_split("Kyurem", "blanco inactivo", "White")
+                if split_name == "Kyurem blanco":
+                    form_translate_split("Kyurem", "blanco", "White")
             
+            # Keldeo
+            if "Keldeo" in split_name and "brío" in split_name:
+                form_translate_split("Keldeo", "brío", "Resolute")
+            else:
+                if "Keldeo" == split_name:
+                    form = " Ordinary"
+
+            # Meloetta
+            form_translate_split("Meloetta", "lírica", "Aria")
+            form_translate_split("Meloetta", "danza", "Pirouette")
+
+            # Genesect
+            form_translate_split("Genesect", "fulgoROM", "Shock Drive")
+            form_translate_split("Genesect", "piroROM", "Burn Drive")
+            form_translate_split("Genesect", "crioROM", "Chill Drive")
+            form_translate_split("Genesect", "hidroROM", "Douse Drive")
 
             # TODO: Combine BW & B2W2, 
             #               XY & ORAS, 
