@@ -87,13 +87,14 @@ def get_game(a):
     title = game_translate(title)
     return(title)
 
-def form_translate_split(spanish_form, translated_form):
+def form_translate_split(pokemon, spanish_form, translated_form):
     global form
     global split_name
 
-    if spanish_form in split_name:
-        form = " " + translated_form
-        split_name = split_name.split(" " + spanish_form)[0]
+    if pokemon in split_name and pokemon != split_name:
+        if spanish_form in split_name:
+            form = " " + translated_form
+            split_name = split_name.split(" " + spanish_form)[0]
 
 
 
@@ -427,32 +428,21 @@ for game, link in sprites_link_dict.items():
                     split_name = split_name.replace("hembra", "f")
                 if gender == " m":
                     split_name = split_name.replace("macho", "m")
+
             # Pikachu (Cosplay)
             # TODO: Get hats from bulbapedia or not at all?
-            if "Pikachu" in split_name and "Pikachu" != split_name:
-                if "aristócrata" in split_name:
-                    form = " Aristocrat"
-                    split_name = split_name.split(" aristócrata")[0]
-                # Not sure if this is the default cosplay image or what?
-                if "coqueta" in split_name:
-                    continue
-                if "enmascarada" in split_name:
-                    form = " libre"
-                    split_name = split_name.split(" enmascarada")[0]
-                if "erudita" in split_name:
-                    form = " PhD"
-                    split_name = split_name.split(" erudita")[0]
-                if "roquera" in split_name:
-                    form = " Rock Star"
-                    split_name = split_name.split(" roquera")[0]
-                if "superstar" in split_name:
-                    form = " Pop Star"
-                    split_name = split_name.split(" superstar")[0]
+            # Not sure if this is the default cosplay image or what? But it's basically a normal Pikachu
+            if "Pikachu coqueta" in split_name:
+                continue
+            form_translate_split("Pikachu", "aristócrata", "Aristocrat")
+            form_translate_split("Pikachu", "enmascarada", "libre")
+            form_translate_split("Pikachu", "erudita", "Phd")
+            form_translate_split("Pikachu", "roquera", "Rock Star")
+            form_translate_split("Pikachu", "superstar", "Pop Star")
+
             # Spiky-eared Pichu
-            if "Pichu" in split_name and split_name != "Pichu":
-                if "picoreja" in split_name:
-                    form = "Spiky-eared"
-                    split_name = split_name.split(" picoreja")
+            form_translate_split("Pichu", "picoreja", "Spiky-eared")
+
             # Unown Characters
             if "Unown" in split_name:
                 # Default sprite image for unown is Unown A, so skip in favor of A
@@ -465,53 +455,39 @@ for game, link in sprites_link_dict.items():
                 # Can't have question marks in file names on Windows
                 if form == " ?":
                     form = " Q-Mark"
+
             # Castform Weathers
-            if "Castform" in split_name:
-                form_translate_split("lluvia", "Rainy")
-                form_translate_split("nieve", "Snowy")
-                form_translate_split("sol", "Sunny")
+            form_translate_split("Castform", "lluvia", "Rainy")
+            form_translate_split("Castform", "nieve", "Snowy")
+            form_translate_split("Castform", "sol", "Sunny")
+
             # Primal Kyogre & Groudon
-            if "Kyogre" in split_name or "Groudon" in split_name:
-                if "primigenio" in split_name:
-                    form = " Primal"
-                    split_name = split_name.split(" primigenio")[0]
+            form_translate_split("Kyogre", "primigenio", "Primal")
+            form_translate_split("Groudon", "primigenio", "Primal")
+
             # Deoxys
-            if "Deoxys" in split_name and split_name != "Deoxys":
-                if "ataque" in split_name:
-                    form = " Attack"
-                    split_name = split_name.split(" ataque")[0]
-                if "defensa" in split_name:
-                    form = " Defense"
-                    split_name = split_name.split(" defensa")
-                if "velocidad" in split_name:
-                    form = " Speed"
-                    split_name = split_name.split(" velocidad")[0]
+            form_translate_split("Deoxys", "ataque", "Attack")
+            form_translate_split("Deoxys", "defensa", "Defense")
+            form_translate_split("Deoxys", "velocidad", "Speed")
             # Deoxys only available in FRLG as defense or attack form dependent on game
                 # Split must work fine for leading characters, but not trailing. Hence this workaround of sorts
-            # TODO: Something going on here
             if names[i].text.startswith("\nDeoxys defensa"):
                 form = " Defense"
                 split_name = names[i].text.split(" defensa")[0]
                 split_name = split_name.split("\n")[1]
+
             # Burmy & Wormadam Cloaks
-            if "Burmy" in split_name or "Wormadam" in split_name:
-                if "planta" in split_name:
-                    form = " Plant Cloak"
-                    split_name = split_name.split(" planta")[0]
-                if "arena" in split_name:
-                    form = " Sandy Cloak"
-                    split_name = split_name.split(" arena")[0]
-                if "basura" in split_name:
-                    form = " Trash Cloak"
-                    split_name = split_name.split(" basura")[0]
+            form_translate_split("Burmy", "planta", "Plant Cloak")
+            form_translate_split("Burmy", "arena", "Sandy Cloak")
+            form_translate_split("Burmy", "basura", "Trash cloak")
+            form_translate_split("Wormadam", "planta", "Plant Cloak")
+            form_translate_split("Wormadam", "arena", "Sandy Cloak")
+            form_translate_split("Wormadam", "basura", "Trash cloak")
+
             # Cherrim
-            if "Cherrim" in split_name:
-                if "encapotado" in split_name:
-                    form = " Overcast"
-                    split_name = split_name.split(" encapotado")[0]
-                if "soleado" in split_name:
-                    form = " Sunshine"
-                    split_name = split_name.split(" soleado")[0]
+            form_translate_split("Cherrim", "encapotado", "Overcast")
+            form_translate_split("Cherrim", "soleado", "Sunshine")
+
             # Shellos & Gastrodon East/West
                 # Done a lil differently since "este" (East) is contained in "oeste" (West)
             if "Shellos" in split_name or "Gastrodon" in split_name:
@@ -521,42 +497,37 @@ for game, link in sprites_link_dict.items():
                 else:
                     form = " East"
                     split_name = split_name.split(" este")[0]
+
             # Rotom Appliances
-            if "Rotom" in split_name and split_name != "Rotom":
-                if "calor" in split_name:
-                    form = " Heat"
-                    split_name = split_name.split(" calor")[0]
-                if "lavado" in split_name:
-                    form = " Wash"
-                    split_name = split_name.split(" lavado")[0]
-                if "frío" in split_name:
-                    form = " Frost"
-                    split_name = split_name.split(" frío")[0]
-                if "ventilador" in split_name:
-                    form = " Fan"
-                    split_name = split_name.split(" ventilador")[0]
-                if "corte" in split_name:
-                    form = " Mow"
-                    split_name = split_name.split(" corte")[0]
+            form_translate_split("Rotom", "calor", "Heat")
+            form_translate_split("Rotom", "lavado", "Wash")
+            form_translate_split("Rotom", "frío", "Frost")
+            form_translate_split("Rotom", "ventilador", "Fan")
+            form_translate_split("Rotom", "corte", "Mow")
+
             # Giratina
-            if "Giratina" in split_name:
-                if "modificada" in split_name:
-                    form = " Altered"
-                    split_name = split_name.split(" modificada")[0]
-                if "origen" in split_name:
-                    form = " Origin"
-                    split_name = split_name.split(" origen")[0]
+            form_translate_split("Giratina", "modificada", "Altered")
+            form_translate_split("Giratina", "origen", "Origin")
+
             # Shaymin
-            if "Shaymin" in split_name:
-                if "tierra" in split_name:
-                    form = " Land"
-                    split_name = split_name.split(" tierra")[0]
-                if "cielo" in split_name:
-                    form = " Sky"
-                    split_name = split_name.split(" cielo")[0]
-            # Arceus
+            form_translate_split("Shaymin", "tierra", "Land")
+            form_translate_split("Shaymin", "cielo", "Sky")
+
+            # Arceus Types
             if "Arceus" in split_name and split_name != "Arceus":
                 type_form_translate_split()
+
+            # Basculin Stripes
+            form_translate_split("Basculin", "azul", "Blue-Striped")
+            form_translate_split("Basculin", "roja", "Red-Striped")
+
+            # Darmanitan Modes
+            if "Darmanitan" == split_name:
+                form = "Standard"
+            else:
+                form_translate_split("Darmanitan", "daruma", "Zen")
+
+            
 
             # TODO: Combine BW & B2W2, 
             #               XY & ORAS, 
