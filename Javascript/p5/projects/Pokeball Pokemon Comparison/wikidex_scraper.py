@@ -87,6 +87,16 @@ def get_game(a):
     title = game_translate(title)
     return(title)
 
+def form_translate_split(spanish_form, translated_form):
+    global form
+    global split_name
+
+    if spanish_form in split_name:
+        form = " " + translated_form
+        split_name = split_name.split(" " + spanish_form)[0]
+
+
+
 def type_form_translate_split():
     global form
     global split_name
@@ -376,13 +386,9 @@ for game, link in sprites_link_dict.items():
                 split_name = names[i].text.split(split_seperators_by_game[game])[0]
             # Removing leading newline character
             split_name = split_name.split("\n")[1]
-            # Handling Nidoran, the only pokemon where this is the case
-            if "Nidoran" in split_name and gender != "":
-                if gender == " f":
-                    split_name = split_name.replace("hembra", "f")
-                if gender == " m":
-                    split_name = split_name.replace("macho", "m")
 
+            # TODO: Group these with form translate split function
+                # Default third parameter form but if not can do region, etc
             # Handling Mega evolutions
             mega = ""
             if split_name.startswith("Mega"):
@@ -414,8 +420,13 @@ for game, link in sprites_link_dict.items():
                 split_name = split_name.split(" de Galar")[0]
 
             # Doing forms becuase accumulation over all generations, shiny, static/animated, and back sprites would easily get into the thousands
-            # TODO: Functionize conditions with globals
             form = ""
+            # Nidoran Genders in name
+            if "Nidoran" in split_name and gender != "":
+                if gender == " f":
+                    split_name = split_name.replace("hembra", "f")
+                if gender == " m":
+                    split_name = split_name.replace("macho", "m")
             # Pikachu (Cosplay)
             # TODO: Get hats from bulbapedia or not at all?
             if "Pikachu" in split_name and "Pikachu" != split_name:
@@ -456,15 +467,9 @@ for game, link in sprites_link_dict.items():
                     form = " Q-Mark"
             # Castform Weathers
             if "Castform" in split_name:
-                if "lluvia" in split_name:
-                    form = " Rainy"
-                    split_name = split_name.split(" lluvia")[0]
-                if "nieve" in split_name:
-                    form = " Snowy"
-                    split_name = split_name.split(" nieve")[0]
-                if "sol" in split_name:
-                    form = " Sunny"
-                    split_name = split_name.split(" sol")[0]
+                form_translate_split("lluvia", "Rainy")
+                form_translate_split("nieve", "Snowy")
+                form_translate_split("sol", "Sunny")
             # Primal Kyogre & Groudon
             if "Kyogre" in split_name or "Groudon" in split_name:
                 if "primigenio" in split_name:
@@ -579,10 +584,10 @@ for game, link in sprites_link_dict.items():
                     pokemon_img_dict[filename] = imgs[i].a.img["src"]
                     # Saves first-frame statics as png from gif for Crystal & Emerald
                         # TODO: THIS CONVERTS IT TO AN ANIMATED PNG (open in Chrome) -- WILL HAVE TO FIND ANOTHER WAY TO DO THIS
-                    if game == "Gen2 Crystal Animated" or game == "Gen2 Crystal Animated Shiny" or game == "Gen3 Emerald Animated" or game == "Gen3 Emerald Animated Shiny":
-                        filename = filename.replace("Animated", "Static")
-                        filename = filename.replace(".gif", ".png")
-                        pokemon_img_dict[filename] = imgs[i].a.img["src"]
+                    # if game == "Gen2 Crystal Animated" or game == "Gen2 Crystal Animated Shiny" or game == "Gen3 Emerald Animated" or game == "Gen3 Emerald Animated Shiny":
+                    #     filename = filename.replace("Animated", "Static")
+                    #     filename = filename.replace(".gif", ".png")
+                    #     pokemon_img_dict[filename] = imgs[i].a.img["src"]
             # This is to see what pokemon aren't formatted correctly
             if match == False:
                 outlier_sprites.append(names[i].text.split("\n")[1])
