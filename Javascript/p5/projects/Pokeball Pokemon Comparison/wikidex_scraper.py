@@ -101,45 +101,69 @@ def form_translate_split(pokemon, spanish_form, translated_form):
 def type_form_translate_split():
     global form
     global split_name
+    spanish_type = ""
 
     if "?" in split_name:
+        spanish_type = " ?"
         form = " Question-Mark"
     if "acero" in split_name:
+        spanish_type = " acero"
         form = " Steel"
     if "agua" in split_name:
+        spanish_type = " agua"
         form = " Water"
     if "bicho" in split_name:
+        spanish_type = " bicho"
         form = " Bug"
     if "dragón" in split_name:
+        spanish_type = " dragón"
         form = " Dragon"
     if "eléctrico" in split_name:
+        spanish_type = " eléctrico"
         form = " Electric"
     if "fantasma" in split_name:
+        spanish_type = " fantasma"
         form = " Ghost"
     if "fuego" in split_name:
+        spanish_type = " fuego"
         form = " Fire"
+    if "hada" in split_name:
+        spanish_type = " hada"
+        form = " Fairy"
     if "hielo" in split_name:
+        spanish_type = " hielo"
         form = " Ice"
     if "lucha" in split_name:
+        spanish_type = " lucha"
         form = " Fighting"
     if "planta" in split_name:
+        spanish_type = " planta"
         form = " Grass"
     if "psíquico" in split_name:
+        spanish_type = " psíquico"
         form = " Pyschic"
     if "roca" in split_name:
+        spanish_type = " roca"
         form = " Rock"
     if "siniestro" in split_name:
+        spanish_type = " siniestro"
         form = " Dark"
     if "tierra" in split_name:
+        spanish_type = " tierra"
         form = " Ground"
     if "veneno" in split_name:
+        spanish_type = " veneno"
         form = " Posion"
     if "volador" in split_name:
+        spanish_type = " volador"
         form = " Flying"
-    if "hada" in split_name:
-        form = " Fairy"
-    
-    split_name = split_name.split(" tipo")[0]
+
+    # Arceus has type flag in filename, Silvally does not
+    # So this splits accordingly
+    if split_name == split_name.split(" tipo")[0]:
+        split_name = split_name.split(spanish_type)[0]
+    else:
+        split_name = split_name.split(" tipo")[0]
 
 sprites_link_dict = {}
 # Template for file naming, also easy access to each game sprites link
@@ -514,6 +538,8 @@ for game, link in sprites_link_dict.items():
             form_translate_split("Shaymin", "cielo", "Sky")
 
             # Arceus Types
+            if "Arceus" == split_name:
+                form = " Normal"
             if "Arceus" in split_name and split_name != "Arceus":
                 type_form_translate_split()
 
@@ -577,6 +603,149 @@ for game, link in sprites_link_dict.items():
             form_translate_split("Genesect", "piroROM", "Burn Drive")
             form_translate_split("Genesect", "crioROM", "Chill Drive")
             form_translate_split("Genesect", "hidroROM", "Douse Drive")
+
+            # Ash Greninja
+            form_translate_split("Greninja", "Ash", "Ash")
+
+            # Vivillon Patterns
+            form_translate_split("Vivillon", "continental", "Continental")
+            form_translate_split("Vivillon", "desierto", "Sandstorm")
+            form_translate_split("Vivillon", "estepa", "High Plains")
+            form_translate_split("Vivillon", "fantasía", "Fancy")
+            form_translate_split("Vivillon", "floral", "Meadow")
+            form_translate_split("Vivillon", "isleño", "Archipelago")
+            form_translate_split("Vivillon", "jungla", "Jungle")
+            form_translate_split("Vivillon", "marino", "Marine")
+            form_translate_split("Vivillon", "moderno", "Modern")
+            form_translate_split("Vivillon", "monzón", "Monsoon")
+            form_translate_split("Vivillon", "oasis", "River")
+            form_translate_split("Vivillon", "océano", "Ocean")
+            form_translate_split("Vivillon", "oriental", "Elegant")
+            form_translate_split("Vivillon", "pantano", "Savanna")
+            form_translate_split("Vivillon", "Poké Ball", "Poké Ball")
+            form_translate_split("Vivillon", "polar", "Icy Snow")
+            form_translate_split("Vivillon", "solar", "Sun")
+            form_translate_split("Vivillon", "taiga", "Polar")
+            form_translate_split("Vivillon", "tundra", "Tundra")
+            form_translate_split("Vivillon", "vergel", "Garden")
+
+
+            # Flabebe, Floette, and Florges colors
+            # Unused form in XY
+            if "Floette" in split_name and "eterna" in split_name:
+                continue
+            form_translate_split("Flabébé", "amarilla", "Yellow Flower")
+            form_translate_split("Flabébé", "azul", "Blue Flower")
+            form_translate_split("Flabébé", "blanca", "White Flower")
+            form_translate_split("Flabébé", "naranja", "Orange Flower")
+            form_translate_split("Flabébé", "roja", "Red Flower")
+            form_translate_split("Floette", "amarilla", "Yellow Flower")
+            form_translate_split("Floette", "azul", "Blue Flower")
+            form_translate_split("Floette", "blanca", "White Flower")
+            form_translate_split("Floette", "naranja", "Orange Flower")
+            form_translate_split("Floette", "roja", "Red Flower")
+            form_translate_split("Florges", "amarilla", "Yellow Flower")
+            form_translate_split("Florges", "azul", "Blue Flower")
+            form_translate_split("Florges", "blanca", "White Flower")
+            form_translate_split("Florges", "naranja", "Orange Flower")
+            form_translate_split("Florges", "roja", "Red Flower")
+
+            # Furfrou Trims
+            form_translate_split("Furfrou", "aristocrático", "La Reine Trim")
+            form_translate_split("Furfrou", "caballero", "Dandy Trim")
+            form_translate_split("Furfrou", "corazón", "Heart Trim")
+            form_translate_split("Furfrou", "dama", "Matron Trim")
+            form_translate_split("Furfrou", "estrella", "Star Trim")
+            form_translate_split("Furfrou", "faraónico", "Pharaoh Trim")
+            form_translate_split("Furfrou", "kabuki", "Kabuki")
+            form_translate_split("Furfrou", "rombo", "Diamond Trim")
+            form_translate_split("Furfrou", "señorita", "Debutante Trim")
+
+            # Aegislash
+            form_translate_split("Aegislash", "escudo", "Shield")
+            form_translate_split("Aegislash", "filo", "Blade")
+
+            # Pumpkaboo and Gourgeist Sizes
+            if "Pumpkaboo" == split_name or "Gourgeist" == split_name:
+                # Average sizes have no indication in filename on this website
+                form = " 1Average Size"
+            else:
+                form_translate_split("Pumpkaboo", "pequeño", "0Small Size")
+                form_translate_split("Pumpkaboo", "grande", "2Large Size")
+                form_translate_split("Pumpkaboo", "extragrande", "3Super Size")
+                form_translate_split("Gourgeist", "pequeño", "0Small Size")
+                form_translate_split("Gourgeist", "grande", "2Large Size")
+                form_translate_split("Gourgeist", "extragrande", "3Super Size")
+
+            # Xerneas
+            if "Xerneas" == split_name:
+                form = " Active"
+            else:
+                form_translate_split("Xerneas", "relajada", "Neutral")
+
+            # Zygarde
+            # Cells & Nuclei aren't really sprites, so continue
+            if split_name == "Zygarde célula" or split_name == "Zygarde núcleo":
+                continue
+            if "Zygarde" == split_name:
+                form = " 50%"
+            else:
+                form_translate_split("Zygarde", "al 10%", "10%")
+                form_translate_split("Zygarde", "completo", "Complete")
+
+            # Hoopa
+            if "Hoopa" == split_name:
+                form = " Confined"
+            else:
+                form_translate_split("Hoopa", "desatado", "Unbound")
+
+            # Oricorio
+            form_translate_split("Oricorio", "animado", "Pom-Pom Style")
+            form_translate_split("Oricorio", "apasionado", "Baile Style")
+            form_translate_split("Oricorio", "plácido", "Pa'u Style")
+            form_translate_split("Oricorio", "refinado", "Sensu Style")
+
+            # Lycanroc
+            form_translate_split("Lycanroc", "diurno", "Midday")
+            form_translate_split("Lycanroc", "nocturno", "Midnight")
+            form_translate_split("Lycanroc", "crepuscular", "Dusk")
+
+            # Wishiwashi
+            form_translate_split("Wishiwashi", "individual", "Solo")
+            form_translate_split("Wishiwashi", "banco", "School")
+
+            # Silvally Types
+            if "Silvally" == split_name:
+                form = " Normal"
+            if "Silvally" in split_name and split_name != "Silvally":
+                type_form_translate_split()
+
+            # Minior
+            form_translate_split("Minior", "meteorito", "Meteor")
+            form_translate_split("Minior", "amarillo", "Yellow Core")
+            form_translate_split("Minior", "añil", "Indigo Core")
+            form_translate_split("Minior", "azul", "Blue Core")
+            form_translate_split("Minior", "naranja", "Orange Core")
+            form_translate_split("Minior", "rojo", "Red Core")
+            form_translate_split("Minior", "verde", "Green Core")
+            form_translate_split("Minior", "violeta", "Violet Core")
+
+            # Mimikyu
+            if "Mimikyu" == split_name:
+                form = " Disguised"
+            else:
+                form_translate_split("Mimikyu", "descubierto", "Busted")
+
+            # Necrozma
+            form_translate_split("Necrozma", "alas del alba", "Dawn Wings")
+            form_translate_split("Necrozma", "melena crepuscular", "Dusk Mane")
+            if "Ultra-Necrozma" == split_name:
+                form = " Ultra"
+                split_name = split_name.split("Ultra-")[1]
+
+            # Magearna
+            form_translate_split("Magearna", "vetusta", "Original Color")
+
 
             # TODO: Combine BW & B2W2, 
             #               XY & ORAS, 
