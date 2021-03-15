@@ -373,11 +373,24 @@ for i in range(2, 900):
 # for i in range(len(pokedex)):
 #     print(vars(pokedex[i]))
 
+game_hit = False
 outlier_sprites = []
 for game, link in sprites_link_dict.items():
     # Running only specific games
+    # Multiple after game
+    # if game != "Gen6 XY Static":
+    #     # If the game hasn't been hit yet, continue on to next game
+    #     # If it HAS been hit, run the script
+    #     if not game_hit:
+    #         continue
+    # else:
+    #     # If the game equals the one specified, run script
+    #     game_hit = True
+    
+    # Single game
     # if game != "Gen4 Diamond-Pearl Static":
     #     continue
+
     # Getting soup of the corresponding sprite page
     game_page = requests.get(link)
     game_page_soup = BeautifulSoup(game_page.content, 'html.parser')
@@ -412,7 +425,7 @@ for game, link in sprites_link_dict.items():
             # Removing game, file size, extension, etc
             # This conditional is due to the websites oversight-- Most on the page are XY Static shinies
                 # Except mostly the Megas, hence the exception. The rest I will do by hand
-            if game == "Gen6 ORAS Static Shiny" and names[i].startswith("Mega-"):
+            if game == "Gen6 ORAS Static Shiny" and names[i].text.startswith("\nMega-"):
                 split_name = names[i].text.split(" ROZA")[0]
             else:
                 split_name = names[i].text.split(split_seperators_by_game[game])[0]
@@ -421,11 +434,11 @@ for game, link in sprites_link_dict.items():
 
             # TODO: Group these with form translate split function
                 # Default third parameter form but if not can do region, etc
-            # Handling Mega evolutions
+            # Handling Mega evolutions -- Excluding the Meganium paradox
             mega = ""
-            if split_name.startswith("Mega"):
+            if split_name.startswith("Mega") and split_name != "Meganium":
                 mega = " Mega"
-                split_name = split_name.split("Mega-")[0]
+                split_name = split_name.split("Mega-")[1]
                 if split_name.endswith("X"):
                     mega = " MegaX"
                     split_name = split_name.split(" X")[0]
@@ -460,16 +473,23 @@ for game, link in sprites_link_dict.items():
                 if gender == " m":
                     split_name = split_name.replace("macho", "m")
 
-            # Pikachu (Cosplay)
-            # TODO: Get hats from bulbapedia or not at all?
+            # Pikachu Cosplay & Caps
             # Not sure if this is the default cosplay image or what? But it's basically a normal Pikachu
             if "Pikachu coqueta" in split_name:
                 continue
-            form_translate_split("Pikachu", "aristócrata", "Aristocrat")
-            form_translate_split("Pikachu", "enmascarada", "libre")
-            form_translate_split("Pikachu", "erudita", "Phd")
-            form_translate_split("Pikachu", "roquera", "Rock Star")
-            form_translate_split("Pikachu", "superstar", "Pop Star")
+            form_translate_split("Pikachu", "aristócrata", "Cosplay-Aristocrat")
+            form_translate_split("Pikachu", "enmascarada", "Cosplay-libre")
+            form_translate_split("Pikachu", "erudita", "Cosplay-Phd")
+            form_translate_split("Pikachu", "roquera", "Cosplay-Rock Star")
+            form_translate_split("Pikachu", "superstar", "Cosplay-Pop Star")
+            form_translate_split("Pikachu", "Alola", "Cap-Alola")
+            form_translate_split("Pikachu", "Hoenn", "Cap-Hoenn")
+            form_translate_split("Pikachu", "Kalos", "Cap-Kalos")
+            form_translate_split("Pikachu", "original", "Cap-Original")
+            form_translate_split("Pikachu", "Sinnoh", "Cap-Sinnoh")
+            form_translate_split("Pikachu", "Teselia", "Cap-Unova")
+            form_translate_split("Pikachu", "compañero", "Cap-Partner")
+            form_translate_split("Pikachu", "trotamundos", "Cap-World")
 
             # Spiky-eared Pichu
             form_translate_split("Pichu", "picoreja", "Spiky-eared")
@@ -551,8 +571,8 @@ for game, link in sprites_link_dict.items():
                 type_form_translate_split()
 
             # Basculin Stripes
-            form_translate_split("Basculin", "azul", "Blue-Striped")
-            form_translate_split("Basculin", "roja", "Red-Striped")
+            form_translate_split("Basculin", "raya azul", "Blue-Striped")
+            form_translate_split("Basculin", "raya roja", "Red-Striped")
 
             # Darmanitan Modes
             if "Darmanitan" == split_name:
@@ -610,6 +630,11 @@ for game, link in sprites_link_dict.items():
             form_translate_split("Genesect", "piroROM", "Burn Drive")
             form_translate_split("Genesect", "crioROM", "Chill Drive")
             form_translate_split("Genesect", "hidroROM", "Douse Drive")
+            # Website named Genesect differenlt in gen8:
+            form_translate_split("Genesect", "disco amarillo", "Shock Drive")
+            form_translate_split("Genesect", "disco rojo", "Burn Drive")
+            form_translate_split("Genesect", "disco blanco", "Chill Drive")
+            form_translate_split("Genesect", "disco azul", "Douse Drive")
 
             # Ash Greninja
             form_translate_split("Greninja", "Ash", "Ash")
@@ -736,6 +761,8 @@ for game, link in sprites_link_dict.items():
             form_translate_split("Minior", "rojo", "Red Core")
             form_translate_split("Minior", "verde", "Green Core")
             form_translate_split("Minior", "violeta", "Violet Core")
+            # Shiny cores all the same color?
+            form_translate_split("Minior", "núcleo", "Core")
 
             # Mimikyu
             if "Mimikyu" == split_name:
@@ -784,8 +811,9 @@ for game, link in sprites_link_dict.items():
                     form_translate_split("Alcremie", "crema de limón", "Lemon Cream-" + form)
                 if "crema de menta" in split_name:
                     form_translate_split("Alcremie", "crema de menta", "Mint Cream-" + form)
-                if "crema de té corazón" in split_name:
-                    form_translate_split("Alcremie", "crema de té corazón", "Matcha Cream-" + form)
+                # Site left out most of the corazón, so I left it out too since theres no te anywhere else
+                if "crema de té" in split_name:
+                    form_translate_split("Alcremie", "crema de té", "Matcha Cream-" + form)
                 if "crema de vainilla" in split_name:
                     form_translate_split("Alcremie", "crema de vainilla", "Vanilla Cream-" + form)
                 if "crema rosa" in split_name:
@@ -802,6 +830,15 @@ for game, link in sprites_link_dict.items():
                 # On website there is no notation if it is Strawberry sweet form, so adding that here
                 if form.endswith("-"):
                     form += "Strawberry Sweet"
+            # Since shiny Alcremies all have the same base color, split name by sweet
+            if game.endswith("Shiny"):
+                form_translate_split("Alcremie", "corazón", "Love Sweet")
+                form_translate_split("Alcremie", "estrella", "Star Sweet")
+                form_translate_split("Alcremie", "flor", "Flower Sweet")
+                form_translate_split("Alcremie", "fruto", "Berry Sweet")
+                form_translate_split("Alcremie", "lazo", "Ribbon Sweet")
+                form_translate_split("Alcremie", "trébol", "Clover Sweet")
+
 
             # Eiscue
             if "Eiscue" == split_name:
@@ -838,6 +875,10 @@ for game, link in sprites_link_dict.items():
             # Calyrex Ridings
             form_translate_split("Calyrex", "jinete espectral", "Shadow Rider")
             form_translate_split("Calyrex", "jinete glacial", "Ice Rider")
+
+            # Type: Null name is completely translated
+            if split_name == "Código Cero":
+                split_name = "Type Null"
 
             # Assigning Filenames
             match = False
@@ -896,11 +937,10 @@ for game, link in sprites_link_dict.items():
             game_page_soup = BeautifulSoup(game_page.content, 'html.parser')
         else:
             # If done with all images for the game, save them
-            for k,v in pokemon_img_dict.items():
-                print(k, ":", v)
-            print(len(outlier_sprites), "outlier pokes: ", outlier_sprites)
+            for file_name, poke_link in pokemon_img_dict.items():
+                urllib.request.urlretrieve(poke_link, file_name)
+            print(game, "Done")
             print("\n\n\n")
-            #urllib.request.urlretrieve(pokemon_img_link[i], file_name)
             time.sleep(7)
             break
     
