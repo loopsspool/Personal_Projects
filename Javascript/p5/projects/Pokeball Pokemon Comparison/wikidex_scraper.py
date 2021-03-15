@@ -87,6 +87,13 @@ def get_game(a):
     title = game_translate(title)
     return(title)
 
+def game_title_replace(old, new):
+    global game
+    global game_str
+
+    if old in game:
+        game_str = game_str.replace(old, new)
+
 def form_translate_split(pokemon, spanish_form, translated_form):
     global form
     global split_name
@@ -369,8 +376,8 @@ for i in range(2, 900):
 outlier_sprites = []
 for game, link in sprites_link_dict.items():
     # Running only specific games
-    if game != "Gen4 Diamond-Pearl Static":
-        continue
+    # if game != "Gen4 Diamond-Pearl Static":
+    #     continue
     # Getting soup of the corresponding sprite page
     game_page = requests.get(link)
     game_page_soup = BeautifulSoup(game_page.content, 'html.parser')
@@ -832,21 +839,26 @@ for game, link in sprites_link_dict.items():
             form_translate_split("Calyrex", "jinete espectral", "Shadow Rider")
             form_translate_split("Calyrex", "jinete glacial", "Ice Rider")
 
-            # TODO: Combine BW & B2W2, 
-            #               XY & ORAS, 
-            #               Sun-Moon & UltraSun-UltraMoon
-            # Since the latters all only have supplemental pokes to the formers
+            # Assigning Filenames
             match = False
             for poke in pokedex:
                 if poke.name == split_name:
                     match = True
+                    game_str = game
                     # This is to replace certain game names to include multiple games
                         # eg Black/White sprites are the same as Black2/White2
                         # XY, ORAS, SM, and USUM all use the same 3d sprites, etc
                             # So instead of doing multiple downloads for each game, I'm combining them to share the same image
-                    game_replace = ""
-                    if "Black-White" in game:
-                    filename = poke.number + " " + poke.name + " " + game + gender + mega + dyna + giganta + form + region
+                    game_title_replace("Black-White", "BW-B2W2")
+                    game_title_replace("Black2-White2", "BW-B2W2")
+                    game_title_replace("Gen6 XY", "Gen6-7 XY-ORAS-SM-USUM")
+                    game_title_replace("Gen6 ORAS", "Gen6-7 XY-ORAS-SM-USUM")
+                    # For back sprites
+                    game_title_replace("Gen6-", "Gen6-7-")
+                    game_title_replace("Gen7 Sun-Moon", "Gen7 SM-USUM")
+                    game_title_replace("Gen7 USUM", "Gen7 SM-USUM")
+
+                    filename = poke.number + " " + poke.name + " " + game_str + gender + mega + dyna + giganta + form + region
                     # If the filename already exists (and it will for double sprites in DPP), add alt
                     try:
                         dummy = pokemon_img_dict[filename + file_ext]
@@ -888,7 +900,6 @@ for game, link in sprites_link_dict.items():
                 print(k, ":", v)
             print(len(outlier_sprites), "outlier pokes: ", outlier_sprites)
             print("\n\n\n")
-            print("Done")
             #urllib.request.urlretrieve(pokemon_img_link[i], file_name)
             time.sleep(7)
             break
