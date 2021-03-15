@@ -425,9 +425,9 @@ for game, link in sprites_link_dict.items():
                 if split_name.endswith("Y"):
                     mega = " MegaY"
                     split_name = split_name.split(" Y")[0]
-            # Handling Dynamax
+            # Handling Dynamax (Except Eternatus Eternamax)
             dyna = ""
-            if split_name.endswith("Dinamax"):
+            if split_name.endswith("Dinamax") and not split_name.startswith("\nEternatus"):
                 dyna = " Dynamax"
                 split_name = split_name.split(" Dinamax")[0]
             # Handling Gigantamax
@@ -746,6 +746,91 @@ for game, link in sprites_link_dict.items():
             # Magearna
             form_translate_split("Magearna", "vetusta", "Original Color")
 
+            # Cramorant
+            form_translate_split("Cramorant", "engulletodo", "Gorging")
+            form_translate_split("Cramorant", "tragatodo", "Gulping")
+
+            # Toxtricity
+            form_translate_split("Toxtricity", "aguda", "Amped")
+            form_translate_split("Toxtricity", "grave", "Low-Key")
+
+            # Alcremie Creams & Sweets
+            # Default Alcremie is Vanilla Cream-Strawberry Sweet, so continue
+            if "Alcremie" == split_name:
+                continue
+            if "Alcremie" in split_name:
+                # Ends with, not in because sweet names overlap with come Cream names
+                if split_name.endswith("corazón") and not "crema de té corazón" in split_name:
+                    form = "Love Sweet"
+                if split_name.endswith("estrella"):
+                    form = "Star Sweet"
+                if split_name.endswith("flor"):
+                    form = "Flower Sweet"
+                if split_name.endswith("fruto"):
+                    form = "Berry Sweet"
+                if split_name.endswith("lazo"):
+                    form = "Ribbon Sweet"
+                if split_name.endswith("trébol"):
+                    form = "Clover Sweet"
+
+                if "crema de limón" in split_name:
+                    form_translate_split("Alcremie", "crema de limón", "Lemon Cream-" + form)
+                if "crema de menta" in split_name:
+                    form_translate_split("Alcremie", "crema de menta", "Mint Cream-" + form)
+                if "crema de té corazón" in split_name:
+                    form_translate_split("Alcremie", "crema de té corazón", "Matcha Cream-" + form)
+                if "crema de vainilla" in split_name:
+                    form_translate_split("Alcremie", "crema de vainilla", "Vanilla Cream-" + form)
+                if "crema rosa" in split_name:
+                    form_translate_split("Alcremie", "crema rosa", "Ruby Cream-" + form)
+                if "crema salada" in split_name:
+                    form_translate_split("Alcremie", "crema salada", "Salted Cream-" + form)
+                if "mezcla caramelo" in split_name:
+                    form_translate_split("Alcremie", "mezcla caramelo", "Caramel Swirl-" + form)
+                if "mezcla rosa" in split_name:
+                    form_translate_split("Alcremie", "mezcla rosa", "Ruby Swirl-" + form)
+                if "tres sabores" in split_name:
+                    form_translate_split("Alcremie", "tres sabores", "Rainbow Swirl-" + form)
+
+                # On website there is no notation if it is Strawberry sweet form, so adding that here
+                if form.endswith("-"):
+                    form += "Strawberry Sweet"
+
+            # Eiscue
+            if "Eiscue" == split_name:
+                form = "Ice Face"
+            else:
+                form_translate_split("Eiscue", "cara deshielo", "Noice Face")
+
+            # Morpeko
+            if "Morpeko" == split_name:
+                form = "Full Belly"
+            else:
+                form_translate_split("Morpeko", "voraz", "Hangry")
+
+            # Zacian and Zamazenta
+            if "Zacian" == split_name:
+                form = "Hero of Many Battles"
+            else:
+                form_translate_split("Zacian", "espada suprema", "Crowned Sword")
+            if "Zamazenta" == split_name:
+                form = "Hero of Many Battles"
+            else:
+                form_translate_split("Zamazenta", "escudo supremo", "Crowned Shield")
+
+            # Eternatus Eternamax
+            form_translate_split("Eternatus", "Dinamax infinito", "Eternamax")
+
+            # Urshifu
+            form_translate_split("Urshifu", "brusco", "Single Strike")
+            form_translate_split("Urshifu", "fluido", "Rapid Strike")
+
+            # Zarude
+            form_translate_split("Zarude", "papá", "Dada")
+
+            # Calyrex Ridings
+            form_translate_split("Calyrex", "jinete espectral", "Shadow Rider")
+            form_translate_split("Calyrex", "jinete glacial", "Ice Rider")
 
             # TODO: Combine BW & B2W2, 
             #               XY & ORAS, 
@@ -755,6 +840,12 @@ for game, link in sprites_link_dict.items():
             for poke in pokedex:
                 if poke.name == split_name:
                     match = True
+                    # This is to replace certain game names to include multiple games
+                        # eg Black/White sprites are the same as Black2/White2
+                        # XY, ORAS, SM, and USUM all use the same 3d sprites, etc
+                            # So instead of doing multiple downloads for each game, I'm combining them to share the same image
+                    game_replace = ""
+                    if "Black-White" in game:
                     filename = poke.number + " " + poke.name + " " + game + gender + mega + dyna + giganta + form + region
                     # If the filename already exists (and it will for double sprites in DPP), add alt
                     try:
