@@ -4,6 +4,7 @@ import xlrd     # For reading excel data (female, forms, etc)
 import urllib.request      # For saving images
 import re   # To check each name is formatted properly
 import time     # To simulate a pause between each page opening
+import os.path   # To skip a file if it already exists
 
 # SPREADSHEET DATA
 pokemon_info = xlrd.open_workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xls')
@@ -228,6 +229,7 @@ def sprite_link_dict_entry(gen, link, animated = False):
         sprites_link_dict[keyname] = "https://www.wikidex.net" + link.get("href")
 
 # Gets rows (games) of sprite link table
+print("Adding games to dict...")
 for games in game_sprites_link_table.findAll("td"):
     games_by_gen.append(games)
 
@@ -355,6 +357,7 @@ type_forms_col = get_col_number("Type Forms")
 misc_forms_col = get_col_number("Misc Forms")
 
 # Adds pokemon info from spreadsheet to object array
+print("Getting pokemon info from spreadsheet...")
 pokedex = []
 for i in range(2, 900):
     name = cell_value(i, name_col)
@@ -378,13 +381,15 @@ outlier_sprites = []
 for game, link in sprites_link_dict.items():
     # Running only specific games
     # Multiple after game
-    # if game != "Gen6 XY Static":
+    # if game != "Gen8 Sword-Shield Animated Shiny":
     #     # If the game hasn't been hit yet, continue on to next game
     #     # If it HAS been hit, run the script
     #     if not game_hit:
+    #         print("Skipping game...")
     #         continue
     # else:
     #     # If the game equals the one specified, run script
+    #     print("Found game...")
     #     game_hit = True
     
     # Single game
@@ -392,8 +397,10 @@ for game, link in sprites_link_dict.items():
     #     continue
 
     # Getting soup of the corresponding sprite page
-    game_page = requests.get(link)
+    game_page = requests.get(link, headers = {'User-Agent': "Chrome/89.0.4389.82"})
     game_page_soup = BeautifulSoup(game_page.content, 'html.parser')
+    print("Opening", game, "First Page...")
+    start_time = time.time()
 
     # Inside for loop to clear for each game
     pokemon_img_dict = {}
@@ -403,6 +410,7 @@ for game, link in sprites_link_dict.items():
     # No do-while loop in python, so running a while True loop with a break condition
         # This break condition being if there is not a next page
     while True:
+        print("Reading pokemon...")
         # Gets images and captions on page
         names = game_page_soup.find_all(class_="gallerytext")
         imgs = game_page_soup.find_all(class_="gallerybox")
@@ -931,17 +939,38 @@ for game, link in sprites_link_dict.items():
         
         # If next game page exists, get its url to parse
         if game_page_soup.find("a", string="página siguiente") != None:
-            time.sleep(1.6)
+            time.sleep(1)
+            print("Opening", game, "Next Page...")
             game_page = game_page_soup.find("a", string="página siguiente").get("href")
-            game_page = requests.get("https://www.wikidex.net" + game_page)
+            game_page = requests.get("https://www.wikidex.net" + game_page, headers = {'User-Agent': "Chrome/89.0.4389.82"})
             game_page_soup = BeautifulSoup(game_page.content, 'html.parser')
         else:
+            amount_of_imgs = len(pokemon_img_dict)
+            current_img = 1
+            pokes_since_time = 0
+            print("Downloading", amount_of_imgs, "Images...")
             # If done with all images for the game, save them
             for file_name, poke_link in pokemon_img_dict.items():
-                urllib.request.urlretrieve(poke_link, file_name)
+                if os.path.exists("Images/Pokemon/" + file_name):
+                    current_img += 1
+                    continue
+                print("Downloading %s/%s" % (current_img, amount_of_imgs),  file_name, "...")
+                download_time = time.time()
+                urllib.request.urlretrieve(poke_link, "Images/Pokemon/" + file_name)
+                download_time = time.time() - download_time
+                print("Downloaded %s/%s" % (current_img, amount_of_imgs), file_name)
+                pokes_since_time += 1
+                total_time = (time.time() - start_time)/60
+                print("Download took %.1f seconds" % download_time)
+                print("Downloading average: %.0f pokemon per minute" % (pokes_since_time/total_time))
+                print("Downloading average: %.0f pokemon per hr" % ((pokes_since_time/total_time) * 60))
+                print("Minutes elapsed: %.1f with %s pokemon downloaded" % (total_time, pokes_since_time))
+                current_img += 1
+                time.sleep(0.3)
             print(game, "Done")
+            print("Total minutes:", (time.time() - start_time)/60, "Pokemon downloaded:", pokes_since_time)
             print("\n\n\n")
-            time.sleep(7)
+            time.sleep(3)
             break
     
 
