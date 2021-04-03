@@ -49,7 +49,7 @@ def get_largest_png(img):
 def get_img_from_string(img, s, save_path):
     if re.search(s, img.attrs['alt']) != None:
         save_img = get_largest_png(img)
-        print(s, " --- ", save_path)
+        #print(s, " --- ", save_path)
         # urllib.request.urlretrieve(save_img, save_path)
 
 # Gets pokemon info from excel sheet
@@ -146,7 +146,7 @@ for i in range(len(pokemon_img_urls)):
     # Getting relevant pokemon data
     pokemon = pokedex[i]
     # For only doing certain pokemon
-    # if pokemon.name != "Unown":
+    # if pokemon.name != "Alcremie":
     #     continue
     # print("Got here")
 
@@ -159,7 +159,7 @@ for i in range(len(pokemon_img_urls)):
     pokemon_imgs = pokemon_starter_page_soup.find_all('img')
     # Downloading certain images
     for img in pokemon_imgs:
-        #print(img["alt"], "\n\n")
+        #print(img, "\n\n")
 
         # DRAWN IMAGES
         # Drawn standard
@@ -267,11 +267,12 @@ for i in range(len(pokemon_img_urls)):
 
         # Arceus Types
         # Only drawn forms are dream versions
-        if img["alt"].endswith("Dream.png"):
-            # Get form
-            form = img["alt"].split(" ")[1]
-            form = "-" + form
-            get_img_from_string(img, "^\d\d\dArceus [a-zA-z]+ Dream.png", drawn_save_path + save_name + form)
+        if pokemon.name == "Arceus":
+            if img["alt"].endswith("Dream.png"):
+                # Get form
+                form = img["alt"].split(" ")[1]
+                form = "-" + form
+                get_img_from_string(img, "^\d\d\dArceus [a-zA-z]+ Dream.png", drawn_save_path + save_name + form)
 
         # Basculin Stripes
         get_img_from_string(img, "^\d\d\dBasculin-Red-Striped_XY_Anime.png", drawn_save_path + save_name + "-Red_Striped")
@@ -318,259 +319,227 @@ for i in range(len(pokemon_img_urls)):
 
         # Genesect
         # Only drawn forms are dream versions
-        if img["alt"].endswith("Dream.png"):
-            # Get form
-            form = img["alt"].split(" ")[1]
-            if form == "B":
-                form = "Burn_Drive"
-            if form == "C":
-                form = "Chill_Drive"
-            if form == "D":
-                form = "Douse_Drive"
-            if form == "S":
-                form = "Shock_Drive"
-            form = "-" + form
-            get_img_from_string(img, "^\d\d\dGenesect [a-zA-z] Dream.png", drawn_save_path + save_name + form)
+        if pokemon.name == "Genesect":
+            if img["alt"].endswith("Dream.png"):
+                # Get form
+                form = img["alt"].split(" ")[1]
+                if form == "B":
+                    form = "Burn_Drive"
+                if form == "C":
+                    form = "Chill_Drive"
+                if form == "D":
+                    form = "Douse_Drive"
+                if form == "S":
+                    form = "Shock_Drive"
+                form = "-" + form
+                get_img_from_string(img, "^\d\d\dGenesect [a-zA-z] Dream.png", drawn_save_path + save_name + form)
 
         # Ash Greninja
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dGreninja-Ash.png", drawn_save_path + save_name + "-Ash")
 
         # Vivillon Patterns
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dVivillon-Archipelago.png", drawn_save_path + save_name + "-Archipelago")
+        get_img_from_string(img, "^\d\d\dVivillon-Continental.png", drawn_save_path + save_name + "-Continental")
+        get_img_from_string(img, "^\d\d\dVivillon-Elegant.png", drawn_save_path + save_name + "-Elegant")
+        get_img_from_string(img, "^\d\d\dVivillon-Fancy.png", drawn_save_path + save_name + "-Fancy")
+        get_img_from_string(img, "^\d\d\dVivillon-Garden.png", drawn_save_path + save_name + "-Garden")
+        get_img_from_string(img, "^\d\d\dVivillon-High Plains.png", drawn_save_path + save_name + "-High_Plains")
+        get_img_from_string(img, "^\d\d\dVivillon-Icy Snow.png", drawn_save_path + save_name + "-Icy_Snow")
+        get_img_from_string(img, "^\d\d\dVivillon-Jungle.png", drawn_save_path + save_name + "-Jungle")
+        get_img_from_string(img, "^\d\d\dVivillon-Marine.png", drawn_save_path + save_name + "-Marine")
+        get_img_from_string(img, "^\d\d\dVivillon-Meadow.png", drawn_save_path + save_name + "-Meadow")
+        get_img_from_string(img, "^\d\d\dVivillon-Modern.png", drawn_save_path + save_name + "-Modern")
+        get_img_from_string(img, "^\d\d\dVivillon-Monsoon.png", drawn_save_path + save_name + "-Monsoon")
+        get_img_from_string(img, "^\d\d\dVivillon-Ocean.png", drawn_save_path + save_name + "-Ocean")
+        get_img_from_string(img, "^\d\d\dVivillon-Poké Ball.png", drawn_save_path + save_name + "-Poke_Ball")
+        get_img_from_string(img, "^\d\d\dVivillon-Polar.png", drawn_save_path + save_name + "-Polar")
+        get_img_from_string(img, "^\d\d\dVivillon-River.png", drawn_save_path + save_name + "-River")
+        get_img_from_string(img, "^\d\d\dVivillon-Sandstorm.png", drawn_save_path + save_name + "-Sandstorm")
+        get_img_from_string(img, "^\d\d\dVivillon-Savanna.png", drawn_save_path + save_name + "-Savanna")
+        get_img_from_string(img, "^\d\d\dVivillon-Sun.png", drawn_save_path + save_name + "-Sun")
+        get_img_from_string(img, "^\d\d\dVivillon-Tundra.png", drawn_save_path + save_name + "-Tundra")
 
 
         # Flabebe, Floette, and Florges colors
-        # Unused form in XY
-        if "Floette" in split_name and "eterna" in split_name:
-            continue
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dFlabébé Blue Flower XY anime.png", drawn_save_path + save_name + "-Blue")
+        get_img_from_string(img, "^\d\d\dFlabébé Orange Flower XY anime.png", drawn_save_path + save_name + "-Orange")
+        get_img_from_string(img, "^\d\d\dFlabébé Red Flower XY anime.png", drawn_save_path + save_name + "-Red")
+        get_img_from_string(img, "^\d\d\dFlabébé White Flower XY anime.png", drawn_save_path + save_name + "-White")
+        get_img_from_string(img, "^\d\d\dFlabébé Yellow Flower XY anime.png", drawn_save_path + save_name + "-Yellow")
+        get_img_from_string(img, "^\d\d\dFloette-Blue XY anime.png", drawn_save_path + save_name + "-Blue")
+        get_img_from_string(img, "^\d\d\dFloette-Orange XY anime.png", drawn_save_path + save_name + "-Orange")
+        get_img_from_string(img, "^\d\d\dFloette-Red XY anime.png", drawn_save_path + save_name + "-Red")
+        get_img_from_string(img, "^\d\d\dFloette-Yellow XY anime.png", drawn_save_path + save_name + "-Yellow")
+        #get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dFlorges Blue Flower XY anime.png", drawn_save_path + save_name + "-Blue")
+        get_img_from_string(img, "^\d\d\dFlorges Orange Flower XY anime.png", drawn_save_path + save_name + "-Orange")
+        get_img_from_string(img, "^\d\d\dFlorges Red Flower XY anime.png", drawn_save_path + save_name + "-Red")
+        get_img_from_string(img, "^\d\d\dFlorges White Flower XY anime.png", drawn_save_path + save_name + "-White")
+        get_img_from_string(img, "^\d\d\dFlorges Yellow Flower XY anime.png", drawn_save_path + save_name + "-Yellow")
 
         # Furfrou Trims
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dFurfrou-Diamond.png", drawn_save_path + save_name + "-Diamond_Trim")
+        get_img_from_string(img, "^\d\d\dFurfrou-Heart.png", drawn_save_path + save_name + "-Heart_Trim")
+        get_img_from_string(img, "^\d\d\dFurfrou-Star.png", drawn_save_path + save_name + "-Star_Trim")
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
 
         # Aegislash
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dAegislash-Blade.png", drawn_save_path + save_name + "-Blade")
+        get_img_from_string(img, "^\d\d\dAegislash-Shield.png", drawn_save_path + save_name + "-Shield")
 
         # Pumpkaboo and Gourgeist Sizes
-        if "Pumpkaboo" == split_name or "Gourgeist" == split_name:
-            # Average sizes have no indication in filename on this website
-            form = " 1Average Size"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # if "Pumpkaboo" == split_name or "Gourgeist" == split_name:
+        #     # Average sizes have no indication in filename on this website
+        #     form = " 1Average Size"
+        # else:
+        #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
 
         # Xerneas
-        if "Xerneas" == split_name:
-            form = " Active"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # if "Xerneas" == split_name:
+        #     form = " Active"
+        # else:
+        #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
 
         # Zygarde
-        # Cells & Nuclei aren't really sprites, so continue
-        if split_name == "Zygarde célula" or split_name == "Zygarde núcleo":
-            continue
-        if "Zygarde" == split_name:
-            form = " 50%"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dZygarde.png", drawn_save_path + save_name + "-50%")
+        get_img_from_string(img, "^\d\d\dZygarde-10Percent.png", drawn_save_path + save_name + "-10%")
+        get_img_from_string(img, "^\d\d\dZygarde-Complete.png", drawn_save_path + save_name + "-Complete")
+
 
         # Hoopa
-        if "Hoopa" == split_name:
-            form = " Confined"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dHoopa.png", drawn_save_path + save_name + "-Confined")
+        get_img_from_string(img, "^\d\d\dHoopa-Unbound.png", drawn_save_path + save_name + "-Unbound")
+
 
         # Oricorio
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # TODO: No default
+        get_img_from_string(img, "^\d\d\dOricorio-Baile.png", drawn_save_path + save_name + "-Baile")
+        get_img_from_string(img, "^\d\d\dOricorio-Pa'u.png", drawn_save_path + save_name + "-Pa'u")
+        get_img_from_string(img, "^\d\d\dOricorio-Pom-Pom.png", drawn_save_path + save_name + "-Pom_Pom")
+        get_img_from_string(img, "^\d\d\dOricorio-Sensu.png", drawn_save_path + save_name + "-Sensu")
 
         # Lycanroc
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dLycanroc.png", drawn_save_path + save_name + "-Midday")
+        get_img_from_string(img, "^\d\d\dLycanroc-Dusk.png", drawn_save_path + save_name + "-Dusk")
+        get_img_from_string(img, "^\d\d\dLycanroc-Midnight.png", drawn_save_path + save_name + "-Midnight")
 
         # Wishiwashi
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # TODO: No default
+        get_img_from_string(img, "^\d\d\dWishiwashi-Solo.png", drawn_save_path + save_name + "-Solo")
+        get_img_from_string(img, "^\d\d\dWishiwashi-School.png", drawn_save_path + save_name + "-School")
 
         # Silvally Types
-        if "Silvally" == split_name:
-            form = " Normal"
-        if "Silvally" in split_name and split_name != "Silvally":
-            type_form_translate_split()
+        # Only drawn forms are dream versions
+        if pokemon.name == "Silvally":
+            if img["alt"].endswith("Dream.png"):
+                # Get form
+                form = img["alt"].split(" ")[1]
+                form = "-" + form
+                get_img_from_string(img, "^\d\d\dSilvally [a-zA-z]+ Dream.png", drawn_save_path + save_name + form)
 
         # Minior
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        # Shiny cores all the same color?
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dMinior.png", drawn_save_path + save_name + "-Meteor")
+        get_img_from_string(img, "^\d\d\dMinior-Core.png", drawn_save_path + save_name + "-Red_Core")
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # # Shiny cores all the same color?
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
 
         # Mimikyu
-        if "Mimikyu" == split_name:
-            form = " Disguised"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dMimikyu.png", drawn_save_path + save_name + "-Disguised")
+        get_img_from_string(img, "^\d\d\dMimikyu Busted Dream.png", drawn_save_path + save_name + "-Busted")
+
+        # Solgaleo
+        get_img_from_string(img, "^\d\d\dSolgaleo-RadiantSunPhase.png", drawn_save_path + save_name + "-Radiant_Sun")
+
+        # Lunala
+        get_img_from_string(img, "^\d\d\dLunala-FullMoonPhase.png", drawn_save_path + save_name + "-Full_Moon")
 
         # Necrozma
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        if "Ultra-Necrozma" == split_name:
-            form = " Ultra"
-            split_name = split_name.split("Ultra-")[1]
+        get_img_from_string(img, "^\d\d\dNecrozma-Dawn Wings.png", drawn_save_path + save_name + "-Dawn_Wings")
+        get_img_from_string(img, "^\d\d\dNecrozma-Dusk Mane.png", drawn_save_path + save_name + "-Dusk_Mane")
+        get_img_from_string(img, "^\d\d\dNecrozma-Ultra.png", drawn_save_path + save_name + "-Ultra")
 
         # Magearna
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+
+        # Marshadow
+        get_img_from_string(img, "^\d\d\dMarshadow-Alt.png", drawn_save_path + save_name + "-Zenith")
 
         # Cramorant
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dCramorant-Gorging.png", drawn_save_path + save_name + "-Gorging")
+        get_img_from_string(img, "^\d\d\dCramorant-Gulping.png", drawn_save_path + save_name + "-Gulping")
 
         # Toxtricity
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dToxtricity-Amped.png", drawn_save_path + save_name + "-Amped")
+        get_img_from_string(img, "^\d\d\dToxtricity-Low Key.png", drawn_save_path + save_name + "-Low_Key")
 
         # Alcremie Creams & Sweets
-        # Default Alcremie is Vanilla Cream-Strawberry Sweet, so continue
-        if "Alcremie" == split_name:
-            continue
-        if "Alcremie" in split_name:
-            # Ends with, not in because sweet names overlap with come Cream names
-            if split_name.endswith("corazón") and not "crema de té corazón" in split_name:
-                form = "Love Sweet"
-            if split_name.endswith("estrella"):
-                form = "Star Sweet"
-            if split_name.endswith("flor"):
-                form = "Flower Sweet"
-            if split_name.endswith("fruto"):
-                form = "Berry Sweet"
-            if split_name.endswith("lazo"):
-                form = "Ribbon Sweet"
-            if split_name.endswith("trébol"):
-                form = "Clover Sweet"
-
-            if "crema de limón" in split_name:
-                form_translate_split("Alcremie", "crema de limón", "Lemon Cream-" + form)
-            if "crema de menta" in split_name:
-                form_translate_split("Alcremie", "crema de menta", "Mint Cream-" + form)
-            # Site left out most of the corazón, so I left it out too since theres no te anywhere else
-            if "crema de té" in split_name:
-                form_translate_split("Alcremie", "crema de té", "Matcha Cream-" + form)
-            if "crema de vainilla" in split_name:
-                form_translate_split("Alcremie", "crema de vainilla", "Vanilla Cream-" + form)
-            if "crema rosa" in split_name:
-                form_translate_split("Alcremie", "crema rosa", "Ruby Cream-" + form)
-            if "crema salada" in split_name:
-                form_translate_split("Alcremie", "crema salada", "Salted Cream-" + form)
-            if "mezcla caramelo" in split_name:
-                form_translate_split("Alcremie", "mezcla caramelo", "Caramel Swirl-" + form)
-            if "mezcla rosa" in split_name:
-                form_translate_split("Alcremie", "mezcla rosa", "Ruby Swirl-" + form)
-            if "tres sabores" in split_name:
-                form_translate_split("Alcremie", "tres sabores", "Rainbow Swirl-" + form)
-
-            # On website there is no notation if it is Strawberry sweet form, so adding that here
-            if form.endswith("-"):
-                form += "Strawberry Sweet"
-        # Since shiny Alcremies all have the same base color, split name by sweet
-        if game.endswith("Shiny"):
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-
+        # Default Alcremie is Vanilla Cream-Strawberry Sweet
+        if pokemon.name == "Alcremie":
+            # Space after excludes gigantamax img
+            if re.search("^869Alcremie-[a-zA-Z]+ ", img.attrs["alt"]):
+                # Getting largest image for Alcremie
+                img_url = get_largest_png(img)
+                # Splits by directory
+                img_url = img_url.split("/")
+                # Gets last string in sequence (the filename)
+                img_url = img_url[len(img_url) - 1]
+                # Splits by hyphen to get cream and sweet
+                img_url = img_url.split("-")
+                cream = "-" + img_url[2]
+                sweet = "-" + img_url[3].replace(".png 2x", "_Sweet")
+                form = cream + sweet
+                get_img_from_string(img, "^869Alcremie-[a-zA-Z]+ ", drawn_save_path + save_name + form)
 
         # Eiscue
-        if "Eiscue" == split_name:
-            form = "Ice Face"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # TODO: No default
+        get_img_from_string(img, "^\d\d\dEiscue-Ice.png", drawn_save_path + save_name + "-Ice_Face")
+        get_img_from_string(img, "^\d\d\dEiscue-Noice.png", drawn_save_path + save_name + "-Noice_Face")
 
         # Morpeko
-        if "Morpeko" == split_name:
-            form = "Full Belly"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dMorpeko-Full.png", drawn_save_path + save_name + "-Full")
+        get_img_from_string(img, "^\d\d\dMorpeko-Hangry.png", drawn_save_path + save_name + "-Hangry")
+
 
         # Zacian and Zamazenta
-        if "Zacian" == split_name:
-            form = "Hero of Many Battles"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        if "Zamazenta" == split_name:
-            form = "Hero of Many Battles"
-        else:
-            get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dZacian.png", drawn_save_path + save_name + "-Crowned_Sword")
+        get_img_from_string(img, "^\d\d\dZacian-Hero.png", drawn_save_path + save_name + "-Hero_of_Many_Battles")
+        get_img_from_string(img, "^\d\d\dZamazenta.png", drawn_save_path + save_name + "-Crowned_Shield")
+        get_img_from_string(img, "^\d\d\dZamazenta-Hero.png", drawn_save_path + save_name + "-Hero_of_Many_Battles")
 
         # Eternatus Eternamax
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
 
         # Urshifu
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dUrshifu-Gigantamax Rapid Strike.png", drawn_save_path + save_name + "Gigantamax-Rapid_Strike")
+        get_img_from_string(img, "^\d\d\dUrshifu-Gigantamax Single Strike.png", drawn_save_path + save_name + "Gigantamax-Single_Strike")
+        get_img_from_string(img, "^\d\d\dUrshifu-Rapid Strike.png", drawn_save_path + save_name + "-Rapid_Strike")
+        get_img_from_string(img, "^\d\d\dUrshifu-Single Strike.png", drawn_save_path + save_name + "-Single_Strike")
+
 
         # Zarude
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dZarude-Dada JN anime.png", drawn_save_path + save_name + "-Dada")
 
         # Calyrex Ridings
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-        get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+        get_img_from_string(img, "^\d\d\dCalyrex-Ice Rider.png", drawn_save_path + save_name + "-Ice_Rider")
+        get_img_from_string(img, "^\d\d\dCalyrex-Shadow Rider.png", drawn_save_path + save_name + "-Shadow_Rider")
 
     
 
