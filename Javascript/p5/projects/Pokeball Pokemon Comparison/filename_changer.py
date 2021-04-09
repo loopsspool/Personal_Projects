@@ -132,16 +132,20 @@ for f in files:
         old_filename = old_filename.replace(" alt", "")
 
     file_ext = f[len(f)-4 : len(f)]
-    # TODO: # Forms: maybe put this last, take out pokemon number, name, game, and other variations, then you're only left with the form?
-        # Yeah so take out string up to Gen\d then split by ONE space 
-            # Analyze what's left by previous variations
-                # If anything remains, that's it's form
+
+    # Getting form
     for poke in pokedex:
         if poke.number == f[0:3]:
             if poke.has_misc_forms or poke.has_type_forms:
                 old_filename = old_filename.replace(file_ext, "")
                 # Splitting filename by gen
-                old_filename = old_filename.split("Gen")[1]
+                    # Unfortunately, Genesects name starts with Gen lol
+                if poke.name != "Genesect":
+                    old_filename = old_filename.split("Gen")[1]
+                else:
+                    # Handling Genesects case
+                    old_filename = old_filename.split("Gen")[2]
+
                 # Then by game
                     # If the file is a back sprite, there's only one space after the gen split
                         # This is due to back sprites being shared by generation
@@ -162,10 +166,24 @@ for f in files:
                     old_filename = old_filename.replace(" Style", "")
                 # Replacing spaces with underscores for proper file sorting
                 old_filename = old_filename.replace(" ", "_")
-                # TODO: Not working for genesect
-                # TODO: Fix Arceus before changing filenames
-                # TODO: Some Alcremies aren't right
-                print(poke.name, ":", old_filename)
+
+                print(poke.number, poke.name, ":", old_filename)
+
+
+# For testing/slight correction in file names
+# for f in files:
+#     if "Eiscue" in f:
+#         print(f)
+        # old = f
+        # new = old.replace("3S", "3_S")
+        # print(new)
+        # os.rename(game_sprite_path + f, game_sprite_path + new)
+
+# TODO: If Gen2-Back and Crystal in name
+    # Replace " Crystal" with ""
+    # And Replace Gen2-Back with Gen2-Crystal Back? Or Something of the sort to sort files properly
+
+
 
     #new_name = 
     #os.rename(game_sprite_path + f, game_sprite_path + new)
