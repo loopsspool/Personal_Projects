@@ -83,6 +83,7 @@ for f in files:
     region = ""
     form = ""
     back = False
+    crystal_back = False
     animated = False
     alt = False
 
@@ -121,6 +122,8 @@ for f in files:
     
     if "Back" in f:
         back = True
+        if " Crystal" in f:
+            crystal_back = True
         old_filename = old_filename.replace("-Back", "")
     
     if "Animated" in f:
@@ -137,14 +140,14 @@ for f in files:
     for poke in pokedex:
         if poke.number == f[0:3]:
             if poke.has_misc_forms or poke.has_type_forms:
-                old_filename = old_filename.replace(file_ext, "")
+                form = old_filename.replace(file_ext, "")
                 # Splitting filename by gen
                     # Unfortunately, Genesects name starts with Gen lol
                 if poke.name != "Genesect":
-                    old_filename = old_filename.split("Gen")[1]
+                    form = form.split("Gen")[1]
                 else:
                     # Handling Genesects case
-                    old_filename = old_filename.split("Gen")[2]
+                    form = form.split("Gen")[2]
 
                 # Then by game
                     # If the file is a back sprite, there's only one space after the gen split
@@ -154,30 +157,30 @@ for f in files:
                     split_num = 1
                 else:
                     split_num = 2
-                old_filename = old_filename.split(" ", split_num)
+                form = form.split(" ", split_num)
                 # Getting only the last element (which should be form)
-                old_filename = old_filename[len(old_filename) - 1]
-                # If old_filename is only gen number or game (ie regular forms), skip
-                if re.search("\d$", old_filename) or re.search("Red-Blue", old_filename) or re.search("Red-Green", old_filename) or re.search("Yellow", old_filename) or re.search("Crystal", old_filename) or re.search("Gold", old_filename) or re.search("Silver", old_filename) or re.search("Emerald", old_filename) or re.search("FireRed-LeafGreen", old_filename) or re.search("Ruby-Sapphire", old_filename) or re.search("Diamond-Pearl", old_filename) or re.search("HGSS", old_filename) or re.search("Platinum", old_filename) or re.search("XY-ORAS-SM-USUM", old_filename) or re.search("SM-USUM", old_filename) or re.search("Sword-Shield", old_filename):
+                form = form[len(form) - 1]
+                # If form is only gen number or game (ie regular forms), skip
+                if re.search("\d$", form) or re.search("Red-Blue", form) or re.search("Red-Green", form) or re.search("Yellow", form) or re.search("Crystal", form) or re.search("Gold", form) or re.search("Silver", form) or re.search("Emerald", form) or re.search("FireRed-LeafGreen", form) or re.search("Ruby-Sapphire", form) or re.search("Diamond-Pearl", form) or re.search("HGSS", form) or re.search("Platinum", form) or re.search("XY-ORAS-SM-USUM", form) or re.search("SM-USUM", form) or re.search("Sword-Shield", form):
                     continue
 
-                # Replacing Oricorio style tag I put in before I decided to do form tags
-                if " Style" in old_filename:
-                    old_filename = old_filename.replace(" Style", "")
+                # Creates a template for the new file name
+                old_filename = old_filename.replace(" " + form, "")
+                print(old_filename)
                 # Replacing spaces with underscores for proper file sorting
-                old_filename = old_filename.replace(" ", "_")
+                form = form.replace(" ", "_")
 
-                print(poke.number, poke.name, ":", old_filename)
+                #print(poke.number, poke.name, ":", form)
 
 
 # For testing/slight correction in file names
 # for f in files:
-#     if "Eiscue" in f:
+#     if f.startswith("741") and " Style" in f:
 #         print(f)
-        # old = f
-        # new = old.replace("3S", "3_S")
-        # print(new)
-        # os.rename(game_sprite_path + f, game_sprite_path + new)
+#         old = f
+#         new = old.replace(" Style", "")
+#         print(new)
+#         os.rename(game_sprite_path + f, game_sprite_path + new)
 
 # TODO: If Gen2-Back and Crystal in name
     # Replace " Crystal" with ""
