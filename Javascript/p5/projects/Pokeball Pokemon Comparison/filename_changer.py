@@ -88,6 +88,7 @@ for f in files:
     alt = False
 
     old_filename = f
+    file_ext = f[len(f)-4 : len(f)]
     
     if "Shiny" in f:
         shiny = True
@@ -114,16 +115,17 @@ for f in files:
         old_filename = old_filename.replace(" Gigantamax", "")
     
     if "Alolan" in f:
-        region = "Alola"
+        region = "-Region-Alola"
         old_filename = old_filename.replace(" Alolan", "")
     if "Galarian" in f:
-        region = "Galar"
+        region = "-Region-Galar"
         old_filename = old_filename.replace(" Galarian", "")
     
     if "Back" in f:
         back = True
         if " Crystal" in f:
             crystal_back = True
+            old_filename.replace(" Crystal", "")
         old_filename = old_filename.replace("-Back", "")
     
     if "Animated" in f:
@@ -133,8 +135,6 @@ for f in files:
     if " alt" in f:
         alt = True
         old_filename = old_filename.replace(" alt", "")
-
-    file_ext = f[len(f)-4 : len(f)]
 
     # Getting form
     for poke in pokedex:
@@ -162,14 +162,51 @@ for f in files:
                 form = form[len(form) - 1]
                 # If form is only gen number or game (ie regular forms), skip
                 if re.search("\d$", form) or re.search("Red-Blue", form) or re.search("Red-Green", form) or re.search("Yellow", form) or re.search("Crystal", form) or re.search("Gold", form) or re.search("Silver", form) or re.search("Emerald", form) or re.search("FireRed-LeafGreen", form) or re.search("Ruby-Sapphire", form) or re.search("Diamond-Pearl", form) or re.search("HGSS", form) or re.search("Platinum", form) or re.search("XY-ORAS-SM-USUM", form) or re.search("SM-USUM", form) or re.search("Sword-Shield", form):
+                    # This is to reset form so it doesn't add the gen number or game to the file tags lol
+                    form = ""
                     continue
 
                 # Creates a template for the new file name
                 old_filename = old_filename.replace(" " + form, "")
-                print(old_filename)
                 # Replacing spaces with underscores for proper file sorting
                 form = form.replace(" ", "_")
+                form = "-Form-" + form
 
+    new_filename_tags = ""
+    if shiny:
+        new_filename_tags += "-Shiny"
+    if female:
+        new_filename_tags += "-f"
+    if mega:
+        new_filename_tags += "-Mega"
+    if mega_x:
+        new_filename_tags += "-Mega_X"
+    if mega_y:
+        new_filename_tags += "-Mega_Y"
+    if gigantamax:
+        new_filename_tags += "-Gigantamax"
+    if region != "":
+        new_filename_tags += region
+    if form != "":
+        new_filename_tags += form
+    if back:
+        if crystal_back:
+            new_filename_tags += "-Back-Crystal"
+        else:
+            new_filename_tags += "-Back"
+    if animated:
+        new_filename_tags += "-Animated"
+    if alt:
+        new_filename_tags += "-Alt"
+    
+    new_filename = old_filename.replace(file_ext, "")
+    # If there's no filename_tags don't add a space between the filename template and file extension
+    if new_filename_tags == "":
+        new_filename += file_ext
+    else:
+        new_filename += " " + new_filename_tags + file_ext
+    print(f)
+    print(new_filename)
                 #print(poke.number, poke.name, ":", form)
 
 
@@ -185,7 +222,7 @@ for f in files:
 # TODO: If Gen2-Back and Crystal in name
     # Replace " Crystal" with ""
     # And Replace Gen2-Back with Gen2-Crystal Back? Or Something of the sort to sort files properly
-
+    ############### Replace with -back-Crystal
 
 
     #new_name = 
