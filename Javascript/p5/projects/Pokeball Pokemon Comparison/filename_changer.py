@@ -66,7 +66,6 @@ game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\p
 files = os.listdir(game_sprite_path)
 file_ext = ""
 
-# TODO:
 # Shiny tag first
 # Then form (AND add -Form-____ tag to misc/type forms)
     # So they aren't sorted below shinies
@@ -194,9 +193,9 @@ for f in files:
     if mega:
         new_filename_tags += "-Mega"
     if mega_x:
-        new_filename_tags += "-Mega_X"
+        new_filename_tags += "_X"
     if mega_y:
-        new_filename_tags += "-Mega_Y"
+        new_filename_tags += "_Y"
     if gigantamax:
         new_filename_tags += "-Gigantamax"
     if region != "":
@@ -220,11 +219,12 @@ for f in files:
     # print(f)
     print(new_filename)
 
-    #test = open("C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Drawn\\" + new_filename, "x")
+    # if f.startswith("646"):
+    #     test = open("C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Drawn\\" + new_filename, "x")
 
-    file_i += 1
-    if file_i == 250:
-        break
+    # file_i += 1
+    # if file_i == 500:
+    #     break
                 #print(poke.number, poke.name, ":", form)
 
 
@@ -237,12 +237,5 @@ for f in files:
 #         print(new)
 #         os.rename(game_sprite_path + f, game_sprite_path + new)
 
-# TODO: If Gen2-Back and Crystal in name
-    # Replace " Crystal" with ""
-    # And Replace Gen2-Back with Gen2-Crystal Back? Or Something of the sort to sort files properly
-    ############### Replace with -back-Crystal
-
-
-    #new_name = 
     #os.rename(game_sprite_path + f, game_sprite_path + new)
 
