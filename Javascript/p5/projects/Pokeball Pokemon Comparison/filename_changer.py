@@ -73,6 +73,7 @@ file_ext = ""
 # Then back
 # Then by animated
 # Then by alt
+file_i = 0
 for f in files:
     shiny = False
     female = False
@@ -100,11 +101,11 @@ for f in files:
    
     if "Mega" in f and not "Meganium" in f:
         mega = True
-        if "MegaX" or "MegaY" in f:
-            try:
+        if "MegaX" in f or "MegaY" in f:
+            if re.search(" MegaX", old_filename):
                 old_filename = old_filename.replace(" MegaX", "")
                 mega_x = True
-            except:
+            if re.search(" MegaY", old_filename):
                 old_filename = old_filename.replace(" MegaY", "")
                 mega_y = True
         else:
@@ -160,6 +161,10 @@ for f in files:
                 form = form.split(" ", split_num)
                 # Getting only the last element (which should be form)
                 form = form[len(form) - 1]
+                # This is for a slight correction for Crystal Back Unowns
+                if " Crystal" in form:
+                    form = form.replace(" Crystal", "")
+                    old_filename = old_filename.replace(" Crystal", "")
                 # If form is only gen number or game (ie regular forms), skip
                 if re.search("\d$", form) or re.search("Red-Blue", form) or re.search("Red-Green", form) or re.search("Yellow", form) or re.search("Crystal", form) or re.search("Gold", form) or re.search("Silver", form) or re.search("Emerald", form) or re.search("FireRed-LeafGreen", form) or re.search("Ruby-Sapphire", form) or re.search("Diamond-Pearl", form) or re.search("HGSS", form) or re.search("Platinum", form) or re.search("XY-ORAS-SM-USUM", form) or re.search("SM-USUM", form) or re.search("Sword-Shield", form):
                     # This is to reset form so it doesn't add the gen number or game to the file tags lol
@@ -167,10 +172,19 @@ for f in files:
                     continue
 
                 # Creates a template for the new file name
-                old_filename = old_filename.replace(" " + form, "")
+                # Splitting by form in unown removes letters (Form G removes the G from Gen)
+                    # So instead I'm truncated them (larger numbers to include file extension)
+                if old_filename.startswith("201"):
+                    if form == "Qmark":
+                        old_filename = old_filename[0 : len(old_filename)-10]
+                    else:
+                        old_filename = old_filename[0 : len(old_filename)-6]
+                else:
+                    old_filename = old_filename.replace(" " + form, "")
                 # Replacing spaces with underscores for proper file sorting
                 form = form.replace(" ", "_")
                 form = "-Form-" + form
+
 
     new_filename_tags = ""
     if shiny:
@@ -191,6 +205,7 @@ for f in files:
         new_filename_tags += form
     if back:
         if crystal_back:
+            old_filename = old_filename.replace(" Crystal", "")
             new_filename_tags += "-Back-Crystal"
         else:
             new_filename_tags += "-Back"
@@ -200,13 +215,16 @@ for f in files:
         new_filename_tags += "-Alt"
     
     new_filename = old_filename.replace(file_ext, "")
-    # If there's no filename_tags don't add a space between the filename template and file extension
-    if new_filename_tags == "":
-        new_filename += file_ext
-    else:
-        new_filename += " " + new_filename_tags + file_ext
-    print(f)
+    new_filename += new_filename_tags + file_ext
+
+    # print(f)
     print(new_filename)
+
+    #test = open("C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Drawn\\" + new_filename, "x")
+
+    file_i += 1
+    if file_i == 250:
+        break
                 #print(poke.number, poke.name, ":", form)
 
 
