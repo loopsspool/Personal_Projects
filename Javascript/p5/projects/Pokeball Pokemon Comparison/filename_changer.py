@@ -216,7 +216,7 @@ for f in files:
     new_filename = old_filename.replace(file_ext, "")
     new_filename += new_filename_tags + file_ext
 
-    # print(f)
+    print(f)
     print(new_filename)
 
     # if f.startswith("646"):
@@ -237,5 +237,5 @@ for f in files:
 #         print(new)
 #         os.rename(game_sprite_path + f, game_sprite_path + new)
 
-    #os.rename(game_sprite_path + f, game_sprite_path + new)
+    os.rename(game_sprite_path + f, game_sprite_path + new_filename)
 
