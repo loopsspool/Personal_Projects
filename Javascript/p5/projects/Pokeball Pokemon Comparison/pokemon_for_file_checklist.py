@@ -1,5 +1,5 @@
 import xlrd     # For reading excel workbook
-import XlsxWriter   # For writing new form rows
+import xlsxwriter   # For writing new form rows
 
 # SPREADSHEET DATA
 pokemon_info = xlrd.open_workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xls')
@@ -20,3 +20,120 @@ def get_col_number(col_name):
         if (cell_value(1, col) == col_name):
             return col
 
+pokedex = []
+class Pokemon:
+    def __init__(self, name, number, variation):
+        self.name = name
+        self.number = number
+        self.variation = variation
+
+# Gets pokemon numbers, names, and forms
+# Starting at 1 skips header cell
+for i in range(1, len(poke_sheet.col(0))):
+    # Can do this with length of the first column since the name and number columns should be the same
+    # Have to do form name keys so they're unique
+        # (Pikachu-f and Pikachu-Cap share the same national dex number so there can't be repeat keys)
+    name = cell_value(i, 1)
+    number = cell_value(i, 0)
+    variation = ""
+    # Multiple variations:
+        # Urshifu Gigantamax forms
+        # Regional Darmanitan forms
+    # Actually doesn't matter and they can still be lumped together
+        # Because shiny comes before every other tag
+        # Both Gigantamax and Regional tags come before form tag (so it's in proper order)
+        # And back and animated tags come after variations
+    if "-" in name and name != "Jangmo-o" and name != "Hakamo-o" and name != "Kommo-o" and name != "Porygon-Z" and name != "Ho-Oh":
+        variation = "-" + name.split("-", 1)[1]
+        name = name.split("-", 1)[0]
+        print(variation)
+
+    pokedex.append(Pokemon(name, number, variation))
+    #poke_form_dict[cell_value(i, 1)] = cell_value(i, 0)
+
+# for i in range(len(pokedex)):
+#     print(pokedex[i].number, pokedex[i].name, "\n", pokedex[i].variation, "\n")
+
+file_check_workbook = xlsxwriter.Workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon File-check Column.xlsx')
+file_check_worksheet = file_check_workbook.add_worksheet()
+
+
+alcremie_shiny_forms_done = []
+minior_shiny_form_done = False
+row_i = 1
+for i in range(len(pokedex)):
+    for i_ in range(8):
+        # The below follow order of the microsoft alphabetically file order system that I have utilized in my naming structure
+        # Normal
+        tags_and_variation = pokedex[i].variation
+
+        # To adjust for there only being shiny alcremie sweet forms
+        if pokedex[i].name == "Alcremie" and (i_ == 2 or i_ == 3 or i_ == 6 or i_ == 7):
+            # Not restricting by one hyphen so can get only the sweet at the end
+            tags_and_variation = tags_and_variation.split("-")
+            # Shiny-Form-Sweet
+            tags_and_variation = "-Form-" + tags_and_variation[len(tags_and_variation) - 1]
+            # If the shiny sweet form has already been done, continue through the other tags
+            if tags_and_variation in alcremie_shiny_forms_done:
+                continue
+            # If it is the final tag iteration for alcremie, add it's shiny sweet forms to the done array to not be done again
+            if i_ == 7:
+                alcremie_shiny_forms_done.append(tags_and_variation)
+
+        # To adjust for all colored minior core shinies being the same
+        if pokedex[i].name == "Minior" and "Core" in tags_and_variation and (i_ == 2 or i_ == 3 or i_ == 6 or i_ == 7):
+            tags_and_variation = "-Form-Core"
+            # If the shiny core has been done, continue
+            if minior_shiny_form_done:
+                continue
+            # If the shiny core hasn't been done and is on it's last iteration, mark it as done
+            if i_ == 7:
+                minior_shiny_form_done = True
+
+        # Animated
+        if i_ == 1:
+            tags_and_variation += "-Animated"
+        # Shiny
+        if i_ == 2:
+            tags_and_variation = "-Shiny" + tags_and_variation
+        # Shiny-Animated
+        if i_ == 3:
+            tags_and_variation = "-Shiny" + tags_and_variation + "-Animated"
+        # Back
+        if i_ == 4:
+            tags_and_variation += "-Back"
+        # Back-Animated
+        if i_ == 5:
+            tags_and_variation += "-Back-Animated"
+        # Shiny-Back
+        if i_ == 6:
+            tags_and_variation = "-Shiny" + tags_and_variation + "-Back"
+        # Shiny-Back-Animated
+        if i_ == 7:
+            tags_and_variation = "-Shiny" + tags_and_variation + "-Back-Animated"
+
+        # Assigning to cells
+        # Number
+        file_check_worksheet.write(row_i, 0, pokedex[i].number)
+        # Name
+        file_check_worksheet.write(row_i, 1, pokedex[i].name)
+        # Tags & Variation
+        file_check_worksheet.write(row_i, 2, tags_and_variation)
+        # Filename (excluding gen & game)
+            # Important to sort by so excel sheet has same ordering as file names
+        filename = str(pokedex[i].number) + " " + pokedex[i].name
+        # Back tags have no space in filename, which is what sorts them after all of the front shots
+        if "Back" in tags_and_variation:
+            filename += tags_and_variation
+        else:
+            filename += " " + tags_and_variation
+        file_check_worksheet.write(row_i, 3, filename)
+
+        # Move onto next row
+        row_i += 1
+
+file_check_workbook.close()
+
+# Row by poke, column by game
+
+# | Number | Name | Tags (incl. variation) |
