@@ -46,7 +46,6 @@ for i in range(1, len(poke_sheet.col(0))):
     if "-" in name and name != "Jangmo-o" and name != "Hakamo-o" and name != "Kommo-o" and name != "Porygon-Z" and name != "Ho-Oh":
         variation = "-" + name.split("-", 1)[1]
         name = name.split("-", 1)[0]
-        print(variation)
 
     pokedex.append(Pokemon(name, number, variation))
     #poke_form_dict[cell_value(i, 1)] = cell_value(i, 0)
@@ -54,10 +53,38 @@ for i in range(1, len(poke_sheet.col(0))):
 # for i in range(len(pokedex)):
 #     print(pokedex[i].number, pokedex[i].name, "\n", pokedex[i].variation, "\n")
 
-file_check_workbook = xlsxwriter.Workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon File-check Column.xlsx')
+file_check_workbook = xlsxwriter.Workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon File-check.xlsx')
 file_check_worksheet = file_check_workbook.add_worksheet()
 
 
+##########################  HEADER ROW  ########################## 
+h_format = file_check_workbook.add_format({'bold': True, 'align': 'center', 'bg_color': 'gray', 'border': 1})
+file_check_worksheet.set_row(0, 1, h_format)
+file_check_worksheet.write(0, 0, "#")
+file_check_worksheet.write(0, 1, "Name")
+file_check_worksheet.write(0, 2, "Tags")
+file_check_worksheet.write(0, 3, "Filename")
+# Games sorted by reverse chronological order for file sorting synchronization between excel and files
+    # Also starting with newest game first so excel file doesn't look barren upon opening
+file_check_worksheet.write(0, 4, "Sword-Shield")
+file_check_worksheet.write(0, 5, "XY-ORAS")
+file_check_worksheet.write(0, 6, "SM-USUM")
+file_check_worksheet.write(0, 7, "BW-B2W2")
+file_check_worksheet.write(0, 8, "Platinum")
+file_check_worksheet.write(0, 9, "HGSS")
+file_check_worksheet.write(0, 10, "Diamond-Pearl")
+file_check_worksheet.write(0, 11, "Ruby-Sapphire")
+file_check_worksheet.write(0, 12, "FRLG")
+file_check_worksheet.write(0, 13, "Emerald")
+file_check_worksheet.write(0, 14, "Silver")
+file_check_worksheet.write(0, 15, "Gold")
+file_check_worksheet.write(0, 16, "Crystal")
+file_check_worksheet.write(0, 17, "Yellow")
+file_check_worksheet.write(0, 18, "Red-Green")
+file_check_worksheet.write(0, 19, "Red-Blue")
+
+
+##########################  POKEMON FILES   ##########################
 alcremie_shiny_forms_done = []
 minior_shiny_form_done = False
 row_i = 1
@@ -133,6 +160,8 @@ for i in range(len(pokedex)):
         row_i += 1
 
 file_check_workbook.close()
+print("Done!")
+print("Remember to sort by filename column to have the spreadsheet line up with your files")
 
 # Row by poke, column by game
 
