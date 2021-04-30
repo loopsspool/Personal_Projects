@@ -1,40 +1,37 @@
 import xlrd     # For reading excel workbook
 import xlsxwriter   # For writing new form rows
+import os   # To check for files
 
 # SPREADSHEET DATA
 pokemon_info = xlrd.open_workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xls')
-poke_sheet = pokemon_info.sheet_by_name("Form Rows")
+form_sheet = pokemon_info.sheet_by_name("Form Rows")
+info_sheet = pokemon_info.sheet_by_name("Summary")
 
-def cell_value(row, col):
-    return (poke_sheet.cell_value(row, col))
+def cell_value(sheet, row, col):
+    return (sheet.cell_value(row, col))
 
-def isnt_empty(row, col):
-    return (str(cell_value(row, col)) != "")
-
-def is_empty(row, col):
-    return (cell_value(row, col) == empty_cell.value)
-
-# Returns column number from column name
-def get_col_number(col_name):
-    for col in range(poke_sheet.ncols):
-        if (cell_value(1, col) == col_name):
-            return col
-
-pokedex = []
+pokedex = {}
+form_pokedex = []
 class Pokemon:
     def __init__(self, name, number, variation):
         self.name = name
         self.number = number
         self.variation = variation
 
+# Getting pokemon number and name
+# Starting at 2 skips header cell
+for i in range(2, len(info_sheet.col(3))):
+    # Pokedex number = Pokemon name
+    pokedex[cell_value(info_sheet, i, 3)] = cell_value(info_sheet, i, 4)
+
 # Gets pokemon numbers, names, and forms
 # Starting at 1 skips header cell
-for i in range(1, len(poke_sheet.col(0))):
+for i in range(1, len(form_sheet.col(0))):
     # Can do this with length of the first column since the name and number columns should be the same
     # Have to do form name keys so they're unique
         # (Pikachu-f and Pikachu-Cap share the same national dex number so there can't be repeat keys)
-    name = cell_value(i, 1)
-    number = cell_value(i, 0)
+    name = cell_value(form_sheet, i, 1)
+    number = cell_value(form_sheet, i, 0)
     variation = ""
     # Multiple variations:
         # Urshifu Gigantamax forms
@@ -47,11 +44,10 @@ for i in range(1, len(poke_sheet.col(0))):
         variation = "-" + name.split("-", 1)[1]
         name = name.split("-", 1)[0]
 
-    pokedex.append(Pokemon(name, number, variation))
-    #poke_form_dict[cell_value(i, 1)] = cell_value(i, 0)
+    form_pokedex.append(Pokemon(name, number, variation))
 
-# for i in range(len(pokedex)):
-#     print(pokedex[i].number, pokedex[i].name, "\n", pokedex[i].variation, "\n")
+# for i in range(len(form_pokedex)):
+#     print(form_pokedex[i].number, form_pokedex[i].name, "\n", form_pokedex[i].variation, "\n")
 
 file_check_workbook = xlsxwriter.Workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon File-check.xlsx')
 file_check_worksheet = file_check_workbook.add_worksheet()
@@ -59,43 +55,36 @@ file_check_worksheet = file_check_workbook.add_worksheet()
 
 ##########################  HEADER ROW  ########################## 
 h_format = file_check_workbook.add_format({'bold': True, 'align': 'center', 'bg_color': 'gray', 'border': 1})
-file_check_worksheet.set_row(0, 1, h_format)
+file_check_worksheet.set_row(0, None, h_format)
+file_check_worksheet.freeze_panes(1, 0)
 file_check_worksheet.write(0, 0, "#")
 file_check_worksheet.write(0, 1, "Name")
 file_check_worksheet.write(0, 2, "Tags")
 file_check_worksheet.write(0, 3, "Filename")
 # Games sorted by reverse chronological order for file sorting synchronization between excel and files
     # Also starting with newest game first so excel file doesn't look barren upon opening
-file_check_worksheet.write(0, 4, "Sword-Shield")
-file_check_worksheet.write(0, 5, "XY-ORAS")
-file_check_worksheet.write(0, 6, "SM-USUM")
-file_check_worksheet.write(0, 7, "BW-B2W2")
-file_check_worksheet.write(0, 8, "Platinum")
-file_check_worksheet.write(0, 9, "HGSS")
-file_check_worksheet.write(0, 10, "Diamond-Pearl")
-file_check_worksheet.write(0, 11, "Ruby-Sapphire")
-file_check_worksheet.write(0, 12, "FRLG")
-file_check_worksheet.write(0, 13, "Emerald")
-file_check_worksheet.write(0, 14, "Silver")
-file_check_worksheet.write(0, 15, "Gold")
-file_check_worksheet.write(0, 16, "Crystal")
-file_check_worksheet.write(0, 17, "Yellow")
-file_check_worksheet.write(0, 18, "Red-Green")
-file_check_worksheet.write(0, 19, "Red-Blue")
+games = ["Sword-Shield", "XY-ORAS", "SM-USUM", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FRLG", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue", ]
+for i in range(len(games)):
+    # i + 4 to write to the next column after filename
+    file_check_worksheet.write(0, i + 4, games[i])
+# TODO: Add drawn column somewhere
+# if i == len(games) - 1:
+#     file_check_worksheet.write(0, 20, "Drawn")
 
-
-##########################  POKEMON FILES   ##########################
+##########################  POKEMON FILENAMES   ##########################
 alcremie_shiny_forms_done = []
 minior_shiny_form_done = False
+filenames = []
+# 1 because it's below the header row (row 0)
 row_i = 1
-for i in range(len(pokedex)):
+for i in range(len(form_pokedex)):
     for i_ in range(8):
         # The below follow order of the microsoft alphabetically file order system that I have utilized in my naming structure
         # Normal
-        tags_and_variation = pokedex[i].variation
+        tags_and_variation = form_pokedex[i].variation
 
         # To adjust for there only being shiny alcremie sweet forms
-        if pokedex[i].name == "Alcremie" and (i_ == 2 or i_ == 3 or i_ == 6 or i_ == 7):
+        if form_pokedex[i].name == "Alcremie" and (i_ == 2 or i_ == 3 or i_ == 6 or i_ == 7):
             # Not restricting by one hyphen so can get only the sweet at the end
             tags_and_variation = tags_and_variation.split("-")
             # Shiny-Form-Sweet
@@ -108,7 +97,7 @@ for i in range(len(pokedex)):
                 alcremie_shiny_forms_done.append(tags_and_variation)
 
         # To adjust for all colored minior core shinies being the same
-        if pokedex[i].name == "Minior" and "Core" in tags_and_variation and (i_ == 2 or i_ == 3 or i_ == 6 or i_ == 7):
+        if form_pokedex[i].name == "Minior" and "Core" in tags_and_variation and (i_ == 2 or i_ == 3 or i_ == 6 or i_ == 7):
             tags_and_variation = "-Form-Core"
             # If the shiny core has been done, continue
             if minior_shiny_form_done:
@@ -141,23 +130,53 @@ for i in range(len(pokedex)):
 
         # Assigning to cells
         # Number
-        file_check_worksheet.write(row_i, 0, pokedex[i].number)
+        file_check_worksheet.write(row_i, 0, form_pokedex[i].number)
         # Name
-        file_check_worksheet.write(row_i, 1, pokedex[i].name)
+        file_check_worksheet.write(row_i, 1, form_pokedex[i].name)
         # Tags & Variation
         file_check_worksheet.write(row_i, 2, tags_and_variation)
         # Filename (excluding gen & game)
             # Important to sort by so excel sheet has same ordering as file names
-        filename = str(pokedex[i].number) + " " + pokedex[i].name
-        # Back tags have no space in filename, which is what sorts them after all of the front shots
+        filename = str(form_pokedex[i].number) + " " + form_pokedex[i].name
+        # Back tags have no space in filename after gen (backs don't have game denotions), but fronts have spaces between gen and game
+            # Adding this space simulates this crucial sorting system in the excel file without adding the gen and game (since those are going into columns)
         if "Back" in tags_and_variation:
             filename += tags_and_variation
         else:
             filename += " " + tags_and_variation
+        # Adding too filenames array for file checking process later
+        filenames.append(filename)
         file_check_worksheet.write(row_i, 3, filename)
 
         # Move onto next row
         row_i += 1
+
+
+##########################  CHECKING FOR FILES   ##########################
+game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
+game_sprite_files = os.listdir(game_sprite_path)
+
+for i in range(len(filenames)):
+    f = filenames[i]
+    # Gets pokemon number from filename to find the pokemon name
+    poke_num = f[0:3]
+    # Figures character length of number (always 4) and name
+    insert_index = 4 + len(pokedex[poke_num])
+    # Removes space after name for non-back sprites
+        # This was added to mimic the file sorting into the excel file
+    if not "Back" in f:
+        f = f[:insert_index] + f[(insert_index + 1):]
+
+    for game in games:
+        # TODO: Add gen for games (maybe a different array to loop through?)
+        # TODO: Only do gen for back (except Crystal, gotta check those seperately)
+        print(f[:insert_index] + ' ' + game + f[insert_index:])
+
+# Centers "x" in cell
+# check_format = file_check_workbook.add_format({'align': 'center'})
+# TODO: Put in for loop for each of the game columns
+# file_check_worksheet.set_column(4, None, check_format)
+
 
 file_check_workbook.close()
 print("Done!")
