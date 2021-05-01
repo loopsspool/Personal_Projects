@@ -10,6 +10,25 @@ info_sheet = pokemon_info.sheet_by_name("Summary")
 def cell_value(sheet, row, col):
     return (sheet.cell_value(row, col))
 
+def gen_finder(num):
+    num = int(num)
+    if num <= 151:
+        return ("Gen1")
+    if num > 151 and num <= 251:
+        return ("Gen2")
+    if num > 251 and num <= 386:
+        return ("Gen3")
+    if num > 386 and num <= 493:
+        return ("Gen4")
+    if num > 493 and num <= 649:
+        return ("Gen5")
+    if num > 649 and num <= 721:
+        return ("Gen6")
+    if num > 721 and num <= 809:
+        return ("Gen7")
+    if num > 809 and num <= 898:
+        return ("Gen8")
+
 pokedex = {}
 form_pokedex = []
 class Pokemon:
@@ -63,7 +82,7 @@ file_check_worksheet.write(0, 2, "Tags")
 file_check_worksheet.write(0, 3, "Filename")
 # Games sorted by reverse chronological order for file sorting synchronization between excel and files
     # Also starting with newest game first so excel file doesn't look barren upon opening
-games = ["Sword-Shield", "XY-ORAS", "SM-USUM", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FRLG", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue", ]
+games = ["Sword-Shield", "XY-ORAS", "SM-USUM", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FRLG", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
 for i in range(len(games)):
     # i + 4 to write to the next column after filename
     file_check_worksheet.write(0, i + 4, games[i])
@@ -153,13 +172,25 @@ for i in range(len(form_pokedex)):
 
 
 ##########################  CHECKING FOR FILES   ##########################
+# TODO: Incorporate alts
+# TODO: Incorporate drawn images
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 game_sprite_files = os.listdir(game_sprite_path)
+for i in range(len(game_sprite_files)):
+    # Removes file extension to just check name
+    game_sprite_files[i] = game_sprite_files[i][:len(game_sprite_files[i])-4]
 
+game_denotions = ["Gen8 Sword-Shield", "Gen7 SM-USUM", "Gen6-7 XY-ORAS-SM-USUM", "Gen5 BW-B2W2", "Gen4 Platinum", "Gen4 HGSS", "Gen4 Diamond-Pearl", "Gen3 Ruby-Sapphire", "Gen3 FireRed-LeafGreen", "Gen3 Emerald", "Gen2 Silver", "Gen2 Gold", "Gen2 Crystal", "Gen1 Yellow", "Gen1 Red-Green", "Gen1 Red-Blue"]
+back_gen_denotions = ["Gen8", "Gen7", "Gen6-7", "Gen5", "Gen4", "Gen3", "Gen2", "Gen1"]
+
+# Slightly inaccurate due to no female forms before gen 4, no megas in any gen but 6, shinies not until gen 2, etc
+    # Sooo probably at least like 15,000 over lol
+missing_count = 0
 for i in range(len(filenames)):
     f = filenames[i]
-    # Gets pokemon number from filename to find the pokemon name
+    # Gets pokemon number from filename to find the pokemon name and gen
     poke_num = f[0:3]
+    poke_gen = gen_finder(poke_num)
     # Figures character length of number (always 4) and name
     insert_index = 4 + len(pokedex[poke_num])
     # Removes space after name for non-back sprites
@@ -167,10 +198,33 @@ for i in range(len(filenames)):
     if not "Back" in f:
         f = f[:insert_index] + f[(insert_index + 1):]
 
-    for game in games:
-        # TODO: Add gen for games (maybe a different array to loop through?)
-        # TODO: Only do gen for back (except Crystal, gotta check those seperately)
-        print(f[:insert_index] + ' ' + game + f[insert_index:])
+    # TODO: Associate these to the proper columns to be marked in the spreadsheet
+    # TODO: Consider speeding up by only looking in game_sprite_files at files that start with the same number
+    if "Back" in f:
+        # TODO: Remember to check for Crystal Backs!
+        for gen in back_gen_denotions:
+            # Skips if pokemon was introduced later than gen it's checking
+            if poke_gen > gen[:4]:
+                continue
+            # Adds generation to checking file string
+            curr_file = f[:insert_index] + ' ' + gen + f[insert_index:]
+            print(curr_file)
+            print(curr_file in game_sprite_files)
+            if not curr_file in game_sprite_files:
+                missing_count += 1
+    else:
+        for game in game_denotions:
+            # Skips if pokemon was introduced later than gen it's checking
+            if poke_gen > game[:4]:
+                continue
+            # Adds game to checking file string
+            curr_file = f[:insert_index] + ' ' + game + f[insert_index:]
+            print(curr_file)
+            print(curr_file in game_sprite_files)
+            if not curr_file in game_sprite_files:
+                missing_count += 1
+
+print("Missing:", missing_count, "images")
 
 # Centers "x" in cell
 # check_format = file_check_workbook.add_format({'align': 'center'})
