@@ -36,9 +36,7 @@ def game_finder_from_gen(gen):
     if gen == 1:
         return(["Yellow", "Red-Green", "Red-Blue"])
     if gen == 2:
-        # Crystal omitted to do a hard-code check
-            # Since this function is only going to be used for backs
-        return(["Silver", "Gold"])
+        return(["Silver", "Gold", "Crystal"])
     if gen == 3:
         return(["Ruby-Sapphire", "FireRed-LeafGreen", "Emerald"])
     if gen == 4:
@@ -53,6 +51,75 @@ def game_finder_from_gen(gen):
     if gen == 8:
         return(["Sword-Shield"])
 
+# TODO: Change to inclue forms, which is on the Gen8_Pokemon sheet
+# TODO: Blocking SM-USUM Regionals
+is_available_in_gen_8 = {}
+for i in range(1, len(info_sheet.col(4))):
+    # Pokemon name = is available in gen 8
+    is_available_in_gen_8[cell_value(info_sheet, i, 4)] = (cell_value(info_sheet, i, 15) == "x")
+
+def unobtainable_checker(filename, file_gen, poke_gen):
+    ###################     UNIVERSAL UNOBTAINABILITY     ###################
+    # If filename is searching gens before pokemon was introduced
+    if poke_gen > file_gen:
+        return True
+    # If filename is searching for animations in games where there weren't any
+    if "-Animated" in filename:
+        # Animated Back sprites before gen 5
+        if "-Back" in filename and file_gen < "Gen5":
+            return True
+        # No animated sprites in gen 1
+        if file_gen == "Gen1":
+            return True
+        # No animated sprites in these games
+        # Gen before game checked because stuff like "Gold" is in "Golduck"s name, etc
+        no_animation_games = ["Gold", "Silver", "FireRed-LeafGreen", "Ruby-Sapphire"]
+        for game in no_animation_games:
+            s = file_gen + " " + game
+            if s in filename:
+                return True
+    # If filename is searching for shinies in gen1
+    if "-Shiny" in filename and file_gen == "Gen1":
+        return True
+    # If filename is searching for females before gen4
+    if "-f" in filename and file_gen < "Gen4":
+        return True
+    # If filename is searching for megas outside of gen 6
+    if "-Mega" in filename and file_gen != "Gen6":
+        return True
+    # If filename is searching for regional variants before gen 7
+    if "-Region" in filename and file_gen < "Gen7":
+        return True
+    # If filename is searching for gigantamax variants before gen 8
+    if "-Gigantamax" in filename and file_gen < "Gen8":
+        return True
+
+    ###################     INDIVIDUAL POKEMON     ###################
+    # Pikachu Cosplay outside of Gen6
+    if "-Form-Cosplay" in filename and file_gen != "Gen6":
+        return True
+    # Pikachu Hat before Gen7
+    if "-Form-Cap" in filename and file_gen < "Gen7":
+        return True
+    # Spiky-Eared Pichu outside of Gen 4
+    if "-Form-Spiky_Eared" in filename and file_gen != "Gen4":
+        return True
+    # Primal Kyogre & Groudon outside of gen 6 & 7
+    if "-Primal" in filename and file_gen != "Gen6" and file_gen != "Gen7":
+        return True
+    
+    # Checking if pokemon is available in gen8
+    if file_gen == "Gen8":
+        for poke, avail in is_available_in_gen_8.items():
+            # Adding a space after for pokes like Porygon, whose evolutions contain the name Porygon also
+            poke_check = poke + " "
+            if poke_check in filename:
+                if avail == False:
+                    return True
+
+    return False
+    
+
 pokedex = {}
 form_pokedex = []
 class Pokemon:
@@ -62,8 +129,8 @@ class Pokemon:
         self.variation = variation
 
 # Getting pokemon number and name
-# Starting at 2 skips header cell
-for i in range(2, len(info_sheet.col(3))):
+# Starting at 1 skips header cell
+for i in range(1, len(info_sheet.col(3))):
     # Pokedex number = Pokemon name
     pokedex[cell_value(info_sheet, i, 3)] = cell_value(info_sheet, i, 4)
 
@@ -216,16 +283,7 @@ back_gen_denotions = ["Gen8", "Gen7", "Gen6-7", "Gen5", "Gen4", "Gen3", "Gen2", 
 # Centers "x" in cell and makes fill color green
 check_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#00cf37'})
 missing_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#ff0000'})
-# file_check_worksheet.set_column(4, None, check_format)
-
-# Slightly inaccurate due to no female forms before gen 4, no megas in any gen but 6, shinies not until gen 2, etc
-    # Sooo probably at least like 15,000 over lol
-# TODO: Restrict the below to make the missing count more accurate
-# - Restrict shinies to gen2 and above
-# - Retrict female and forms to gen4 and above
-# - Restrict megas to gen6
-# - Restrict regional forms to gen7 and above
-# - Restrict gigantamax to gen8
+unobtainable_format = file_check_workbook.add_format({'align': 'center', 'bg_color': 'black'})
 
 missing_count = 0
 row = 1
@@ -243,11 +301,7 @@ for i in range(len(filenames)):
 
     col = -1
     if "Back" in f:
-        # TODO: Remember to check for Crystal Backs!
         for gen in back_gen_denotions:
-            # Skips if pokemon was introduced later than gen it's checking
-            if poke_gen > gen[:4]:
-                continue
             # Adds generation to checking file string
             curr_file = f[:insert_index] + ' ' + gen + f[insert_index:]
             # Getting games in generation to find column
@@ -255,40 +309,44 @@ for i in range(len(filenames)):
             # Finding columns of games in gen
             for game in games_in_gen:
                 col = game_cols[game]
+                # Unobtainability checker
+                is_unobtainable = unobtainable_checker(curr_file, gen[:4], poke_gen)
+                if is_unobtainable:
+                    file_check_worksheet.write(row, col, "u", unobtainable_format)
+                    continue
+                # Omitting Cosplay Pikachu from SM-USUM column even though it's in filename
+                    # Kept in so I don't have to add another game/back gen denotion just for cosplay pikachu
+                if game == "SM-USUM" and "-Form-Cosplay" in curr_file:
+                    continue
+                # Checking for Crystal Backs
+                if game == "Crystal":
+                    # Adding Crystal into file checker name
+                    curr_file = curr_file[:curr_file.find("Back") + 4] + "-Crystal" + curr_file[curr_file.find("Back") + 4:]
                 # Writing to the appropriate cell
                 if curr_file in game_sprite_files:
                     file_check_worksheet.write(row, col, "x", check_format)
                 else:
                     file_check_worksheet.write(row, col, "", missing_format)
-            
-            if not curr_file in game_sprite_files:
-                missing_count += 1
-            
-            # Checking for Crystal backs
-            if gen == "Gen2":
-                # Adding Crystal into file checker name
-                curr_file = curr_file[:curr_file.find("Back") + 4] + "-Crystal" + curr_file[curr_file.find("Back") + 4:]
-                col = game_cols["Crystal"]
-                # Writing to the appropriate cell
-                if curr_file in game_sprite_files:
-                    file_check_worksheet.write(row, col, "x", check_format)
-                else:
-                    file_check_worksheet.write(row, col, "", missing_format)
-
-                if not curr_file in game_sprite_files:
                     missing_count += 1
+
             print(curr_file)
     else:
         for filegame in game_denotions:
-            # Skips if pokemon was introduced later than gen it's checking
-            if poke_gen > filegame[:4]:
-                continue
             # Adds game to checking file string
             curr_file = f[:insert_index] + ' ' + filegame + f[insert_index:]
             # Find column of game
             for game in games:
                 if game in filegame:
                     col = game_cols[game]
+                    # Unobtainability checker
+                    is_unobtainable = unobtainable_checker(curr_file, filegame[:4], poke_gen)
+                    if is_unobtainable:
+                        file_check_worksheet.write(row, col, "u", unobtainable_format)
+                        continue
+                    # Omitting Cosplay Pikachu from SM-USUM column even though it's in filename
+                    # Kept in so I don't have to add another game/back gen denotion just for cosplay pikachu
+                    if game == "SM-USUM" and "-Form-Cosplay" in curr_file:
+                        continue
                     # Writing to the cell if the file exists
                     # Has to be inside this game loop for XY-ORAS and SM-USUM
                         # These are combined in the filenames since models were shared through the 6th and 7th gen
@@ -297,10 +355,9 @@ for i in range(len(filenames)):
                         file_check_worksheet.write(row, col, "x", check_format)
                     else:
                         file_check_worksheet.write(row, col, "", missing_format)
+                        missing_count += 1
 
             print(curr_file)
-            if not curr_file in game_sprite_files:
-                missing_count += 1
     row += 1
 
 print("Missing:", missing_count, "images")
