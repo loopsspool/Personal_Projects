@@ -29,6 +29,30 @@ def gen_finder(num):
     if num > 809 and num <= 898:
         return ("Gen8")
 
+def game_finder_from_gen(gen):
+    gen = int(gen[-1])
+    print(gen)
+
+    if gen == 1:
+        return(["Yellow", "Red-Green", "Red-Blue"])
+    if gen == 2:
+        # Crystal omitted to do a hard-code check
+            # Since this function is only going to be used for backs
+        return(["Silver", "Gold"])
+    if gen == 3:
+        return(["Ruby-Sapphire", "FireRed-LeafGreen", "Emerald"])
+    if gen == 4:
+        return(["Platinum", "HGSS", "Diamond-Pearl"])
+    if gen == 5:
+        return(["BW-B2W2"])
+    if gen == 6:
+        # Including SM-USUM here since gen 7 shared sprites from gen 6
+        return(["SM-USUM", "XY-ORAS"])
+    if gen == 7:
+        return(["SM-USUM"])
+    if gen == 8:
+        return(["Sword-Shield"])
+
 pokedex = {}
 form_pokedex = []
 class Pokemon:
@@ -82,8 +106,11 @@ file_check_worksheet.write(0, 2, "Tags")
 file_check_worksheet.write(0, 3, "Filename")
 # Games sorted by reverse chronological order for file sorting synchronization between excel and files
     # Also starting with newest game first so excel file doesn't look barren upon opening
-games = ["Sword-Shield", "XY-ORAS", "SM-USUM", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FRLG", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
+games = ["Sword-Shield", "SM-USUM", "XY-ORAS", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FireRed-LeafGreen", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
+game_cols = {}
 for i in range(len(games)):
+    # Saving game columns
+    game_cols[games[i]] = i + 4
     # i + 4 to write to the next column after filename
     file_check_worksheet.write(0, i + 4, games[i])
 # TODO: Add drawn column somewhere
@@ -174,18 +201,29 @@ for i in range(len(form_pokedex)):
 ##########################  CHECKING FOR FILES   ##########################
 # TODO: Incorporate alts
 # TODO: Incorporate drawn images
+# TODO: Add black fill color for impossible combos (eg mega evolutions in gen1)
+# TODO: Green fill for cells with file and red for ones missing?
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 game_sprite_files = os.listdir(game_sprite_path)
 for i in range(len(game_sprite_files)):
     # Removes file extension to just check name
     game_sprite_files[i] = game_sprite_files[i][:len(game_sprite_files[i])-4]
 
+# games = ["Sword-Shield", "SM-USUM", "XY-ORAS", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FireRed-LeafGreen", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
 game_denotions = ["Gen8 Sword-Shield", "Gen7 SM-USUM", "Gen6-7 XY-ORAS-SM-USUM", "Gen5 BW-B2W2", "Gen4 Platinum", "Gen4 HGSS", "Gen4 Diamond-Pearl", "Gen3 Ruby-Sapphire", "Gen3 FireRed-LeafGreen", "Gen3 Emerald", "Gen2 Silver", "Gen2 Gold", "Gen2 Crystal", "Gen1 Yellow", "Gen1 Red-Green", "Gen1 Red-Blue"]
 back_gen_denotions = ["Gen8", "Gen7", "Gen6-7", "Gen5", "Gen4", "Gen3", "Gen2", "Gen1"]
 
 # Slightly inaccurate due to no female forms before gen 4, no megas in any gen but 6, shinies not until gen 2, etc
     # Sooo probably at least like 15,000 over lol
+# TODO: Restrict the below to make the missing count more accurate
+# - Restrict shinies to gen2 and above
+# - Retrict female and forms to gen4 and above
+# - Restrict megas to gen6
+# - Restrict regional forms to gen7 and above
+# - Restrict gigantamax to gen8
+
 missing_count = 0
+row = 1
 for i in range(len(filenames)):
     f = filenames[i]
     # Gets pokemon number from filename to find the pokemon name and gen
@@ -198,8 +236,7 @@ for i in range(len(filenames)):
     if not "Back" in f:
         f = f[:insert_index] + f[(insert_index + 1):]
 
-    # TODO: Associate these to the proper columns to be marked in the spreadsheet
-    # TODO: Consider speeding up by only looking in game_sprite_files at files that start with the same number
+    col = -1
     if "Back" in f:
         # TODO: Remember to check for Crystal Backs!
         for gen in back_gen_denotions:
@@ -208,21 +245,43 @@ for i in range(len(filenames)):
                 continue
             # Adds generation to checking file string
             curr_file = f[:insert_index] + ' ' + gen + f[insert_index:]
+            # Getting games in generation to find column
+            games_in_gen = game_finder_from_gen(gen)
+            # Finding columns of games in gen
+            for game in games_in_gen:
+                col = game_cols[game]
+                # Writing to the appropriate cell
+                if curr_file in game_sprite_files:
+                    file_check_worksheet.write(row, col, "x")
+            # Checking specifically for Crystal back
+            if gen == "Gen2" and "Back-Crystal" in f:
+                col = game_cols["Crystal"]
+                file_check_worksheet.write(row, col, "x")
             print(curr_file)
-            print(curr_file in game_sprite_files)
             if not curr_file in game_sprite_files:
                 missing_count += 1
     else:
-        for game in game_denotions:
+        for filegame in game_denotions:
             # Skips if pokemon was introduced later than gen it's checking
-            if poke_gen > game[:4]:
+            if poke_gen > filegame[:4]:
                 continue
             # Adds game to checking file string
-            curr_file = f[:insert_index] + ' ' + game + f[insert_index:]
+            curr_file = f[:insert_index] + ' ' + filegame + f[insert_index:]
+            # Find column of game
+            for game in games:
+                if game in filegame:
+                    col = game_cols[game]
+                    # Writing to the cell if the file exists
+                    # Has to be inside this game loop for XY-ORAS and SM-USUM
+                        # These are combined in the filenames since models were shared through the 6th and 7th gen
+                        # So if this isn't here the most recent (SM-USUM) will override prior (XY-ORAS) column
+                    if curr_file in game_sprite_files:
+                        file_check_worksheet.write(row, col, "x")
+
             print(curr_file)
-            print(curr_file in game_sprite_files)
             if not curr_file in game_sprite_files:
                 missing_count += 1
+    row += 1
 
 print("Missing:", missing_count, "images")
 
