@@ -30,7 +30,8 @@ def gen_finder(num):
         return ("Gen8")
 
 def game_finder_from_gen(gen):
-    gen = int(gen[-1])
+    # Index 4 instead of -1 because on Gen6-7 it would favor Gen7, excluding XY-ORAS
+    gen = int(gen[3])
 
     if gen == 1:
         return(["Yellow", "Red-Green", "Red-Blue"])
@@ -212,6 +213,11 @@ for i in range(len(game_sprite_files)):
 game_denotions = ["Gen8 Sword-Shield", "Gen7 SM-USUM", "Gen6-7 XY-ORAS-SM-USUM", "Gen5 BW-B2W2", "Gen4 Platinum", "Gen4 HGSS", "Gen4 Diamond-Pearl", "Gen3 Ruby-Sapphire", "Gen3 FireRed-LeafGreen", "Gen3 Emerald", "Gen2 Silver", "Gen2 Gold", "Gen2 Crystal", "Gen1 Yellow", "Gen1 Red-Green", "Gen1 Red-Blue"]
 back_gen_denotions = ["Gen8", "Gen7", "Gen6-7", "Gen5", "Gen4", "Gen3", "Gen2", "Gen1"]
 
+# Centers "x" in cell and makes fill color green
+check_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#00cf37'})
+missing_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#ff0000'})
+# file_check_worksheet.set_column(4, None, check_format)
+
 # Slightly inaccurate due to no female forms before gen 4, no megas in any gen but 6, shinies not until gen 2, etc
     # Sooo probably at least like 15,000 over lol
 # TODO: Restrict the below to make the missing count more accurate
@@ -251,7 +257,13 @@ for i in range(len(filenames)):
                 col = game_cols[game]
                 # Writing to the appropriate cell
                 if curr_file in game_sprite_files:
-                    file_check_worksheet.write(row, col, "x")
+                    file_check_worksheet.write(row, col, "x", check_format)
+                else:
+                    file_check_worksheet.write(row, col, "", missing_format)
+            
+            if not curr_file in game_sprite_files:
+                missing_count += 1
+            
             # Checking for Crystal backs
             if gen == "Gen2":
                 # Adding Crystal into file checker name
@@ -259,10 +271,13 @@ for i in range(len(filenames)):
                 col = game_cols["Crystal"]
                 # Writing to the appropriate cell
                 if curr_file in game_sprite_files:
-                    file_check_worksheet.write(row, col, "x")
+                    file_check_worksheet.write(row, col, "x", check_format)
+                else:
+                    file_check_worksheet.write(row, col, "", missing_format)
+
+                if not curr_file in game_sprite_files:
+                    missing_count += 1
             print(curr_file)
-            if not curr_file in game_sprite_files:
-                missing_count += 1
     else:
         for filegame in game_denotions:
             # Skips if pokemon was introduced later than gen it's checking
@@ -279,7 +294,9 @@ for i in range(len(filenames)):
                         # These are combined in the filenames since models were shared through the 6th and 7th gen
                         # So if this isn't here the most recent (SM-USUM) will override prior (XY-ORAS) column
                     if curr_file in game_sprite_files:
-                        file_check_worksheet.write(row, col, "x")
+                        file_check_worksheet.write(row, col, "x", check_format)
+                    else:
+                        file_check_worksheet.write(row, col, "", missing_format)
 
             print(curr_file)
             if not curr_file in game_sprite_files:
@@ -287,12 +304,6 @@ for i in range(len(filenames)):
     row += 1
 
 print("Missing:", missing_count, "images")
-
-# Centers "x" in cell
-# check_format = file_check_workbook.add_format({'align': 'center'})
-# TODO: Put in for loop for each of the game columns
-# file_check_worksheet.set_column(4, None, check_format)
-
 
 file_check_workbook.close()
 print("Done!")
