@@ -31,7 +31,6 @@ def gen_finder(num):
 
 def game_finder_from_gen(gen):
     gen = int(gen[-1])
-    print(gen)
 
     if gen == 1:
         return(["Yellow", "Red-Green", "Red-Blue"])
@@ -253,10 +252,14 @@ for i in range(len(filenames)):
                 # Writing to the appropriate cell
                 if curr_file in game_sprite_files:
                     file_check_worksheet.write(row, col, "x")
-            # Checking specifically for Crystal back
-            if gen == "Gen2" and "Back-Crystal" in f:
+            # Checking for Crystal backs
+            if gen == "Gen2":
+                # Adding Crystal into file checker name
+                curr_file = curr_file[:curr_file.find("Back") + 4] + "-Crystal" + curr_file[curr_file.find("Back") + 4:]
                 col = game_cols["Crystal"]
-                file_check_worksheet.write(row, col, "x")
+                # Writing to the appropriate cell
+                if curr_file in game_sprite_files:
+                    file_check_worksheet.write(row, col, "x")
             print(curr_file)
             if not curr_file in game_sprite_files:
                 missing_count += 1
