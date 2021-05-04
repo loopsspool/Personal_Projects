@@ -51,13 +51,13 @@ def game_finder_from_gen(gen):
     if gen == 8:
         return(["Sword-Shield"])
 
-# TODO: Change to inclue forms, which is on the Gen8_Pokemon sheet
-# TODO: Blocking SM-USUM Regionals
+# TODO: Change to include forms, which is on the Gen8_Pokemon sheet
 is_available_in_gen_8 = {}
 for i in range(1, len(info_sheet.col(4))):
     # Pokemon name = is available in gen 8
     is_available_in_gen_8[cell_value(info_sheet, i, 4)] = (cell_value(info_sheet, i, 15) == "x")
 
+# TODO: Blocking SM-USUM Regionals
 def unobtainable_checker(filename, file_gen, poke_gen):
     ###################     UNIVERSAL UNOBTAINABILITY     ###################
     # If filename is searching gens before pokemon was introduced
@@ -308,6 +308,13 @@ for i in range(len(filenames)):
             games_in_gen = game_finder_from_gen(gen)
             # Finding columns of games in gen
             for game in games_in_gen:
+                # The unobtainability check was blocking all Alolan Regions in the spreadsheeet
+                    # This was due to SM-USUM being contained in the gen6-7 file denotion (bc they share sprites)
+                        # And the Region tag for gen 6 was flagged unobtainable
+                    # Because SM-USUM was still in the game title, the unobtainability went to that column
+                        # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
+                if "Region-Alola" in f and gen == "Gen6-7" and game == "SM-USUM":
+                    continue
                 col = game_cols[game]
                 # Unobtainability checker
                 is_unobtainable = unobtainable_checker(curr_file, gen[:4], poke_gen)
@@ -329,7 +336,7 @@ for i in range(len(filenames)):
                     file_check_worksheet.write(row, col, "", missing_format)
                     missing_count += 1
 
-            print(curr_file)
+            # print(curr_file)
     else:
         for filegame in game_denotions:
             # Adds game to checking file string
@@ -337,6 +344,13 @@ for i in range(len(filenames)):
             # Find column of game
             for game in games:
                 if game in filegame:
+                    # The unobtainability check was blocking all Alolan Regions in the spreadsheeet
+                        # This was due to SM-USUM being contained in the gen6-7 file denotion (bc they share sprites)
+                            # And the Region tag for gen 6 was flagged unobtainable
+                        # Because SM-USUM was still in the game title, the unobtainability went to that column
+                            # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
+                    if "Region-Alola" in f and filegame == "Gen6-7 XY-ORAS-SM-USUM" and game == "SM-USUM":
+                        continue
                     col = game_cols[game]
                     # Unobtainability checker
                     is_unobtainable = unobtainable_checker(curr_file, filegame[:4], poke_gen)
@@ -357,7 +371,7 @@ for i in range(len(filenames)):
                         file_check_worksheet.write(row, col, "", missing_format)
                         missing_count += 1
 
-            print(curr_file)
+            # print(curr_file)
     row += 1
 
 print("Missing:", missing_count, "images")
