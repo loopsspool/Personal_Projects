@@ -78,6 +78,9 @@ def unobtainable_checker(filename, file_gen, poke_gen):
             s = file_gen + " " + game
             if s in filename:
                 return True
+    # If searching for a fairy type before gen6
+    if "-Form-Fairy" in filename and file_gen < "Gen6":
+        return True
     # If filename is searching for shinies in gen1
     if "-Shiny" in filename and file_gen == "Gen1":
         return True
@@ -98,14 +101,47 @@ def unobtainable_checker(filename, file_gen, poke_gen):
     # Pikachu Cosplay outside of Gen6
     if "-Form-Cosplay" in filename and file_gen != "Gen6":
         return True
+    # Can't be shiny either
+    if "-Form-Cosplay" in filename and "Shiny" in filename:
+        return True
     # Pikachu Hat before Gen7
     if "-Form-Cap" in filename and file_gen < "Gen7":
         return True
-    # Spiky-Eared Pichu outside of Gen 4
+    # Can't be shiny either
+    if "-Form-Cap" in filename and "Shiny" in filename:
+        return True
+    # And World Cap only in Sword-Shiel
+    if "-Form-Cap-World" in filename and file_gen < "Gen8":
+        return True
+    # Unown punctuation before gen 3
+    if "201" in filename and ("!" in filename or "Qmark" in filename) and file_gen < "Gen3":
+        return True
+    # Spiky-Eared Pichu outside of gen 4
     if "-Form-Spiky_Eared" in filename and file_gen != "Gen4":
         return True
     # Primal Kyogre & Groudon outside of gen 6 & 7
     if "-Primal" in filename and file_gen != "Gen6" and file_gen != "Gen7":
+        return True
+    # Rotom Forms only available from Platinum on
+    if "Rotom" in filename and "Form" in filename and "Diamond-Pearl" in filename:
+        return True
+    # Origin Giratina form only available from Platinum on
+    if "Giratina" in filename and "-Form-Origin" in filename and "Diamond-Pearl" in filename:
+        return True
+    # Sky Form Shaymin form only available from Platinum on
+    if "Shaymin" in filename and "-Form-Sky" in filename and "Diamond-Pearl" in filename:
+        return True
+    # ??? Form for Arceus not available after gen4
+    if "Arceus" in filename and "Qmark" in filename and file_gen > "Gen4":
+        return True
+    # Ash-Greninja only in SM-USUM
+    # TODO: Check if this makes it unavailable in SM-USUM column, too
+        # TODO: Zygarde forms being overwritten like Alola Region
+    if "-Form-Ash" in filename and "XY-ORAS" in filename:
+        return True
+    # 10% and complete Zygarde forms only available in SM
+    # TODO: Check same thing as Ash Greninja above
+    if ("10%" in filename or "Complete" in filename) and "XY-ORAS" in filename:
         return True
     
     # Checking if pokemon is available in gen8
@@ -119,6 +155,23 @@ def unobtainable_checker(filename, file_gen, poke_gen):
 
     return False
     
+def prevent_overriding(filename, game):
+    # The unobtainability check was blocking all Alolan Regions in the spreadsheeet
+        # This was due to SM-USUM being contained in the gen6-7 file denotion (bc they share sprites)
+            # And the Region tag for gen 6 was flagged unobtainable
+        # Because SM-USUM was still in the game title, the unobtainability went to that column
+            # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
+    if "Gen6-7" in filename and game == "SM-USUM":
+        if "Region-Alola" in filename:
+            return True
+        # Allowing gen 7 pokemon to show as available
+        if gen_finder(filename[:4]) == "Gen7":
+            return True
+        # Allowing Pikachu Caps through
+        if "-Form-Cap" in filename:
+            return True
+
+    return False
 
 pokedex = {}
 form_pokedex = []
@@ -268,8 +321,8 @@ for i in range(len(form_pokedex)):
 ##########################  CHECKING FOR FILES   ##########################
 # TODO: Incorporate alts
 # TODO: Incorporate drawn images
-# TODO: Add black fill color for impossible combos (eg mega evolutions in gen1)
-# TODO: Green fill for cells with file and red for ones missing?
+# TODO: If pokemon is fully unobtainable delete row? (ie shiny cosplay/cap pikachus)
+# TODO: Some gender differences, like Zubat (females have smaller fangs) aren't visible from back sprites, so male & female back sprites are the same
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 game_sprite_files = os.listdir(game_sprite_path)
 for i in range(len(game_sprite_files)):
@@ -284,6 +337,8 @@ back_gen_denotions = ["Gen8", "Gen7", "Gen6-7", "Gen5", "Gen4", "Gen3", "Gen2", 
 check_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#00cf37'})
 missing_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#ff0000'})
 unobtainable_format = file_check_workbook.add_format({'align': 'center', 'bg_color': 'black'})
+# It's own "Missing" format since only some pokes have different Crystal back sprites
+missing_crystal_back_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#fcba03'})
 
 missing_count = 0
 row = 1
@@ -313,12 +368,17 @@ for i in range(len(filenames)):
                         # And the Region tag for gen 6 was flagged unobtainable
                     # Because SM-USUM was still in the game title, the unobtainability went to that column
                         # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
-                if "Region-Alola" in f and gen == "Gen6-7" and game == "SM-USUM":
+                # if "Region-Alola" in f and gen == "Gen6-7" and game == "SM-USUM":
+                #     continue
+                will_override = prevent_overriding(curr_file, game)
+                if will_override:
                     continue
                 col = game_cols[game]
                 # Unobtainability checker
                 is_unobtainable = unobtainable_checker(curr_file, gen[:4], poke_gen)
                 if is_unobtainable:
+                    if "-Form-Cap" in curr_file:
+                        print(curr_file, game, col)
                     file_check_worksheet.write(row, col, "u", unobtainable_format)
                     continue
                 # Omitting Cosplay Pikachu from SM-USUM column even though it's in filename
@@ -326,15 +386,24 @@ for i in range(len(filenames)):
                 if game == "SM-USUM" and "-Form-Cosplay" in curr_file:
                     continue
                 # Checking for Crystal Backs
+                crystal_back_check = False
                 if game == "Crystal":
+                    crystal_back_check = True
                     # Adding Crystal into file checker name
                     curr_file = curr_file[:curr_file.find("Back") + 4] + "-Crystal" + curr_file[curr_file.find("Back") + 4:]
                 # Writing to the appropriate cell
                 if curr_file in game_sprite_files:
                     file_check_worksheet.write(row, col, "x", check_format)
                 else:
-                    file_check_worksheet.write(row, col, "", missing_format)
-                    missing_count += 1
+                    if crystal_back_check:
+                        # If the files not there, I'm assuming the pokemon back sprite didn't get changed
+                            # Hence "un"(changed)
+                            # Will use Gold/Silver back sprites
+                                # So not counting as missing
+                        file_check_worksheet.write(row, col, "un", missing_crystal_back_format)
+                    else:
+                        file_check_worksheet.write(row, col, "", missing_format)
+                        missing_count += 1
 
             # print(curr_file)
     else:
@@ -349,7 +418,12 @@ for i in range(len(filenames)):
                             # And the Region tag for gen 6 was flagged unobtainable
                         # Because SM-USUM was still in the game title, the unobtainability went to that column
                             # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
-                    if "Region-Alola" in f and filegame == "Gen6-7 XY-ORAS-SM-USUM" and game == "SM-USUM":
+                    # if "Region-Alola" in f and filegame == "Gen6-7 XY-ORAS-SM-USUM" and game == "SM-USUM":
+                    #     continue
+                    # if gen_finder(curr_file[:4]) == "Gen7" and filegame == "Gen6-7 XY-ORAS-SM-USUM" and game == "SM-USUM":
+                    #     continue
+                    will_override = prevent_overriding(curr_file, game)
+                    if will_override:
                         continue
                     col = game_cols[game]
                     # Unobtainability checker
