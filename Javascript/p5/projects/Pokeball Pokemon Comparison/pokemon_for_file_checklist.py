@@ -51,13 +51,11 @@ def game_finder_from_gen(gen):
     if gen == 8:
         return(["Sword-Shield"])
 
-# TODO: Change to include forms, which is on the Gen8_Pokemon sheet
 is_available_in_gen_8 = {}
 for i in range(1, len(info_sheet.col(4))):
     # Pokemon name = is available in gen 8
     is_available_in_gen_8[cell_value(info_sheet, i, 4)] = (cell_value(info_sheet, i, 15) == "x")
 
-# TODO: Blocking SM-USUM Regionals
 def unobtainable_checker(filename, file_gen, poke_gen):
     ###################     UNIVERSAL UNOBTAINABILITY     ###################
     # If filename is searching gens before pokemon was introduced
@@ -135,13 +133,10 @@ def unobtainable_checker(filename, file_gen, poke_gen):
     if "Arceus" in filename and "Qmark" in filename and file_gen > "Gen4":
         return True
     # Ash-Greninja only in SM-USUM
-    # TODO: Check if this makes it unavailable in SM-USUM column, too
-        # TODO: Zygarde forms being overwritten like Alola Region
-    if "-Form-Ash" in filename and "XY-ORAS" in filename:
+    if "-Form-Ash" in filename and file_gen < "Gen7":
         return True
     # 10% and complete Zygarde forms only available in SM
-    # TODO: Check same thing as Ash Greninja above
-    if ("10%" in filename or "Complete" in filename) and "XY-ORAS" in filename:
+    if ("10%" in filename or "Complete" in filename) and file_gen < "Gen7":
         return True
     
     # Checking if pokemon is available in gen8
@@ -162,6 +157,7 @@ def prevent_overriding(filename, game):
         # Because SM-USUM was still in the game title, the unobtainability went to that column
             # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
     if "Gen6-7" in filename and game == "SM-USUM":
+        # Allowing Alola Regions to show
         if "Region-Alola" in filename:
             return True
         # Allowing gen 7 pokemon to show as available
@@ -169,6 +165,15 @@ def prevent_overriding(filename, game):
             return True
         # Allowing Pikachu Caps through
         if "-Form-Cap" in filename:
+            return True
+        # REJECTING Cosplay Pikachu for SM-USUM
+        if "-Form-Cosplay" in filename:
+            return True
+        # Allowing Ash Greninja
+        if "-Form-Ash" in filename:
+            return True
+        # Allowing Zygarde forms
+        if "10%" in filename or "Complete" in filename:
             return True
 
     return False
@@ -181,6 +186,7 @@ class Pokemon:
         self.number = number
         self.variation = variation
 
+print("Getting pokemon info from spreadsheet...")
 # Getting pokemon number and name
 # Starting at 1 skips header cell
 for i in range(1, len(info_sheet.col(3))):
@@ -217,6 +223,7 @@ file_check_worksheet = file_check_workbook.add_worksheet()
 
 
 ##########################  HEADER ROW  ########################## 
+print("Generating header row...")
 h_format = file_check_workbook.add_format({'bold': True, 'align': 'center', 'bg_color': 'gray', 'border': 1})
 file_check_worksheet.set_row(0, None, h_format)
 file_check_worksheet.freeze_panes(1, 0)
@@ -238,6 +245,7 @@ for i in range(len(games)):
 #     file_check_worksheet.write(0, 20, "Drawn")
 
 ##########################  POKEMON FILENAMES   ##########################
+print("Creating potential pokemon filenames...")
 alcremie_shiny_forms_done = []
 minior_shiny_form_done = False
 filenames = []
@@ -319,6 +327,7 @@ for i in range(len(form_pokedex)):
 
 
 ##########################  CHECKING FOR FILES   ##########################
+print("Checking filenames against actual image files...")
 # TODO: Incorporate alts
 # TODO: Incorporate drawn images
 # TODO: If pokemon is fully unobtainable delete row? (ie shiny cosplay/cap pikachus)
@@ -340,6 +349,7 @@ unobtainable_format = file_check_workbook.add_format({'align': 'center', 'bg_col
 # It's own "Missing" format since only some pokes have different Crystal back sprites
 missing_crystal_back_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#fcba03'})
 
+potential_wrong_continues = []
 missing_count = 0
 row = 1
 for i in range(len(filenames)):
@@ -363,27 +373,16 @@ for i in range(len(filenames)):
             games_in_gen = game_finder_from_gen(gen)
             # Finding columns of games in gen
             for game in games_in_gen:
-                # The unobtainability check was blocking all Alolan Regions in the spreadsheeet
-                    # This was due to SM-USUM being contained in the gen6-7 file denotion (bc they share sprites)
-                        # And the Region tag for gen 6 was flagged unobtainable
-                    # Because SM-USUM was still in the game title, the unobtainability went to that column
-                        # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
-                # if "Region-Alola" in f and gen == "Gen6-7" and game == "SM-USUM":
-                #     continue
                 will_override = prevent_overriding(curr_file, game)
                 if will_override:
+                    potential_wrong_continues.append(curr_file)
                     continue
                 col = game_cols[game]
                 # Unobtainability checker
                 is_unobtainable = unobtainable_checker(curr_file, gen[:4], poke_gen)
                 if is_unobtainable:
-                    if "-Form-Cap" in curr_file:
-                        print(curr_file, game, col)
+                    potential_wrong_continues.append(curr_file)
                     file_check_worksheet.write(row, col, "u", unobtainable_format)
-                    continue
-                # Omitting Cosplay Pikachu from SM-USUM column even though it's in filename
-                    # Kept in so I don't have to add another game/back gen denotion just for cosplay pikachu
-                if game == "SM-USUM" and "-Form-Cosplay" in curr_file:
                     continue
                 # Checking for Crystal Backs
                 crystal_back_check = False
@@ -413,27 +412,16 @@ for i in range(len(filenames)):
             # Find column of game
             for game in games:
                 if game in filegame:
-                    # The unobtainability check was blocking all Alolan Regions in the spreadsheeet
-                        # This was due to SM-USUM being contained in the gen6-7 file denotion (bc they share sprites)
-                            # And the Region tag for gen 6 was flagged unobtainable
-                        # Because SM-USUM was still in the game title, the unobtainability went to that column
-                            # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
-                    # if "Region-Alola" in f and filegame == "Gen6-7 XY-ORAS-SM-USUM" and game == "SM-USUM":
-                    #     continue
-                    # if gen_finder(curr_file[:4]) == "Gen7" and filegame == "Gen6-7 XY-ORAS-SM-USUM" and game == "SM-USUM":
-                    #     continue
                     will_override = prevent_overriding(curr_file, game)
                     if will_override:
+                        potential_wrong_continues.append(curr_file)
                         continue
                     col = game_cols[game]
                     # Unobtainability checker
                     is_unobtainable = unobtainable_checker(curr_file, filegame[:4], poke_gen)
                     if is_unobtainable:
+                        potential_wrong_continues.append(curr_file)
                         file_check_worksheet.write(row, col, "u", unobtainable_format)
-                        continue
-                    # Omitting Cosplay Pikachu from SM-USUM column even though it's in filename
-                    # Kept in so I don't have to add another game/back gen denotion just for cosplay pikachu
-                    if game == "SM-USUM" and "-Form-Cosplay" in curr_file:
                         continue
                     # Writing to the cell if the file exists
                     # Has to be inside this game loop for XY-ORAS and SM-USUM
@@ -449,6 +437,13 @@ for i in range(len(filenames)):
     row += 1
 
 print("Missing:", missing_count, "images")
+
+for f in potential_wrong_continues:
+    # Excluding cosplay because the files ARE there, but they include SM-USUM in the name
+        # Instead of creating a XY-ORAS only tag and rewriting code
+        # The exclusion happens here. They are not continued for XY-ORAS, only SM-USUM for non-overwriting purposes of the unobtainability
+    if f in game_sprite_files and not "-Form-Cosplay" in f:
+        print("WRONG CONTINUE FOR:\n", f)
 
 file_check_workbook.close()
 print("Done!")
