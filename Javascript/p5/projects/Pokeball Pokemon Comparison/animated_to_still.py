@@ -152,10 +152,19 @@ for pokemon_range in pokemon_ranges.values():
 
                     # Actually saving the first frame
                     # Courtesy of https://stackoverflow.com/questions/4904940/python-converting-gif-frames-to-png
-                    # im = Image.open(game_sprite_path + filename + "-Animated.gif")
-                    # transparency = im.info['transparency']
-                    # im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\" + 'test2.png', transparency=transparency)
+                    im = Image.open(game_sprite_path + filename + "-Animated.gif")
+                    # Error on some files not having a transparency key?
+                    try:
+                        transparency = im.info['transparency']
+                        im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\" + filename + ".png", transparency=transparency)
+                    except:
+                        print("No transparency:", filename)
+                        im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\" + filename + ".png")
 
 print("Done!")
 print("Images added:", img_count)
 print("Don't forget to run the file checker again to accomodate for the new images!")
+
+# TODO: Some came out botched... Namely Emerald-Shinies?
+    # Perhaps do a check on them for if the upper left corner is transparent
+        # If not it got screwy
