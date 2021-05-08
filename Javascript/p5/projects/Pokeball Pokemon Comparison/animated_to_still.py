@@ -7,6 +7,7 @@ import openpyxl     # For reading excel workbook
 # TODO: Decide if you want this script to update spreadsheet, or to run the file checker again
 
 # SPREADSHEET DATA
+print("Loading spreadsheet...")
 pokemon_info = openpyxl.load_workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon File-check.xlsx')
 sheet = pokemon_info.worksheets[0]
 n_rows = sheet.max_row
@@ -28,10 +29,30 @@ def get_col_number(col_name):
         if (cell_value(1, col) == col_name):
             return col
 
+# Returns generation based on game
+def gen_finder_from_game(g):
+    if g == "Red-Blue" or g == "Red-Green" or g == "Yellow":
+        return("Gen1")
+    if g == "Crystal" or g == "Gold" or g == "Silver":
+        return("Gen2")
+    if g == "Emerald" or g == "FireRed-LeafGreen" or g == "Ruby-Sapphire":
+        return("Gen3")
+    if g == "Diamond-Pearl" or g == "HGSS" or g == "Platinum":
+        return("Gen4")
+    if g == "BW-B2W2":
+        return("Gen5")
+    if g == "XY-ORAS-SM-USUM":
+        return("Gen6-7")
+    if g == "SM-USUM":
+        return("Gen7")
+    if g == "Sword-Shield":
+        return("Gen8")
+
 # FILES
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 files = os.listdir(game_sprite_path)
 
+print("Getting pokemon row ranges...")
 # Getting row range of cells pokemon are contained in
 pokemon_ranges = {}
 # Grabbing the name column from the excel file
@@ -69,7 +90,7 @@ for name in name_col:
     # Adding to the row iterator
     row_i += 1
 
-#print(pokemon_ranges)
+print("Checking files and saving frames...")
 # Keeps track of how many photos I can converted from animated to static
 img_count = 0
 col_i = 1
@@ -86,26 +107,55 @@ for pokemon_range in pokemon_ranges.values():
         named_rows[name] = row
 
     # Checking if there's an animated but not a static image
-    for tags, row in named_rows.items():
+    for name, row in named_rows.items():
         # Skips animated rows, which will be crossed refrenced in their static counterpart
-        if "Animated" in tags:
+        if "Animated" in name:
             continue
         else:
             # Get animated counterpart of static tag row
-            animated_counterpart_row = named_rows[tags + "-Animated"]
+            animated_counterpart_row = named_rows[name + "-Animated"]
+            # For finding what game or generation to add
+                # Necessary here since it is used in determining if a photo can cover bases for SM-USUM and XY-ORAS
+            game = ""
             for i in range(len(row)):
                 # Check if there's an animated image and not a static one
                 if row[i].value == None and animated_counterpart_row[i].value == "x":
                     img_count += 1
-                    filename = tags
+                    # If the previous game (due to assignment) was SM-USUM and found an empty XY-ORAS cell
+                        # Which is the current iteration of the loop
+                        # Continue, bc the file covers the both of them
+                    if game == "XY-ORAS-SM-USUM" and cell_value(1, i+1) == "XY-ORAS":
+                        continue
                     game = cell_value(1, i+1)
-                    # TODO: Figure out how to deal with SM-USUM and XY-ORAS files
-                    print(tags, game)
+                    # Checks if XY-ORAS column is empty too, since the games share sprites
+                        # And if it's a SM-USUM exclusive, XY-ORAS despite having a black fill also has a "u" character tag, saying its unobtainable
+                            # So if it's possible, the cell will be empty and red
+                    # Minus one because array indices start at 0
+                        # But columns in openpyxl start at 1
+                    if game == "SM-USUM" and row[get_col_number("XY-ORAS") - 1].value == None:
+                        game = "XY-ORAS-SM-USUM"
 
-    #break
-print(img_count)
+                    # Generating filename
+                    poke_num = row[get_col_number("#") - 1].value
+                    file_tags = row[get_col_number("Tags") - 1].value
+                    # If there are no tags (cells empty), replace None with empty string
+                    if file_tags == None:
+                        file_tags = ""
 
-# Courtesy of https://stackoverflow.com/questions/4904940/python-converting-gif-frames-to-png
-# im = Image.open("C:\\Users\\ejone\\Downloads\\Aggron_NB.png")
-# transparency = im.info['transparency'] 
-# im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\" + 'test2.png', transparency=transparency)
+                    filename = poke_num + " " + row[get_col_number("Name") - 1].value + " "
+                    if "Back" in name:
+                        filename += gen_finder_from_game(game) + file_tags
+                    else:
+                        filename += gen_finder_from_game(game) + " " + game + file_tags
+                    
+                    print(filename)
+
+                    # Actually saving the first frame
+                    # Courtesy of https://stackoverflow.com/questions/4904940/python-converting-gif-frames-to-png
+                    # im = Image.open(game_sprite_path + filename + "-Animated.gif")
+                    # transparency = im.info['transparency']
+                    # im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\" + 'test2.png', transparency=transparency)
+
+print("Done!")
+print("Images added:", img_count)
+print("Don't forget to run the file checker again to accomodate for the new images!")
