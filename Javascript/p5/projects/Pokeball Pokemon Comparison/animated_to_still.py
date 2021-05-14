@@ -2,6 +2,7 @@ from PIL import Image
 import os
 import openpyxl     # For reading excel workbook
 # NOTE: openpyxl is a 1 based index
+from wand.image import Image
 
 # TODO: Purple background when using on animated pngs
 # TODO: Decide if you want this script to update spreadsheet, or to run the file checker again
@@ -51,6 +52,8 @@ def gen_finder_from_game(g):
 # FILES
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 files = os.listdir(game_sprite_path)
+failed_stills_path = "C:\\Users\\ejone\\Onedrive\\Desktop\\Test\\Failed"
+failed_still_files = os.listdir(failed_stills_path)
 
 print("Getting pokemon row ranges...")
 # Getting row range of cells pokemon are contained in
@@ -148,18 +151,34 @@ for pokemon_range in pokemon_ranges.values():
                     else:
                         filename += gen_finder_from_game(game) + " " + game + file_tags
                     
-                    print(filename)
+                    #print(filename)
 
                     # Actually saving the first frame
+                    ############ This method has issues with Crystal and saving 1x1 pixel frames
+                    # Courtesy of https://stackoverflow.com/questions/21996710/more-problems-extracting-frames-from-gifs
+                    with Image(filename=game_sprite_path + filename + "-Animated.gif") as gif:
+                        for i, first_frame in enumerate(gif.sequence):
+                            with Image(image=first_frame) as frame:
+                                frame.format = 'PNG'
+                                if frame.height < 30:
+                                    print("POTENTIALLY INCORRECT:", filename)
+                                    #break
+                                # Used to save only unsuccessful attempts at previous saves
+                                if filename + ".png" in failed_still_files:
+                                    frame.save(filename = "C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\Failed\\" + filename + ".png")
+                                    break
+                    ############ This method has issues with Emerald-Shiny
                     # Courtesy of https://stackoverflow.com/questions/4904940/python-converting-gif-frames-to-png
-                    im = Image.open(game_sprite_path + filename + "-Animated.gif")
+                    #im = Image.open(game_sprite_path + filename + "-Animated.gif")
                     # Error on some files not having a transparency key?
-                    try:
-                        transparency = im.info['transparency']
-                        im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\" + filename + ".png", transparency=transparency)
-                    except:
-                        print("No transparency:", filename)
-                        im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\" + filename + ".png")
+                    # try:
+                    #     transparency = im.info['transparency']
+                    #     im.convert('RGBA')
+                    #     im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\Failed\\" + filename + ".png", transparency=transparency)
+                    # except:
+                    #     print("No transparency:", filename)
+                    #     im.convert('RGBA')
+                    #     im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\Failed\\" + filename + ".png")
 
 print("Done!")
 print("Images added:", img_count)
