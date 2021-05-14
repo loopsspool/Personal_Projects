@@ -1,8 +1,8 @@
-from PIL import Image
-import os
+from PIL import Image, ImageChops   # For downloading image, cropping, and border checking
+import os   # For file moving and checking
 import openpyxl     # For reading excel workbook
 # NOTE: openpyxl is a 1 based index
-from wand.image import Image
+import wand.image   # For backup file download
 
 # TODO: Purple background when using on animated pngs
 # TODO: Decide if you want this script to update spreadsheet, or to run the file checker again
@@ -49,11 +49,69 @@ def gen_finder_from_game(g):
     if g == "Sword-Shield":
         return("Gen8")
 
+# Helper function for is_there_a_border
+def find_solid_border_corner(im):
+    im = im.convert('RGBA')
+    # Checking each corners alpha values
+        # Sometimes there's a thin line of transparency
+            # Without this, that's interpreted as a "border"
+    # Checking top left corner alpha
+    if im.getpixel((0, 0))[3] != 0:
+        return ((0, 0))
+    # Checking top right corner alpha
+    if im.getpixel((im.width-1, 0))[3] != 0:
+        return ((im.width-1, 0))
+    # Checking bottom right corner alpha
+    if im.getpixel((im.width-1, im.height-1))[3] != 0:
+        return ((im.width-1, im.height-1))
+    # Checking bottom left corner alpha
+    if im.getpixel((0, im.height-1))[3] != 0:
+        return ((0, im.height-1))
+
+    # If all corners are transparent, return -1
+    return (-1)
+
+# Checks to see if there's an image around a border
+# Courtesy of https://stackoverflow.com/questions/10985550/detect-if-an-image-has-a-border-programmatically-return-boolean
+def is_there_a_border(img_name):
+    im = Image.open(img_name)
+    solid_color_reference_corner = find_solid_border_corner(im)
+    # If all four corners are transparent, exit function
+    if solid_color_reference_corner == -1:
+        return (False)
+    
+    bg = Image.new(im.mode, im.size, im.getpixel(solid_color_reference_corner))
+    diff = ImageChops.difference(im, bg)
+    diff = ImageChops.add(diff, diff, 2.0, -100)
+    bbox = diff.getbbox()
+    # If image has border on any side, print filename
+    if bbox != (0,0,im.size[0],im.size[1]):
+        return (True)
+
+def remove_border(img_name):
+    im = Image.open(img_name)
+    solid_color_reference_corner = find_solid_border_corner(im)
+    # If all four corners are transparent, exit function
+    if solid_color_reference_corner == -1:
+        return (False)
+
+    bg = Image.new(im.mode, im.size, im.getpixel(solid_color_reference_corner))
+    diff = ImageChops.difference(im, bg)
+    diff = ImageChops.add(diff, diff, 2.0, -100)
+    bbox = diff.getbbox()
+    if bbox:
+        im = im.crop(bbox)
+        im.save(img_name)
+
+
 # FILES
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 files = os.listdir(game_sprite_path)
 failed_stills_path = "C:\\Users\\ejone\\Onedrive\\Desktop\\Test\\Failed"
 failed_still_files = os.listdir(failed_stills_path)
+
+potentially_incorrect = []
+has_border = []
 
 print("Getting pokemon row ranges...")
 # Getting row range of cells pokemon are contained in
@@ -151,39 +209,66 @@ for pokemon_range in pokemon_ranges.values():
                     else:
                         filename += gen_finder_from_game(game) + " " + game + file_tags
                     
-                    #print(filename)
+                    print(filename)
 
                     # Actually saving the first frame
-                    ############ This method has issues with Crystal and saving 1x1 pixel frames
-                    # Courtesy of https://stackoverflow.com/questions/21996710/more-problems-extracting-frames-from-gifs
-                    with Image(filename=game_sprite_path + filename + "-Animated.gif") as gif:
-                        for i, first_frame in enumerate(gif.sequence):
-                            with Image(image=first_frame) as frame:
-                                frame.format = 'PNG'
-                                if frame.height < 30:
-                                    print("POTENTIALLY INCORRECT:", filename)
-                                    #break
-                                # Used to save only unsuccessful attempts at previous saves
-                                if filename + ".png" in failed_still_files:
-                                    frame.save(filename = "C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\Failed\\" + filename + ".png")
-                                    break
                     ############ This method has issues with Emerald-Shiny
                     # Courtesy of https://stackoverflow.com/questions/4904940/python-converting-gif-frames-to-png
-                    #im = Image.open(game_sprite_path + filename + "-Animated.gif")
                     # Error on some files not having a transparency key?
-                    # try:
-                    #     transparency = im.info['transparency']
-                    #     im.convert('RGBA')
-                    #     im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\Failed\\" + filename + ".png", transparency=transparency)
-                    # except:
-                    #     print("No transparency:", filename)
-                    #     im.convert('RGBA')
-                    #     im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\Failed\\" + filename + ".png")
+                    try:
+                        im = Image.open(game_sprite_path + filename + "-Animated.gif")
+                        transparency = im.info['transparency']
+                        im.convert('RGBA')
+                        im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\" + filename + ".png", transparency=transparency)
+                        break
+                    except:
+                        print("No transparency:", filename)
+                        im = Image.open(game_sprite_path + filename + "-Animated.gif")
+                        im.convert('RGBA')
+                        im.save("C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\" + filename + ".png")
+                        break
 
-print("Done!")
+                    ############ This method has issues with Crystal and saving 1x1 pixel frames
+                    # NOTE: Due to the ubiquity of saving 1x1 images, this method of saving is better suited to attempting to save images that have severely failed with borders/transparency
+                    # Courtesy of https://stackoverflow.com/questions/21996710/more-problems-extracting-frames-from-gifs
+                    # with wand.image(filename=game_sprite_path + filename + "-Animated.gif") as gif:
+                    #     for i, first_frame in enumerate(gif.sequence):
+                    #         with wand.image(image=first_frame) as frame:
+                    #             frame.format = 'PNG'
+                    #             if frame.height < 30:
+                    #                 potentially_incorrect.append(filename)
+                    #                 break
+                    #             # Used to save only unsuccessful attempts at previous saves
+                    #             if filename + ".png" in failed_still_files:
+                    #                 frame.save(filename = "C:\\Users\\ejone\\OneDrive\\Desktop\\Test\\Failed\\" + filename + ".png")
+                    #                 break
+
+print("Checking for borders...")
+saved_imgs_path = "C:\\Users\\ejone\\Onedrive\\Desktop\\Test"
+saved_imgs = os.listdir(saved_imgs_path)
+for img in saved_imgs:
+    # Skipping failed directory
+    if img == "Failed":
+        continue
+    border = is_there_a_border(saved_imgs_path + "\\" + img)
+    if border:
+        has_border.append(img)
+        # Moves image to failed folder
+        new_path = saved_imgs_path + "\\Failed\\" + img
+        os.rename(saved_imgs_path + "\\" + img, new_path)
+        # Removes border
+        remove_border(new_path)
+
+if len(potentially_incorrect) > 0:
+    print("\n\n-------------POTENTIALLY INCORRECT-------------")
+    for pi in potentially_incorrect:
+        print(pi)
+
+if len(has_border) > 0:
+    print("\n\n-------------HAD BORDERS REMOVED AND MOVED TO FAILED TO CHECK-------------")
+    for bordered in has_border:
+        print(bordered)
+        
+print("\n\nDone!")
 print("Images added:", img_count)
 print("Don't forget to run the file checker again to accomodate for the new images!")
-
-# TODO: Some came out botched... Namely Emerald-Shinies?
-    # Perhaps do a check on them for if the upper left corner is transparent
-        # If not it got screwy
