@@ -6,55 +6,7 @@ import os   # For downloading those images to my computer
 from PIL import Image   # For converting URL image data to PIL Image object 
 import openpyxl     # For reading excel workbook
 # Must explicitly state this...
-
 from openpyxl import load_workbook
-
-# SPREADSHEET DATA
-pokemon_info = load_workbook(filename = 'C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xlsx', data_only=True)
-pokemon_info_sheet = pokemon_info.worksheets[0]
-
-def cell_value(row, col, sheet):
-    return (sheet.cell(row, col).value)
-
-def isnt_empty(row, col, sheet):
-    return (cell_value(row, col, sheet) != None)
-
-def is_empty(row, col, sheet):
-    return (cell_value(row, col, sheet) == None)
-
-# Returns column number from column name
-def get_col_number(col_name, sheet):
-    for col in range(1, sheet.max_column):
-        if (cell_value(1, col, sheet) == col_name):
-            return col
-
-
-def check_if_animated(link):
-    # Converting URL image to PIL Image Object
-    img = Image.open(requests.get(link, stream = True).raw)
-    # Checking if it is an animated image
-    return(img.is_animated)
-
-
-def get_largest_png(img):
-    # If multiple sized images, grab the largest
-    try:
-        # Sourceset is a string of urls seperated by a comma
-            # This breaks that into a list and takes the last (and largest) png url
-        srcset = img['srcset'].split(",")
-        src = srcset[len(srcset) - 1]
-    # If there's only one photo, theres no srcset and that's the largest
-    except:
-        src = img['src']
-
-    return (src)
-
-def get_img_from_string(img, s, save_path):
-    if re.search(s, img.attrs['alt']) != None:
-        save_img = get_largest_png(img)
-        print(img.attrs['alt'])
-        print(s, " --- ", save_path)
-        # urllib.request.urlretrieve(save_img, save_path)
 
 def search_for_forms(pokemon):
     # Custom type forms
@@ -431,6 +383,59 @@ class Pokemon:
         self.has_misc_forms = has_misc_forms
         self.is_in_gen8 = is_in_gen8
 
+# SPREADSHEET DATA
+pokemon_info = load_workbook(filename = 'C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xlsx', data_only=True)
+pokemon_info_sheet = pokemon_info.worksheets[0]
+pokemon_files = load_workbook(filename = 'C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon File-check.xlsx', data_only=True)
+pokemon_files_sheet = pokemon_files.worksheets[0]
+
+def cell_value(row, col, sheet):
+    return (sheet.cell(row, col).value)
+
+def isnt_empty(row, col, sheet):
+    return (cell_value(row, col, sheet) != None)
+
+def is_empty(row, col, sheet):
+    return (cell_value(row, col, sheet) == None)
+
+# Returns column number from column name
+def get_col_number(col_name, sheet):
+    for col in range(1, sheet.max_column):
+        if (cell_value(1, col, sheet) == col_name):
+            return col
+
+# Returns column name from column number
+def get_col_name(col_number, sheet):
+    return(cell_value(1, col_number, sheet))
+
+
+def check_if_animated(link):
+    # Converting URL image to PIL Image Object
+    img = Image.open(requests.get(link, stream = True).raw)
+    # Checking if it is an animated image
+    return(img.is_animated)
+
+
+def get_largest_png(img):
+    # If multiple sized images, grab the largest
+    try:
+        # Sourceset is a string of urls seperated by a comma
+            # This breaks that into a list and takes the last (and largest) png url
+        srcset = img['srcset'].split(",")
+        src = srcset[len(srcset) - 1]
+    # If there's only one photo, theres no srcset and that's the largest
+    except:
+        src = img['src']
+
+    return (src)
+
+def get_img_from_string(img, s, save_path):
+    if re.search(s, img.attrs['alt']) != None:
+        save_img = get_largest_png(img)
+        print(img.attrs['alt'])
+        print(s, " --- ", save_path)
+        # urllib.request.urlretrieve(save_img, save_path)
+
 # Gets column numbers from spreadsheet
 name_col = get_col_number("Name", pokemon_info_sheet)
 num_col = get_col_number("#", pokemon_info_sheet)
@@ -459,6 +464,23 @@ for i in range(2, 900):
     is_in_gen8 = isnt_empty(i, gen8_col, pokemon_info_sheet)
 
     pokedex.append(Pokemon(name, num, gen, has_f_var, has_mega, has_giganta, reg_forms, has_type_forms, has_misc_forms, is_in_gen8))
+
+# Getting missing images
+print("Getting missing images from spreadsheet...")
+missing_imgs = {}
+poke_num_col = get_col_number("#", pokemon_files_sheet)
+poke_name_col = get_col_number("Name", pokemon_files_sheet)
+tags_col = get_col_number("Tags", pokemon_files_sheet)
+filename_col = get_col_number("Filename", pokemon_files_sheet)
+print(pokemon_files_sheet.max_column)
+for row in range(2, pokemon_files_sheet.max_row):
+    # Only doing filename_col up because those are where the actual checks need to be made (missing for certain games)
+        # And +1 at the end to be inclusive
+    for col in range(filename_col + 1, pokemon_files_sheet.max_column + 1):
+        if is_empty(row, col, pokemon_files_sheet):
+            # TODO: Find best way to organize this
+                # Dictionary based off pokemon somehow (since pages are seperated by pokemon)
+            print(cell_value(row, filename_col, pokemon_files_sheet), get_col_name(col, pokemon_files_sheet))
 
 # Origin page (list of pokes by national pokedex)
 starter_url = "https://archives.bulbagarden.net"
