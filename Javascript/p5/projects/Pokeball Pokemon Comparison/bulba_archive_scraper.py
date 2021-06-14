@@ -436,6 +436,51 @@ def get_img_from_string(img, s, save_path):
         print(s, " --- ", save_path)
         # urllib.request.urlretrieve(save_img, save_path)
 
+# TODO: TEST
+def combine_gen_and_game(game):
+    if game == "Red-Blue" or game == "Red-Green" or game == "Yellow":
+        return ("Gen1 " + game)
+    if game == "Crystal" or game == "Gold" or game == "Silver":
+        return ("Gen2 " + game)
+    if game == "Emerald" or game == "FireRed-LeafGreen" or game == "Ruby-Sapphire":
+        return ("Gen3 " + game)
+    if game == "Diamond-Pearl" or game == "HGSS" or game == "Platinum":
+        return ("Gen4 " + game)
+    if game == "BW-B2W2":
+        return ("Gen5 " + game)
+    # TODO: Since XY-ORAS and SM-USUM shared sprites
+        # You're going to have to remove the SM-USUM variant where the XY-ORAS-SM-USUM covers them both
+            # So basically if their national dex number is less than the starting for SM-USUM
+    if game == "XY-ORAS":
+        return ("Gen6-7 XY-ORAS-SM-USUM")
+    if game == "SM-USUM":
+        return ("Gen7 " + game)
+    if game == "Sword-Shield":
+        return ("Gen8 " + game)
+
+# TODO: TEST
+def get_back_gen(game):
+    if game == "Red-Blue" or game == "Red-Green" or game == "Yellow":
+        return ("Gen1")
+    if game == "Crystal" or game == "Gold" or game == "Silver":
+        return ("Gen2")
+    if game == "Emerald" or game == "FireRed-LeafGreen" or game == "Ruby-Sapphire":
+        return ("Gen3")
+    if game == "Diamond-Pearl" or game == "HGSS" or game == "Platinum":
+        return ("Gen4")
+    if game == "BW-B2W2":
+        return ("Gen5")
+    # TODO: Since XY-ORAS and SM-USUM shared sprites
+        # You're going to have to remove the SM-USUM variant where the XY-ORAS-SM-USUM covers them both
+            # So basically if their national dex number is less than the starting for SM-USUM
+    if game == "XY-ORAS":
+        return ("Gen6-7")
+    if game == "SM-USUM":
+        return ("Gen7")
+    if game == "Sword-Shield":
+        return ("Gen8")
+
+
 # Gets column numbers from spreadsheet
 name_col = get_col_number("Name", pokemon_info_sheet)
 num_col = get_col_number("#", pokemon_info_sheet)
@@ -474,13 +519,21 @@ tags_col = get_col_number("Tags", pokemon_files_sheet)
 filename_col = get_col_number("Filename", pokemon_files_sheet)
 print(pokemon_files_sheet.max_column)
 for row in range(2, pokemon_files_sheet.max_row):
+    tags = cell_value(row, tags_col, pokemon_files_sheet)
     # Only doing filename_col up because those are where the actual checks need to be made (missing for certain games)
         # And +1 at the end to be inclusive
     for col in range(filename_col + 1, pokemon_files_sheet.max_column + 1):
+        col_name = get_col_name(col, pokemon_files_sheet)
+        # TODO: Using the below, create a full filename for the missing images
         if is_empty(row, col, pokemon_files_sheet):
+            if "-Back" in tags:
+                back_gen = get_back_gen(col_name)
+            else:
+                gen_and_game = combine_gen_and_game(col_name)
+
             # TODO: Find best way to organize this
                 # Dictionary based off pokemon somehow (since pages are seperated by pokemon)
-            print(cell_value(row, filename_col, pokemon_files_sheet), get_col_name(col, pokemon_files_sheet))
+            print(tags, col_name)
 
 # Origin page (list of pokes by national pokedex)
 starter_url = "https://archives.bulbagarden.net"
