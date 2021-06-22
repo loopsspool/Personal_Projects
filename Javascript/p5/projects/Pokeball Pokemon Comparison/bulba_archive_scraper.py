@@ -436,8 +436,24 @@ def get_img_from_string(img, s, save_path):
         print(s, " --- ", save_path)
         # urllib.request.urlretrieve(save_img, save_path)
 
+# Determines if a pokemon can only be obtained in SM-USUM (so exclude XY-ORAS in filename)
+def sm_usum_exclusivity_test(poke_num, tags):
+    if poke_num >= 722:
+        return True
+    if "-Region-Alola" in tags:
+        return True
+    # For Cap Pikachu
+    if "-Form-Cap" in tags:
+        return True
+    # For Ash Greninja
+    if "-Form-Ash" in tags:
+        return True
+    # For Zygarde
+    if "-Form-10%" in tags or "-Form-Complete" in tags:
+        return True
+
 # TODO: TEST
-def combine_gen_and_game(game):
+def combine_gen_and_game(game, poke_num, tags):
     if game == "Red-Blue" or game == "Red-Green" or game == "Yellow":
         return ("Gen1 " + game)
     if game == "Crystal" or game == "Gold" or game == "Silver":
@@ -448,18 +464,18 @@ def combine_gen_and_game(game):
         return ("Gen4 " + game)
     if game == "BW-B2W2":
         return ("Gen5 " + game)
-    # TODO: Since XY-ORAS and SM-USUM shared sprites
-        # You're going to have to remove the SM-USUM variant where the XY-ORAS-SM-USUM covers them both
-            # So basically if their national dex number is less than the starting for SM-USUM
-    if game == "XY-ORAS":
-        return ("Gen6-7 XY-ORAS-SM-USUM")
-    if game == "SM-USUM":
-        return ("Gen7 " + game)
+    # Since XY-ORAS and SM-USUM shared sprites
+    if game == "XY-ORAS" or game == "SM-USUM":
+        is_sm_usum_exclusive = sm_usum_exclusivity_test(poke_num, tags)
+        if is_sm_usum_exclusive:
+            return ("Gen7 " + game)
+        else:
+            return ("Gen6-7 XY-ORAS-SM-USUM")
     if game == "Sword-Shield":
         return ("Gen8 " + game)
 
 # TODO: TEST
-def get_back_gen(game):
+def get_back_gen(game, poke_num):
     if game == "Red-Blue" or game == "Red-Green" or game == "Yellow":
         return ("Gen1")
     if game == "Crystal" or game == "Gold" or game == "Silver":
@@ -470,13 +486,13 @@ def get_back_gen(game):
         return ("Gen4")
     if game == "BW-B2W2":
         return ("Gen5")
-    # TODO: Since XY-ORAS and SM-USUM shared sprites
-        # You're going to have to remove the SM-USUM variant where the XY-ORAS-SM-USUM covers them both
-            # So basically if their national dex number is less than the starting for SM-USUM
-    if game == "XY-ORAS":
-        return ("Gen6-7")
-    if game == "SM-USUM":
-        return ("Gen7")
+    # Since XY-ORAS and SM-USUM shared sprites
+    if game == "XY-ORAS" or game == "SM-USUM":
+        is_sm_usum_exclusive = sm_usum_exclusivity_test(poke_num, tags)
+        if is_sm_usum_exclusive:
+            return ("Gen7")
+        else:
+            return ("Gen6-7")
     if game == "Sword-Shield":
         return ("Gen8")
 
@@ -520,16 +536,21 @@ filename_col = get_col_number("Filename", pokemon_files_sheet)
 print(pokemon_files_sheet.max_column)
 for row in range(2, pokemon_files_sheet.max_row):
     tags = cell_value(row, tags_col, pokemon_files_sheet)
+    poke_num = cell_value(row, poke_num_col, pokemon_files_sheet)
     # Only doing filename_col up because those are where the actual checks need to be made (missing for certain games)
         # And +1 at the end to be inclusive
     for col in range(filename_col + 1, pokemon_files_sheet.max_column + 1):
+        # If pokemon image is unavailable, continue
+        if cell_value(row, col, pokemon_files_sheet) == "u":
+            continue
+
         col_name = get_col_name(col, pokemon_files_sheet)
         # TODO: Using the below, create a full filename for the missing images
         if is_empty(row, col, pokemon_files_sheet):
             if "-Back" in tags:
-                back_gen = get_back_gen(col_name)
+                back_gen = get_back_gen(col_name, poke_num, tags)
             else:
-                gen_and_game = combine_gen_and_game(col_name)
+                gen_and_game = combine_gen_and_game(col_name, poke_num, tags)
 
             # TODO: Find best way to organize this
                 # Dictionary based off pokemon somehow (since pages are seperated by pokemon)
