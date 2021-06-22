@@ -452,7 +452,6 @@ def sm_usum_exclusivity_test(poke_num, tags):
     if "-Form-10%" in tags or "-Form-Complete" in tags:
         return True
 
-# TODO: TEST
 def combine_gen_and_game(game, poke_num, tags):
     if game == "Red-Blue" or game == "Red-Green" or game == "Yellow":
         return ("Gen1 " + game)
@@ -474,8 +473,7 @@ def combine_gen_and_game(game, poke_num, tags):
     if game == "Sword-Shield":
         return ("Gen8 " + game)
 
-# TODO: TEST
-def get_back_gen(game, poke_num):
+def get_back_gen(game, poke_num, tags):
     if game == "Red-Blue" or game == "Red-Green" or game == "Yellow":
         return ("Gen1")
     if game == "Crystal" or game == "Gold" or game == "Silver":
@@ -533,10 +531,12 @@ poke_num_col = get_col_number("#", pokemon_files_sheet)
 poke_name_col = get_col_number("Name", pokemon_files_sheet)
 tags_col = get_col_number("Tags", pokemon_files_sheet)
 filename_col = get_col_number("Filename", pokemon_files_sheet)
-print(pokemon_files_sheet.max_column)
+
 for row in range(2, pokemon_files_sheet.max_row):
-    tags = cell_value(row, tags_col, pokemon_files_sheet)
     poke_num = cell_value(row, poke_num_col, pokemon_files_sheet)
+    poke_name = cell_value(row, poke_name_col, pokemon_files_sheet)
+    tags = cell_value(row, tags_col, pokemon_files_sheet)
+    filename = cell_value(row, filename_col, pokemon_files_sheet)
     # Only doing filename_col up because those are where the actual checks need to be made (missing for certain games)
         # And +1 at the end to be inclusive
     for col in range(filename_col + 1, pokemon_files_sheet.max_column + 1):
@@ -545,16 +545,34 @@ for row in range(2, pokemon_files_sheet.max_row):
             continue
 
         col_name = get_col_name(col, pokemon_files_sheet)
-        # TODO: Using the below, create a full filename for the missing images
         if is_empty(row, col, pokemon_files_sheet):
+            gen_insert_index = filename.find(poke_name) + len(poke_name)
             if "-Back" in tags:
                 back_gen = get_back_gen(col_name, poke_num, tags)
+                filename_w_gen = filename[:gen_insert_index] + " " + back_gen + filename[gen_insert_index:]
             else:
                 gen_and_game = combine_gen_and_game(col_name, poke_num, tags)
+                # Going +1 after the insert index because there's a space for non-back sprites
+                    # This is to simulate in the spreadsheet the space between generation and games in the  filenames
+                        # This determines sorting order, so is fairly important
+                            # Since the spreadsheet doesn't acknowledge games or gens in the "Filename" column (because each game gets it's own column)
+                                # The space must be included to sort the spreadsheet to match filenames
+                                    # And thus, must be accounted for here
+                gen_insert_index += 1
+                filename_w_gen = filename[:gen_insert_index] + gen_and_game + filename[gen_insert_index:]
 
-            # TODO: Find best way to organize this
-                # Dictionary based off pokemon somehow (since pages are seperated by pokemon)
-            print(tags, col_name)
+            # TODO: Create function to replace first "" in tuple with the bulbapedia filenaming structure for the file
+            if poke_name in missing_imgs.keys():
+                missing_imgs[poke_name].append(("", filename_w_gen))
+            else:
+                missing_imgs[poke_name] = []
+                missing_imgs[poke_name].append(("", filename_w_gen))
+    #print(missing_imgs)
+    for k,v in missing_imgs.items():
+        print(k, ":")
+        for f in v:
+            print(f)
+        print("\n\n")
 
 # Origin page (list of pokes by national pokedex)
 starter_url = "https://archives.bulbagarden.net"
