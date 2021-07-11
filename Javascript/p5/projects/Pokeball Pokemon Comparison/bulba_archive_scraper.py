@@ -369,20 +369,6 @@ def search_for_forms(pokemon):
     get_img_from_string(img, "^\d\d\dCalyrex-Shadow Rider.png", drawn_save_path + save_name + "-Shadow_Rider")
 
 
-# Gets pokemon info from excel sheet
-class Pokemon:
-    def __init__(self, name, number, gen, has_f_var, has_mega, has_giganta, reg_forms, has_type_forms, has_misc_forms, is_in_gen8):
-        self.name = name
-        self.number = number
-        self.gen = gen
-        self.has_f_var = has_f_var
-        self.has_mega = has_mega
-        self.has_giganta = has_giganta
-        self.reg_forms = reg_forms
-        self.has_type_forms = has_type_forms
-        self.has_misc_forms = has_misc_forms
-        self.is_in_gen8 = is_in_gen8
-
 # SPREADSHEET DATA
 pokemon_info = load_workbook(filename = 'C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xlsx', data_only=True)
 pokemon_info_sheet = pokemon_info.worksheets[0]
@@ -473,6 +459,8 @@ def combine_gen_and_game(game, poke_num, tags):
     if game == "Sword-Shield":
         return ("Gen8 " + game)
 
+# Get back gen from game
+    # Handles more sophistocated cases -- Regions, forms, etc
 def get_back_gen(game, poke_num, tags):
     if game == "Red-Blue" or game == "Red-Green" or game == "Yellow":
         return ("Gen1")
@@ -494,6 +482,89 @@ def get_back_gen(game, poke_num, tags):
     if game == "Sword-Shield":
         return ("Gen8")
 
+# Determines what gen to start reading games from
+def get_back_gen_index_starter(poke_num):
+    if poke_num <= 151:
+        return (0)
+    if poke_num >= 152 and poke_num <= 251:
+        return (1)
+    if poke_num >= 252 and poke_num <= 386:
+        return (2)
+    if poke_num >= 387 and poke_num <= 493:
+        return (3)
+
+def bulba_front_name_conversion(filename):
+    if "Gen1 Red-Blue" in filename:
+        return (" 1b")
+    if "Gen1 Red-Green" in filename:
+        return (" 1g")
+    if "Gen1 Yellow" in filename:
+        return (" 1y")
+    if "Gen2 Crystal" in filename:
+        return (" 2c")
+    if "Gen2 Gold" in filename:
+        return (" 2g")
+    if "Gen2 Silver" in filename:
+        return (" 2s")
+    if "Gen3 Emerald" in filename:
+        return (" 3e")
+    if "Gen3 FireRed-LeafGreen" in filename:
+        return (" 3f")
+    if "Gen3 Ruby-Sapphire" in filename:
+        return (" 3r")
+    if "Gen4 Diamond-Pearl" in filename:
+        return (" 4d")
+    if "Gen4 HGSS" in filename:
+        return (" 4h")
+    if "Gen4 Platinum" in filename:
+        return (" 4p")
+    # TODO: If this doesn't exist, try 5b2
+    if "Gen5 BW-B2W2" in filename:
+        return (" 5b")
+    if "Gen6 XY-ORAS" in filename:
+        return (" 6x")
+    if "Gen7 SM-USUM" in filename:
+        return (" 7s")
+    if "Gen8 Sword-Shield" in filename:
+        return (" 8s")
+
+def bulba_back_name_conversion(filename):
+    if " Gen1" in filename:
+        return (" g1")
+    if " Gen2" in filename:
+        if "Crystal" in filename:
+            return (" 2c")
+        return (" 2g")
+    # TODO: Apparently back sprites also differ by game, but changes on pokemon whether unique or recycled...
+        # Run an identical check on other images from the generation to determine if they're the same
+            # If they are all the same it can be a generational denoter
+            # If they aren't, they'll have to be on a per game basis
+    # open("image1.jpg","rb").read() == open("image2.jpg","rb").read()
+        # The best thing to do here may be to send all the back sprites to another folder, then do processing on them there
+            # This program works one image at a time and would be time-consuming to save the image, compare it to the next one or two, then delete it, etc
+            # So just download ALL gen 2-4 back sprites, put them in this folder, and determine where the similarities and differences lie
+
+
+def determine_bulba_name(computer_filename):
+    bulba_name = "Spr"
+    if "-Back" in computer_filename:
+        bulba_name += " b"
+    
+# Pokemon object
+class Pokemon:
+    def __init__(self, name, number, gen, has_f_var, has_mega, has_giganta, reg_forms, has_type_forms, has_misc_forms, is_in_gen8):
+        self.name = name
+        self.number = number
+        self.gen = gen
+        self.has_f_var = has_f_var
+        self.has_mega = has_mega
+        self.has_giganta = has_giganta
+        self.reg_forms = reg_forms
+        self.has_type_forms = has_type_forms
+        self.has_misc_forms = has_misc_forms
+        self.is_in_gen8 = is_in_gen8
+        self.missing_imgs = []
+        self.missing_gen1_thru_gen4_back_imgs = []
 
 # Gets column numbers from spreadsheet
 name_col = get_col_number("Name", pokemon_info_sheet)
@@ -531,12 +602,44 @@ poke_num_col = get_col_number("#", pokemon_files_sheet)
 poke_name_col = get_col_number("Name", pokemon_files_sheet)
 tags_col = get_col_number("Tags", pokemon_files_sheet)
 filename_col = get_col_number("Filename", pokemon_files_sheet)
+# These are for back generation differences to be able to loop through and concatonate game name to filename
+gen1_games = ["Yellow", "Red-Green", "Red-Blue"]
+gen2_games = ["Silver", "Gold", "Crystal"]
+gen3_games = ["Ruby-Sapphire", "FireRed-LeafGreen", "Emerald"]
+gen4_games = ["Platinum", "HGSS", "Diamond-Pearl"]
+gen_2_thru_4_games = [gen1_games, gen2_games, gen3_games, gen4_games]
 
 for row in range(2, pokemon_files_sheet.max_row):
-    poke_num = cell_value(row, poke_num_col, pokemon_files_sheet)
+
+    poke_num = int(cell_value(row, poke_num_col, pokemon_files_sheet))
     poke_name = cell_value(row, poke_name_col, pokemon_files_sheet)
+    poke_obj = -1
+    for pokemon in pokedex:
+        if pokemon.name == poke_name:
+            poke_obj = pokemon
     tags = cell_value(row, tags_col, pokemon_files_sheet)
+    if tags == None:
+        tags = ""
     filename = cell_value(row, filename_col, pokemon_files_sheet)
+
+    # If it's a back image from a pokemon between gen2 and gen4
+        # Put all game images into missing
+            # This is so another script can go through these images and determine if there were differences in the sprites between games
+                # If there were, each file will be named differently
+                # Otherwise, they will all be lumped into a single gen# back img
+    # Placed here so it will occur for every row, not just the rows where there are back pictures actually missing from my files
+    if "-Back" in tags and poke_obj.number <= 493:
+        # This tells what generation between these three to start at
+            # Since if a poke was introduced in generation 2, it will have sprites in gen3 and gen4 so should loop through those as well
+                # But if introduced in gen3, it will not have gen2 sprites, so add 1 to the index starter
+        gen_index_starter = get_back_gen_index_starter(poke_obj.number)
+        # TODO: Adapt the below to cycle through all games in bulba and my filenames
+        for game in gen2_games:
+            filename_w_gen = filename[:gen_insert_index] + " " + back_gen + filename[gen_insert_index:] + game
+            bulba_name = determine_bulba_name(filename_w_gen)
+            poke_obj.missing_gen1_thru_gen4_back_imgs.append((bulba_name, filename_w_gen))
+
+
     # Only doing filename_col up because those are where the actual checks need to be made (missing for certain games)
         # And +1 at the end to be inclusive
     for col in range(filename_col + 1, pokemon_files_sheet.max_column + 1):
@@ -547,9 +650,15 @@ for row in range(2, pokemon_files_sheet.max_row):
         col_name = get_col_name(col, pokemon_files_sheet)
         if is_empty(row, col, pokemon_files_sheet):
             gen_insert_index = filename.find(poke_name) + len(poke_name)
+            # If pokemon is in gen4 or under all of it's back sprites have already been downloaded
+            # TODO: Change from pokemon number to gen5 or above
+                # Otherwise bulba back missing from SwSh would be continued
+            if "-Back" in tags and poke_obj.number <= 493:
+                continue
             if "-Back" in tags:
                 back_gen = get_back_gen(col_name, poke_num, tags)
                 filename_w_gen = filename[:gen_insert_index] + " " + back_gen + filename[gen_insert_index:]
+                
             else:
                 gen_and_game = combine_gen_and_game(col_name, poke_num, tags)
                 # Going +1 after the insert index because there's a space for non-back sprites
@@ -560,19 +669,15 @@ for row in range(2, pokemon_files_sheet.max_row):
                                     # And thus, must be accounted for here
                 gen_insert_index += 1
                 filename_w_gen = filename[:gen_insert_index] + gen_and_game + filename[gen_insert_index:]
+            
+            bulba_name = determine_bulba_name(filename_w_gen)
 
             # TODO: Create function to replace first "" in tuple with the bulbapedia filenaming structure for the file
-            if poke_name in missing_imgs.keys():
-                missing_imgs[poke_name].append(("", filename_w_gen))
-            else:
-                missing_imgs[poke_name] = []
-                missing_imgs[poke_name].append(("", filename_w_gen))
-    #print(missing_imgs)
-    for k,v in missing_imgs.items():
-        print(k, ":")
-        for f in v:
-            print(f)
-        print("\n\n")
+            poke_obj.missing_imgs.append(("", filename_w_gen))
+    print(poke_obj.name)
+    for img in poke_obj.missing_imgs:
+        print(img)
+    print("\n\n")
 
 # Origin page (list of pokes by national pokedex)
 starter_url = "https://archives.bulbagarden.net"
@@ -641,6 +746,14 @@ for i in range(len(pokemon_img_urls)):
     # Downloading certain images
     for img in pokemon_imgs:
         #print(img.attrs['alt'], "\n\n")
+
+        # TODO: Download Let's Go sprites (LGPE?)
+            # Denoted as Spr 7p ###
+        # And Pokemon Go sprites
+            # Found here https://archives.bulbagarden.net/wiki/Category:Pok%C3%A9mon_GO_models
+            # Denoted as GO###form
+        # Possibly more animations?
+            # See: https://www.reddit.com/r/TheSilphRoad/comments/65q7us/reminder_pokemon_go_pokemon_models_are_from/
 
         # DRAWN IMAGES
         # Drawn standard
