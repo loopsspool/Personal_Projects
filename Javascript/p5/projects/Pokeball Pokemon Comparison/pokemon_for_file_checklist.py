@@ -2,6 +2,11 @@ import xlrd     # For reading excel workbook
 import xlsxwriter   # For writing new form rows
 import os   # To check for files
 
+# TODO: Nitpick fixes
+    # Deoxys forms game exlusive in gen 3
+    # Spiky-eared pichu for all gen 4
+    # Female backs that only have differences in the front
+
 # SPREADSHEET DATA
 pokemon_info = xlrd.open_workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xls')
 form_sheet = pokemon_info.sheet_by_name("Form Rows")
@@ -47,7 +52,7 @@ def game_finder_from_gen(gen):
         # Including SM-USUM here since gen 7 shared sprites from gen 6
         return(["SM-USUM", "XY-ORAS"])
     if gen == 7:
-        return(["SM-USUM"])
+        return(["LGPE", "SM-USUM"])
     if gen == 8:
         return(["Sword-Shield"])
 
@@ -56,11 +61,25 @@ for i in range(1, len(info_sheet.col(4))):
     # Pokemon name = is available in gen 8
     is_available_in_gen_8[cell_value(info_sheet, i, 4)] = (cell_value(info_sheet, i, 15) == "x")
 
-def unobtainable_checker(filename, file_gen, poke_gen):
+# This is just to avoid using logic for finding what pokes are available in Lets Go lol
+poke_nums_available_in_LGPE = []
+for i in range(1, 152):
+    # Converts int number to string with leading zeroes
+    poke_nums_available_in_LGPE.append(str(i).zfill(3))
+poke_nums_available_in_LGPE.append(808)
+poke_nums_available_in_LGPE.append(809)
+print(poke_nums_available_in_LGPE)
+
+# TODO: Correct 808 and 809 in LGPE
+def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     ###################     UNIVERSAL UNOBTAINABILITY     ###################
     # If filename is searching gens before pokemon was introduced
     if poke_gen > file_gen:
         return True
+    # If pokemon isn't gen 1 or Meltan(808) or Melmetal(809) in Let's Go games
+    if game == "LGPE":
+        if not poke_num in poke_nums_available_in_LGPE:
+            return True
     # If filename is searching for animations in games where there weren't any
     if "-Animated" in filename:
         # Animated Back sprites before gen 5
@@ -103,7 +122,8 @@ def unobtainable_checker(filename, file_gen, poke_gen):
     if "-Form-Cosplay" in filename and "Shiny" in filename:
         return True
     # Pikachu Hat before Gen7
-    if "-Form-Cap" in filename and file_gen < "Gen7":
+    # TODO: Check LGPE portion
+    if "-Form-Cap" in filename and (file_gen < "Gen7" or game == "LGPE"):
         return True
     # Can't be shiny either
     if "-Form-Cap" in filename and "Shiny" in filename:
@@ -233,7 +253,7 @@ file_check_worksheet.write(0, 2, "Tags")
 file_check_worksheet.write(0, 3, "Filename")
 # Games sorted by reverse chronological order for file sorting synchronization between excel and files
     # Also starting with newest game first so excel file doesn't look barren upon opening
-games = ["Sword-Shield", "SM-USUM", "XY-ORAS", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FireRed-LeafGreen", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
+games = ["Sword-Shield", "LGPE", "SM-USUM", "XY-ORAS", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FireRed-LeafGreen", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
 game_cols = {}
 for i in range(len(games)):
     # Saving game columns
@@ -246,6 +266,7 @@ for i in range(len(games)):
 
 ##########################  POKEMON FILENAMES   ##########################
 print("Creating potential pokemon filenames...")
+# To adjust for there only being a single shiny look when in default form these pokemon have multiple forms
 alcremie_shiny_forms_done = []
 minior_shiny_form_done = False
 filenames = []
@@ -332,6 +353,9 @@ print("Checking filenames against actual image files...")
 # TODO: Incorporate drawn images
 # TODO: If pokemon is fully unobtainable delete row? (ie shiny cosplay/cap pikachus)
 # TODO: Some gender differences, like Zubat (females have smaller fangs) aren't visible from back sprites, so male & female back sprites are the same
+# TODO: After bulba scrape and filter of back sprites
+    # Checking off of games in same generation must be rid of
+        # Since same-gen games can have different back sprites now
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 game_sprite_files = os.listdir(game_sprite_path)
 for i in range(len(game_sprite_files)):
@@ -339,7 +363,7 @@ for i in range(len(game_sprite_files)):
     game_sprite_files[i] = game_sprite_files[i][:len(game_sprite_files[i])-4]
 
 # games = ["Sword-Shield", "SM-USUM", "XY-ORAS", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FireRed-LeafGreen", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
-game_denotions = ["Gen8 Sword-Shield", "Gen7 SM-USUM", "Gen6-7 XY-ORAS-SM-USUM", "Gen5 BW-B2W2", "Gen4 Platinum", "Gen4 HGSS", "Gen4 Diamond-Pearl", "Gen3 Ruby-Sapphire", "Gen3 FireRed-LeafGreen", "Gen3 Emerald", "Gen2 Silver", "Gen2 Gold", "Gen2 Crystal", "Gen1 Yellow", "Gen1 Red-Green", "Gen1 Red-Blue"]
+game_denotions = ["Gen8 Sword-Shield", "Gen7 LGPE", "Gen7 SM-USUM", "Gen6-7 XY-ORAS-SM-USUM", "Gen5 BW-B2W2", "Gen4 Platinum", "Gen4 HGSS", "Gen4 Diamond-Pearl", "Gen3 Ruby-Sapphire", "Gen3 FireRed-LeafGreen", "Gen3 Emerald", "Gen2 Silver", "Gen2 Gold", "Gen2 Crystal", "Gen1 Yellow", "Gen1 Red-Green", "Gen1 Red-Blue"]
 back_gen_denotions = ["Gen8", "Gen7", "Gen6-7", "Gen5", "Gen4", "Gen3", "Gen2", "Gen1"]
 
 # Centers "x" in cell and makes fill color green
@@ -379,7 +403,7 @@ for i in range(len(filenames)):
                     continue
                 col = game_cols[game]
                 # Unobtainability checker
-                is_unobtainable = unobtainable_checker(curr_file, gen[:4], poke_gen)
+                is_unobtainable = unobtainable_checker(curr_file, gen[:4], poke_gen, poke_num, game)
                 if is_unobtainable:
                     potential_wrong_continues.append(curr_file)
                     file_check_worksheet.write(row, col, "u", unobtainable_format)
@@ -418,7 +442,7 @@ for i in range(len(filenames)):
                         continue
                     col = game_cols[game]
                     # Unobtainability checker
-                    is_unobtainable = unobtainable_checker(curr_file, filegame[:4], poke_gen)
+                    is_unobtainable = unobtainable_checker(curr_file, filegame[:4], poke_gen, poke_num, game)
                     if is_unobtainable:
                         potential_wrong_continues.append(curr_file)
                         file_check_worksheet.write(row, col, "u", unobtainable_format)
@@ -438,6 +462,7 @@ for i in range(len(filenames)):
 
 print("Missing:", missing_count, "images")
 
+# TODO: This seems to take a while?
 for f in potential_wrong_continues:
     # Excluding cosplay because the files ARE there, but they include SM-USUM in the name
         # Instead of creating a XY-ORAS only tag and rewriting code
