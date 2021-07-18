@@ -532,6 +532,7 @@ def bulba_game_denoter_conversion(filename):
         return (" 8s")
 
 
+# Converts my filename structure to bulbapedias
 def determine_bulba_name(computer_filename):
     # All files start with Spr
     bulba_name = "Spr"
@@ -545,6 +546,17 @@ def determine_bulba_name(computer_filename):
     # Then Game denoters
     if not is_gen1_back:
         bulba_name += bulba_game_denoter_conversion(computer_filename)
+    # Then pokedex number
+    bulba_name += " " + computer_filename[:3]
+
+    # TODO: Check for variants (male, regions, mega, giganta, type, other, etc)
+
+    # Then shiny
+    if "Shiny" in computer_filename:
+        bulba_name += " s"
+
+    return (bulba_name)
+
     
 # Pokemon object
 class Pokemon:
