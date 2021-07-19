@@ -66,11 +66,9 @@ poke_nums_available_in_LGPE = []
 for i in range(1, 152):
     # Converts int number to string with leading zeroes
     poke_nums_available_in_LGPE.append(str(i).zfill(3))
-poke_nums_available_in_LGPE.append(808)
-poke_nums_available_in_LGPE.append(809)
-print(poke_nums_available_in_LGPE)
+poke_nums_available_in_LGPE.append("808")
+poke_nums_available_in_LGPE.append("809")
 
-# TODO: Correct 808 and 809 in LGPE
 def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     ###################     UNIVERSAL UNOBTAINABILITY     ###################
     # If filename is searching gens before pokemon was introduced
@@ -122,7 +120,7 @@ def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     if "-Form-Cosplay" in filename and "Shiny" in filename:
         return True
     # Pikachu Hat before Gen7
-    # TODO: Check LGPE portion
+    # TODO: Check LGPE portion, maybe overridden by SM-USUM?
     if "-Form-Cap" in filename and (file_gen < "Gen7" or game == "LGPE"):
         return True
     # Can't be shiny either
@@ -389,6 +387,9 @@ for i in range(len(filenames)):
         f = f[:insert_index] + f[(insert_index + 1):]
 
     col = -1
+    # TODO: Back sprites for LGPE are showing because game isn't in filename
+        # Since filename only contains Gen7, the SM-USUM photos trigger the "x" in the LGPE column
+        # This should be fixed when more games are determined to have different sprites
     if "Back" in f:
         for gen in back_gen_denotions:
             # Adds generation to checking file string
@@ -468,6 +469,7 @@ for f in potential_wrong_continues:
         # Instead of creating a XY-ORAS only tag and rewriting code
         # The exclusion happens here. They are not continued for XY-ORAS, only SM-USUM for non-overwriting purposes of the unobtainability
     if f in game_sprite_files and not "-Form-Cosplay" in f:
+        # TODO: This returns mostly gen7 pokes since LGPE (gen7 game) only has gen1 pokes and 808 & 809
         print("WRONG CONTINUE FOR:\n", f)
 
 file_check_workbook.close()
