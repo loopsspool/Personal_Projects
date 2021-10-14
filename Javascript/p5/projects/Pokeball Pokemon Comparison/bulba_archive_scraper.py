@@ -573,7 +573,7 @@ def bulba_game_denoter_conversion(filename):
 
 
 # Converts my filename structure to bulbapedias
-def determine_bulba_name(computer_filename):
+def determine_bulba_name(computer_filename, pokemon):
     # All files start with Spr
     bulba_name = "Spr"
     # Back denotions first
@@ -589,7 +589,34 @@ def determine_bulba_name(computer_filename):
     # Then pokedex number
     bulba_name += " " + computer_filename[:3]
     # TODO: PICK UP HERE!
-    # TODO: Check for variants (male, regions, mega, giganta, type, other, etc)
+    # TODO: Check for variants (type, other, etc)
+
+    # Then Mega
+        # Not gender specific, so can go before gender check
+    if "-Mega" in computer_filename:
+        bulba_name += "M"
+
+    # Then Gigantamax
+        # Not gender specific, so can go before gender check
+    if "-Gigantamax" in computer_filename:
+        bulba_name += "Gi"
+
+    # Then Region
+        # Not gender specific, so can go before gender check
+    if "-Region-Alola" in computer_filename:
+        bulba_name += "A"
+    if "-Region-Galar" in computer_filename:
+        bulba_name += "G"
+
+    # Then gender
+    if "-f" in computer_filename:
+        bulba_name += " f"
+    else:
+        # Bulbapedia puts m denoters into filenames for male version
+            # So if the female denoter is missing in my filename, but the species has a female version
+                # Check for this and add the male denoter if needed
+        if pokemon.has_f_var:
+            bulba_name += " m"
 
     # Then shiny
     if "Shiny" in computer_filename:
@@ -685,7 +712,7 @@ for row in range(2, pokemon_files_sheet.max_row):
                 back_gen = get_back_gen(game, poke_num, tags)
                 gen_insert_index = filename.find(poke_name) + len(poke_name)
                 filename_w_gen = filename[:gen_insert_index] + " " + back_gen + filename[gen_insert_index:] + "-" + game
-                bulba_name = determine_bulba_name(filename_w_gen)
+                bulba_name = determine_bulba_name(filename_w_gen, poke_obj)
                 poke_obj.missing_gen1_thru_gen4_back_imgs.append((bulba_name, filename_w_gen))
 
     # This is to track generations and skip if it's a back sprite below gen 5
@@ -725,7 +752,7 @@ for row in range(2, pokemon_files_sheet.max_row):
                 gen_insert_index += 1
                 filename_w_gen = filename[:gen_insert_index] + gen_and_game + filename[gen_insert_index:]
             
-            bulba_name = determine_bulba_name(filename_w_gen)
+            bulba_name = determine_bulba_name(filename_w_gen, poke_obj)
 
             poke_obj.missing_imgs.append((bulba_name, filename_w_gen))
     print(poke_obj.name)
