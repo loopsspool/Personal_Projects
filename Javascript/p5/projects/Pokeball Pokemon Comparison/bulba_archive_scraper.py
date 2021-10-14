@@ -8,7 +8,7 @@ import openpyxl     # For reading excel workbook
 # Must explicitly state this...
 from openpyxl import load_workbook
 
-def search_for_forms(pokemon):
+def search_for_drawn_forms(pokemon):
     # Custom type forms
     # Pikachu Cosplay & Caps
     get_img_from_string(img, "^\d\d\dPikachu-Alola.png", drawn_save_path + save_name + "-Cap-Alola")
@@ -369,6 +369,39 @@ def search_for_forms(pokemon):
     get_img_from_string(img, "^\d\d\dCalyrex-Shadow Rider.png", drawn_save_path + save_name + "-Shadow_Rider")
 
 
+def get_drawn_images(pokemon, img):
+    # DRAWN IMAGES
+    # Drawn standard
+
+    save_name = pokemon.number + " " + pokemon.name
+    if pokemon.name == "Type: Null":
+        save_name = pokemon.number + " Type Null"
+    # Done this way so certain images that just have characters after the pokemon number don't match
+        # Don't have to do this with the others because the hyphen denoters prevent the possibility
+    pokemon_name_len = len(pokemon.name)
+    get_img_from_string(img, "^\d\d\d[a-zA-Z]{" + str(pokemon_name_len) + "}.png", drawn_save_path + save_name)
+    # Drawn Mega
+    if pokemon.has_mega:
+        if pokemon.name == "Charizard" or pokemon.name == "Mewtwo":
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega X.png", drawn_save_path + save_name + "-Mega_X")
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega Y.png", drawn_save_path + save_name + "-Mega_Y")
+        else:
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega.png", drawn_save_path + save_name + "-Mega")
+    # Gigantamax
+    if pokemon.has_giganta:
+        get_img_from_string(img, "^\d\d\d[a-zA-Z]-Gigantamax.png", drawn_save_path + save_name + "-Gigantamax")
+    # Regional forms
+    if pokemon.reg_forms != "":
+        if "," in pokemon.reg_forms:
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Alola.png", drawn_save_path + save_name + "-Region-Alola")
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Galar.png", drawn_save_path + save_name + "-Region-Galar")
+        else:
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-" + pokemon.reg_forms + ".png", drawn_save_path + save_name + "-Region-" + pokemon.reg_forms)
+    # Other forms
+    if pokemon.has_misc_forms or pokemon.has_type_forms:
+        search_for_drawn_forms(pokemon)
+
+
 # SPREADSHEET DATA
 pokemon_info = load_workbook(filename = 'C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xlsx', data_only=True)
 pokemon_info_sheet = pokemon_info.worksheets[0]
@@ -456,6 +489,8 @@ def combine_gen_and_game(game, poke_num, tags):
             return ("Gen7 " + game)
         else:
             return ("Gen6-7 XY-ORAS-SM-USUM")
+    if game == "LGPE":
+        return ("Gen7 " + game)
     if game == "Sword-Shield":
         return ("Gen8 " + game)
 
@@ -479,11 +514,14 @@ def get_back_gen(game, poke_num, tags):
             return ("Gen7")
         else:
             return ("Gen6-7")
+    if game == "LGPE":
+        return ("Gen7")
     if game == "Sword-Shield":
         return ("Gen8")
 
 # Determines what gen to start reading games from
     # Returns gen - 1 for what it's respective index is in the gen array
+    # Only goes up to 4 because that's where the potential back discrepancies go up to
 def get_back_gen_index_starter(poke_num):
     if poke_num <= 151:
         return (0)
@@ -528,6 +566,8 @@ def bulba_game_denoter_conversion(filename):
         return (" 6x")
     if "SM-USUM" in filename:
         return (" 7s")
+    if "LGPE" in filename:
+        return (" 7p")
     if "Sword-Shield" in filename:
         return (" 8s")
 
@@ -548,7 +588,7 @@ def determine_bulba_name(computer_filename):
         bulba_name += bulba_game_denoter_conversion(computer_filename)
     # Then pokedex number
     bulba_name += " " + computer_filename[:3]
-
+    # TODO: PICK UP HERE!
     # TODO: Check for variants (male, regions, mega, giganta, type, other, etc)
 
     # Then shiny
@@ -629,15 +669,6 @@ for row in range(2, pokemon_files_sheet.max_row):
         tags = ""
     filename = cell_value(row, filename_col, pokemon_files_sheet)
 
-   # TODO: Apparently back sprites also differ by game, but changes on pokemon whether unique or recycled...
-        # Run an identical check on other images from the generation to determine if they're the same
-            # If they are all the same it can be a generational denoter
-            # If they aren't, they'll have to be on a per game basis
-    # open("image1.jpg","rb").read() == open("image2.jpg","rb").read()
-        # The best thing to do here may be to send all the back sprites to another folder, then do processing on them there
-            # This program works one image at a time and would be time-consuming to save the image, compare it to the next one or two, then delete it, etc
-            # So just download ALL gen 1-4 back sprites, put them in this folder, and determine where the similarities and differences lie
-
     # If it's a back image from a pokemon between gen1 and gen4
         # Put all game images into missing
             # This is so another script can go through these images and determine if there were differences in the sprites between games
@@ -652,6 +683,7 @@ for row in range(2, pokemon_files_sheet.max_row):
         for gen in range(gen_index_starter, len(gen_1_thru_4_games)):
             for game in gen_1_thru_4_games[gen]:
                 back_gen = get_back_gen(game, poke_num, tags)
+                gen_insert_index = filename.find(poke_name) + len(poke_name)
                 filename_w_gen = filename[:gen_insert_index] + " " + back_gen + filename[gen_insert_index:] + "-" + game
                 bulba_name = determine_bulba_name(filename_w_gen)
                 poke_obj.missing_gen1_thru_gen4_back_imgs.append((bulba_name, filename_w_gen))
@@ -663,7 +695,7 @@ for row in range(2, pokemon_files_sheet.max_row):
     # Only doing filename_col up because those are where the actual checks need to be made (missing for certain games)
         # And +1 at the end to be inclusive
     for col in range(filename_col + 1, pokemon_files_sheet.max_column + 1):
-        if cell_value(0, col, pokemon_files_sheet) == "Platinum":
+        if cell_value(1, col, pokemon_files_sheet) == "Platinum":
             is_below_gen5 = True
         
         # If pokemon image is unavailable, continue
@@ -673,7 +705,7 @@ for row in range(2, pokemon_files_sheet.max_row):
         col_name = get_col_name(col, pokemon_files_sheet)
         if is_empty(row, col, pokemon_files_sheet):
             gen_insert_index = filename.find(poke_name) + len(poke_name)
-            # If pokemon is in gen4 or under all of it's back sprites have already been downloaded
+            # If pokemon is in gen4 or under all of it's back sprites have already been downloaded to a seperate location
             if "-Back" in tags and is_below_gen5:
                 continue
             if "-Back" in tags:
@@ -681,7 +713,9 @@ for row in range(2, pokemon_files_sheet.max_row):
                 filename_w_gen = filename[:gen_insert_index] + " " + back_gen + filename[gen_insert_index:]
                 
             else:
+                print(col_name, "\n", poke_num, "\n", tags, "\n")
                 gen_and_game = combine_gen_and_game(col_name, poke_num, tags)
+                print(type(gen_and_game))
                 # Going +1 after the insert index because there's a space for non-back sprites
                     # This is to simulate in the spreadsheet the space between generation and games in the  filenames
                         # This determines sorting order, so is fairly important
@@ -693,8 +727,7 @@ for row in range(2, pokemon_files_sheet.max_row):
             
             bulba_name = determine_bulba_name(filename_w_gen)
 
-            # TODO: Create function to replace first "" in tuple with the bulbapedia filenaming structure for the file
-            poke_obj.missing_imgs.append(("", filename_w_gen))
+            poke_obj.missing_imgs.append((bulba_name, filename_w_gen))
     print(poke_obj.name)
     for img in poke_obj.missing_imgs:
         print(img)
@@ -707,6 +740,8 @@ pokemon_starter_page_soup = BeautifulSoup(pokemon_starter_page.content, 'html.pa
 save_path_starter = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon"
 drawn_save_path = save_path_starter + "\\Drawn\\"
 game_save_path = save_path_starter + "\\Game Sprites\\"
+gen1_thru_4_backs_save_path = game_save_path + "\\missing_back_imgs_to_be_filtered\\"
+pokemon_go_save_path = save_path_starter + "\\Pokemon Go Sprites\\"
 
 pokemon_img_urls = []
 curr_page_soup = pokemon_starter_page_soup
@@ -718,7 +753,10 @@ while True:
     # Stopping after a certain page for testing
     # if page_index == 2:
     #     break
+
     # Grabbing each individual pokemons archived image url
+    # TODO: I don't think this next line needs to be in a for loop... It's only getting one div
+        # When fixing using find(), not find_all()
     for list_div in curr_page_soup.find_all('div', {'class': 'mw-category-group'}):
         for poke in list_div.find_all('li'):
             # Skipping specific artwork I don't want
@@ -742,6 +780,38 @@ while True:
         print("Reached end of pokemon archive links.")
         break
 
+def get_GO_images(pokemon, img):
+    # Let's Go Pikachu/Eevee images
+    # NOTE: DOWNLOADS ALL IMAGES, NO CHECK IF THEY'RE ALREADY THERE
+
+    save_name = pokemon.number + " " + pokemon.name
+    if pokemon.name == "Type: Null":
+        save_name = pokemon.number + " Type Null"
+    # Done this way so certain images that just have characters after the pokemon number don't match
+        # Don't have to do this with the others because the hyphen denoters prevent the possibility
+    pokemon_name_len = len(pokemon.name)
+    get_img_from_string(img, "^\d\d\d[a-zA-Z]{" + str(pokemon_name_len) + "}.png", drawn_save_path + save_name)
+    # Drawn Mega
+    if pokemon.has_mega:
+        if pokemon.name == "Charizard" or pokemon.name == "Mewtwo":
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega X.png", drawn_save_path + save_name + "-Mega_X")
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega Y.png", drawn_save_path + save_name + "-Mega_Y")
+        else:
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega.png", drawn_save_path + save_name + "-Mega")
+    # Gigantamax
+    if pokemon.has_giganta:
+        get_img_from_string(img, "^\d\d\d[a-zA-Z]-Gigantamax.png", drawn_save_path + save_name + "-Gigantamax")
+    # Regional forms
+    if pokemon.reg_forms != "":
+        if "," in pokemon.reg_forms:
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Alola.png", drawn_save_path + save_name + "-Region-Alola")
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Galar.png", drawn_save_path + save_name + "-Region-Galar")
+        else:
+            get_img_from_string(img, "^\d\d\d[a-zA-Z]-" + pokemon.reg_forms + ".png", drawn_save_path + save_name + "-Region-" + pokemon.reg_forms)
+    # Other forms
+    if pokemon.has_misc_forms or pokemon.has_type_forms:
+        search_for_drawn_forms(pokemon)
+
 # TODO: Create dict checklist for each of the type of images you want
     # When they're all fulfilled, break so unecessary image processing for each poke isn't occuring
     # If end of page is reached and requirements aren't satisfied (ie Arceus), continue to next page of images
@@ -757,9 +827,6 @@ for i in range(len(pokemon_img_urls)):
     #     continue
     # print("Got here")
 
-    save_name = pokemon.number + " " + pokemon.name
-    if pokemon.name == "Type: Null":
-        save_name = pokemon.number + " Type Null"
     # Getting pokemon archived image page information
     pokemon_starter_page = requests.get(starter_url + pokemon_img_urls[i])
     pokemon_starter_page_soup = BeautifulSoup(pokemon_starter_page.content, 'html.parser')
@@ -773,35 +840,26 @@ for i in range(len(pokemon_img_urls)):
         # And Pokemon Go sprites
             # Found here https://archives.bulbagarden.net/wiki/Category:Pok%C3%A9mon_GO_models
             # Denoted as GO###form
+            # Download to GO folder
         # Possibly more animations?
             # See: https://www.reddit.com/r/TheSilphRoad/comments/65q7us/reminder_pokemon_go_pokemon_models_are_from/
 
-        # DRAWN IMAGES
-        # Drawn standard
-        # Done this way so certain images that just have characters after the pokemon number don't match
-            # Don't have to do this with the others because the hyphen denoters prevent the possibility
-        pokemon_name_len = len(pokemon.name)
-        get_img_from_string(img, "^\d\d\d[a-zA-Z]{" + str(pokemon_name_len) + "}.png", drawn_save_path + save_name)
-        # Drawn Mega
-        if pokemon.has_mega:
-            if pokemon.name == "Charizard" or pokemon.name == "Mewtwo":
-                get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega X.png", drawn_save_path + save_name + "-Mega_X")
-                get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega Y.png", drawn_save_path + save_name + "-Mega_Y")
-            else:
-                get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega.png", drawn_save_path + save_name + "-Mega")
-        # Gigantamax
-        if pokemon.has_giganta:
-            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Gigantamax.png", drawn_save_path + save_name + "-Gigantamax")
-        # Regional forms
-        if pokemon.reg_forms != "":
-            if "," in pokemon.reg_forms:
-                get_img_from_string(img, "^\d\d\d[a-zA-Z]-Alola.png", drawn_save_path + save_name + "-Region-Alola")
-                get_img_from_string(img, "^\d\d\d[a-zA-Z]-Galar.png", drawn_save_path + save_name + "-Region-Galar")
-            else:
-                get_img_from_string(img, "^\d\d\d[a-zA-Z]-" + pokemon.reg_forms + ".png", drawn_save_path + save_name + "-Region-" + pokemon.reg_forms)
-        # Other forms
-        if pokemon.has_misc_forms or pokemon.has_type_forms:
-            search_for_forms(pokemon)
+        get_drawn_images(pokemon, img)
+        # NOTE: If running this script in the future note that LGPE & Go functions don't check if images are present or not
+            # They download everything
+        #get_LGPE_images(pokemon, img)
+        #get_GO_images(pokemon, img)
+
+        # TODO: Download gen1 to gen4 back sprites into a seperate folder
+            # To run a different filtering script on those images (see below)
+                # back sprites differ by game, but changes on pokemon whether unique or recycled...
+                    # Run an identical check on other images from the generation to determine if they're the same
+                        # If they are all the same it can be a generational denoter
+                        # If they aren't, they'll have to be on a per game basis
+                    # open("image1.jpg","rb").read() == open("image2.jpg","rb").read()
+                        # The best thing to do here may be to send all the back sprites to another folder, then do processing on them there
+                            # This program works one image at a time and would be time-consuming to save the image, compare it to the next one or two, then delete it, etc
+                            # So just download ALL gen 1-4 back sprites, put them in this folder, and determine where the similarities and differences lie
 
 
     
