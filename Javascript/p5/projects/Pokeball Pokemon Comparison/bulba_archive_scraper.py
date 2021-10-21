@@ -722,89 +722,84 @@ def form_translation(pokemon, computer_filename):
     # NOTE: Overdrives were mislabelled as defaults, so I did these by hand
     # TODO: Rename Kyurem in misc folder in sprite images and transfer them to regular folder
         # Then run excel sheet again so it won't try to grab overdrive images
+        # TODO: First try to change to gifs from animated pngs so animated not showing in certain browsers isn't an issue
     
     # Keldeo
-    get_img_from_string(img, "^\d\d\dKeldeo.png", drawn_save_path + save_name + "-Ordinary")
-    get_img_from_string(img, "^\d\d\dKeldeo-Resolute.png", drawn_save_path + save_name + "-Resolute")
+    if pokemon.name == "Keldeo":
+        # Ordinary form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Ordinary", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Resolute", "R", computer_filename)
 
     # Meloetta
-    get_img_from_string(img, "^\d\d\dMeloetta.png", drawn_save_path + save_name + "-Aria")
-    get_img_from_string(img, "^\d\d\dMeloetta-Pirouette.png", drawn_save_path + save_name + "-Pirouette")
+    if pokemon.name == "Meloetta":
+        bulba_code_form = check_for_form("-Form-Aria", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Pirouette", "P", computer_filename)
 
     # Genesect
-    # Only drawn forms are dream versions
     if pokemon.name == "Genesect":
-        if img["alt"].endswith("Dream.png"):
-            # Get form
-            form = img["alt"].split(" ")[1]
-            if form == "B":
-                form = "Burn_Drive"
-            if form == "C":
-                form = "Chill_Drive"
-            if form == "D":
-                form = "Douse_Drive"
-            if form == "S":
-                form = "Shock_Drive"
-            form = "-" + form
-            get_img_from_string(img, "^\d\d\dGenesect [a-zA-z] Dream.png", drawn_save_path + save_name + form)
+        if "-Form-Douse_Drive" in computer_filename:
+            bulba_code_form = "B"
+        if "-Form-Burn_Drive" in computer_filename:
+            bulba_code_form = "R"
+        if "-Form-Chill_Drive" in computer_filename:
+            bulba_code_form = "W"
+        if "-Form-Shock_Drive" in computer_filename:
+            bulba_code_form = "Y"
 
     # Ash Greninja
-    get_img_from_string(img, "^\d\d\dGreninja-Ash.png", drawn_save_path + save_name + "-Ash")
+    if pokemon.name == "Greninja":
+        bulba_code_form = check_for_form("-Form-Ash", "A", computer_filename)
 
     # Vivillon Patterns
-    get_img_from_string(img, "^\d\d\dVivillon-Archipelago.png", drawn_save_path + save_name + "-Archipelago")
-    get_img_from_string(img, "^\d\d\dVivillon-Continental.png", drawn_save_path + save_name + "-Continental")
-    get_img_from_string(img, "^\d\d\dVivillon-Elegant.png", drawn_save_path + save_name + "-Elegant")
-    get_img_from_string(img, "^\d\d\dVivillon-Fancy.png", drawn_save_path + save_name + "-Fancy")
-    get_img_from_string(img, "^\d\d\dVivillon-Garden.png", drawn_save_path + save_name + "-Garden")
-    get_img_from_string(img, "^\d\d\dVivillon-High Plains.png", drawn_save_path + save_name + "-High_Plains")
-    get_img_from_string(img, "^\d\d\dVivillon-Icy Snow.png", drawn_save_path + save_name + "-Icy_Snow")
-    get_img_from_string(img, "^\d\d\dVivillon-Jungle.png", drawn_save_path + save_name + "-Jungle")
-    get_img_from_string(img, "^\d\d\dVivillon-Marine.png", drawn_save_path + save_name + "-Marine")
-    get_img_from_string(img, "^\d\d\dVivillon-Meadow.png", drawn_save_path + save_name + "-Meadow")
-    get_img_from_string(img, "^\d\d\dVivillon-Modern.png", drawn_save_path + save_name + "-Modern")
-    get_img_from_string(img, "^\d\d\dVivillon-Monsoon.png", drawn_save_path + save_name + "-Monsoon")
-    get_img_from_string(img, "^\d\d\dVivillon-Ocean.png", drawn_save_path + save_name + "-Ocean")
-    get_img_from_string(img, "^\d\d\dVivillon-Poké Ball.png", drawn_save_path + save_name + "-Poke_Ball")
-    get_img_from_string(img, "^\d\d\dVivillon-Polar.png", drawn_save_path + save_name + "-Polar")
-    get_img_from_string(img, "^\d\d\dVivillon-River.png", drawn_save_path + save_name + "-River")
-    get_img_from_string(img, "^\d\d\dVivillon-Sandstorm.png", drawn_save_path + save_name + "-Sandstorm")
-    get_img_from_string(img, "^\d\d\dVivillon-Savanna.png", drawn_save_path + save_name + "-Savanna")
-    get_img_from_string(img, "^\d\d\dVivillon-Sun.png", drawn_save_path + save_name + "-Sun")
-    get_img_from_string(img, "^\d\d\dVivillon-Tundra.png", drawn_save_path + save_name + "-Tundra")
-
-
+    if pokemon.name == "Vivillon":
+        # Meadow form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Meadow", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Archipelago", "Arc", computer_filename)
+        bulba_code_form = check_for_form("-Form-Continental", "Con", computer_filename)
+        bulba_code_form = check_for_form("-Form-Elegant", "Ele", computer_filename)
+        bulba_code_form = check_for_form("-Form-Garden", "Gar", computer_filename)
+        bulba_code_form = check_for_form("-Form-High_Plains", "Hig", computer_filename)
+        bulba_code_form = check_for_form("-Form-Icy_Snow", "Icy", computer_filename)
+        bulba_code_form = check_for_form("-Form-Jungle", "Jun", computer_filename)
+        bulba_code_form = check_for_form("-Form-Marine", "Mar", computer_filename)
+        bulba_code_form = check_for_form("-Form-Modern", "Mod", computer_filename)
+        bulba_code_form = check_for_form("-Form-Monsoon", "Mon", computer_filename)
+        bulba_code_form = check_for_form("-Form-Ocean", "Oce", computer_filename)
+        bulba_code_form = check_for_form("-Form-Polar", "Pol", computer_filename)
+        bulba_code_form = check_for_form("-Form-River", "Riv", computer_filename)
+        bulba_code_form = check_for_form("-Form-Sandstorm", "San", computer_filename)
+        bulba_code_form = check_for_form("-Form-Savanna", "Sav", computer_filename)
+        bulba_code_form = check_for_form("-Form-Sun", "Sun", computer_filename)
+        bulba_code_form = check_for_form("-Form-Tundra", "Tun", computer_filename)
+        bulba_code_form = check_for_form("-Form-Poke_Ball", "Pok", computer_filename)
+        bulba_code_form = check_for_form("-Form-Fancy", "Fan", computer_filename)
+    
     # Flabebe, Floette, and Florges colors
-    get_img_from_string(img, "^\d\d\dFlabébé Blue Flower XY anime.png", drawn_save_path + save_name + "-Blue")
-    get_img_from_string(img, "^\d\d\dFlabébé Orange Flower XY anime.png", drawn_save_path + save_name + "-Orange")
-    get_img_from_string(img, "^\d\d\dFlabébé Red Flower XY anime.png", drawn_save_path + save_name + "-Red")
-    get_img_from_string(img, "^\d\d\dFlabébé White Flower XY anime.png", drawn_save_path + save_name + "-White")
-    get_img_from_string(img, "^\d\d\dFlabébé Yellow Flower XY anime.png", drawn_save_path + save_name + "-Yellow")
-    get_img_from_string(img, "^\d\d\dFloette-Blue XY anime.png", drawn_save_path + save_name + "-Blue")
-    get_img_from_string(img, "^\d\d\dFloette-Orange XY anime.png", drawn_save_path + save_name + "-Orange")
-    get_img_from_string(img, "^\d\d\dFloette-Red XY anime.png", drawn_save_path + save_name + "-Red")
-    get_img_from_string(img, "^\d\d\dFloette-Yellow XY anime.png", drawn_save_path + save_name + "-Yellow")
-    #get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    get_img_from_string(img, "^\d\d\dFlorges Blue Flower XY anime.png", drawn_save_path + save_name + "-Blue")
-    get_img_from_string(img, "^\d\d\dFlorges Orange Flower XY anime.png", drawn_save_path + save_name + "-Orange")
-    get_img_from_string(img, "^\d\d\dFlorges Red Flower XY anime.png", drawn_save_path + save_name + "-Red")
-    get_img_from_string(img, "^\d\d\dFlorges White Flower XY anime.png", drawn_save_path + save_name + "-White")
-    get_img_from_string(img, "^\d\d\dFlorges Yellow Flower XY anime.png", drawn_save_path + save_name + "-Yellow")
+    if pokemon.name == "Flabebe" or pokemon.name == "Floette" or pokemon.name == "Florges":
+        # Red Flower form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Red_Flower", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Blue_Flower", "B", computer_filename)
+        bulba_code_form = check_for_form("-Form-Orange_Flower", "O", computer_filename)
+        bulba_code_form = check_for_form("-Form-White_Flower", "W", computer_filename)
+        bulba_code_form = check_for_form("-Form-Yellow_Flower", "Y", computer_filename)
 
     # Furfrou Trims
-    get_img_from_string(img, "^\d\d\dFurfrou-Diamond.png", drawn_save_path + save_name + "-Diamond_Trim")
-    get_img_from_string(img, "^\d\d\dFurfrou-Heart.png", drawn_save_path + save_name + "-Heart_Trim")
-    get_img_from_string(img, "^\d\d\dFurfrou-Star.png", drawn_save_path + save_name + "-Star_Trim")
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+    if pokemon.name == "Furfrou":
+        bulba_code_form = check_for_form("-Form-Dandy_Trim", "Da", computer_filename)
+        bulba_code_form = check_for_form("-Form-Debutante_Trim", "De", computer_filename)
+        bulba_code_form = check_for_form("-Form-Diamond_Trim", "Di", computer_filename)
+        bulba_code_form = check_for_form("-Form-Heart_Trim", "He", computer_filename)
+        bulba_code_form = check_for_form("-Form-Kabuki_Trim", "Ka", computer_filename)
+        bulba_code_form = check_for_form("-Form-La_Reine_Trim", "La", computer_filename)
+        bulba_code_form = check_for_form("-Form-Matron_Trim", "Ma", computer_filename)
+        bulba_code_form = check_for_form("-Form-Pharaoh_Trim", "Ph", computer_filename)
+        bulba_code_form = check_for_form("-Form-Star_Trim", "St", computer_filename)
 
     # Aegislash
-    get_img_from_string(img, "^\d\d\dAegislash-Blade.png", drawn_save_path + save_name + "-Blade")
-    get_img_from_string(img, "^\d\d\dAegislash-Shield.png", drawn_save_path + save_name + "-Shield")
+    if pokemon.name == "Aegislash":
+        # Shield form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Shield", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Blade", "B", computer_filename)
 
     # Pumpkaboo and Gourgeist Sizes
     # if "Pumpkaboo" == split_name or "Gourgeist" == split_name:
@@ -1283,6 +1278,8 @@ for i in range(len(pokemon_img_urls)):
         # TODO: Download box sprites too? For list images
         # TODO: Possibly more animations?
             # See: https://www.reddit.com/r/TheSilphRoad/comments/65q7us/reminder_pokemon_go_pokemon_models_are_from/
+
+        # TODO: Make sure pokemon like flabebe with apostrophe over letter work okay
 
         get_drawn_images(pokemon, img)
         # NOTE: If running this script in the future note that LGPE & Go functions don't check if images are present or not
