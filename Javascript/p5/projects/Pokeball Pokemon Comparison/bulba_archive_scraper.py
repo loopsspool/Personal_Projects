@@ -576,16 +576,31 @@ def check_for_form(plaintext_form, bulba_code_form, computer_filename):
     if plaintext_form in computer_filename:
         return bulba_code_form
 
+def check_for_type(computer_filename):
+    for t in types:
+        poke_type = "-Form-" + t
+        if poke_type in computer_filename:
+            # Handling the ??? type used in gen4
+            if t == "Qmark":
+                return("-Unknown")
+            else:
+                return("-" + t)
+
 # TODO: PICK UP HERE!
 uppers = list(string.ascii_uppercase)
 types = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy", "Qmark"]
+# Vanilla Cream is default, so no letter denoter
+creams = [("Caramel_Swirl", "CaS"), ("Lemon_Cream", "LeC"), ("Matcha_Cream", "MaC"), ("Mint_Cream", "MiC"), ("Rainbow_Swirl", "RaS"), ("Ruby_Cream", "RaC"), ("Ruby_Swirl", "RuS"), ("Salted_Cream", "SaC"), ("Vanilla_Cream", "")]
+# Strawberry Sweet is default, so no letter denoter
+sweets = [("Berry_Sweet", "B"), ("Clover_Sweet", "C"), ("Flower_Sweet", "F"), ("Love_Sweet", "L"), ("Ribbon_Sweet", "R"), ("Star_Sweet", "S"), ("Strawberry_Sweet", "")]
+
 # Converts forms into bulbapedia notation
 def form_translation(pokemon, computer_filename):
     bulba_code_form = ""
     # If pokemon has no type or misc forms, return empty string to concatonate onto bulba filename
         # This is running before any web scraping, so I don't need to intentionally slow the script down
     if not pokemon.has_misc_forms and not pokemon.has_type_forms:
-        return bulba_code_form
+        return(bulba_code_form)
 
     # Pikachu Cosplay & Caps
     if pokemon.name == "Pikachu":
@@ -682,15 +697,7 @@ def form_translation(pokemon, computer_filename):
 
     # Arceus Types
     if pokemon.name == "Arceus":
-        for t in types:
-            arceus_type = "-Form-" + t
-            if arceus_type in computer_filename:
-                # Handling the ??? type used in gen4
-                if t == "Qmark":
-                    bulba_code_form = "-Unknown"
-                else:
-                    bulba_code_form = "-" + t
-                break
+        bulba_code_form = check_for_type(computer_filename)
 
     # Basculin Stripes
     if pokemon.name == "Basculin":
@@ -802,153 +809,167 @@ def form_translation(pokemon, computer_filename):
         bulba_code_form = check_for_form("-Form-Blade", "B", computer_filename)
 
     # Pumpkaboo and Gourgeist Sizes
-    # if "Pumpkaboo" == split_name or "Gourgeist" == split_name:
-    #     # Average sizes have no indication in filename on this website
-    #     form = " 1Average Size"
-    # else:
-    #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+    if pokemon.name == "Pumpkaboo" or pokemon.name == "Gourgeist":
+        # Average Size form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-1_Average_Size", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-0_Small_Size", "Sm", computer_filename)
+        bulba_code_form = check_for_form("-Form-2_Large_Size", "La", computer_filename)
+        bulba_code_form = check_for_form("-Form-3_Super_Size", "Su", computer_filename)
 
     # Xerneas
-    # if "Xerneas" == split_name:
-    #     form = " Active"
-    # else:
-    #     get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+    if pokemon.name == "Xerneas":
+        # Active form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Active", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Neutral", "N", computer_filename)
 
     # Zygarde
-    get_img_from_string(img, "^\d\d\dZygarde.png", drawn_save_path + save_name + "-50%")
-    get_img_from_string(img, "^\d\d\dZygarde-10Percent.png", drawn_save_path + save_name + "-10%")
-    get_img_from_string(img, "^\d\d\dZygarde-Complete.png", drawn_save_path + save_name + "-Complete")
-
+    if pokemon.name == "Zygarde":
+        # 50% form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-50%", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Complete", "C", computer_filename)
+        bulba_code_form = check_for_form("-Form-10%", "T", computer_filename)
 
     # Hoopa
-    get_img_from_string(img, "^\d\d\dHoopa.png", drawn_save_path + save_name + "-Confined")
-    get_img_from_string(img, "^\d\d\dHoopa-Unbound.png", drawn_save_path + save_name + "-Unbound")
-
+    if pokemon.name == "Hoopa":
+        # Confined form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Confined", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Unbound", "U", computer_filename)
 
     # Oricorio
-    # TODO: No default
-    get_img_from_string(img, "^\d\d\dOricorio-Baile.png", drawn_save_path + save_name + "-Baile")
-    get_img_from_string(img, "^\d\d\dOricorio-Pa'u.png", drawn_save_path + save_name + "-Pa'u")
-    get_img_from_string(img, "^\d\d\dOricorio-Pom-Pom.png", drawn_save_path + save_name + "-Pom_Pom")
-    get_img_from_string(img, "^\d\d\dOricorio-Sensu.png", drawn_save_path + save_name + "-Sensu")
+    if pokemon.name == "Oricorio":
+        # Confined form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Baile", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Pa'u", "Pa", computer_filename)
+        bulba_code_form = check_for_form("-Form-Pom_Pom", "Po", computer_filename)
+        bulba_code_form = check_for_form("-Form-Sensu", "Se", computer_filename)
 
     # Lycanroc
-    get_img_from_string(img, "^\d\d\dLycanroc.png", drawn_save_path + save_name + "-Midday")
-    get_img_from_string(img, "^\d\d\dLycanroc-Dusk.png", drawn_save_path + save_name + "-Dusk")
-    get_img_from_string(img, "^\d\d\dLycanroc-Midnight.png", drawn_save_path + save_name + "-Midnight")
+    if pokemon.name == "Lycanroc":
+        # Midday form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Midday", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Dusk", "D", computer_filename)
+        bulba_code_form = check_for_form("-Form-Midnight", "Mn", computer_filename)
 
     # Wishiwashi
-    # TODO: No default
-    get_img_from_string(img, "^\d\d\dWishiwashi-Solo.png", drawn_save_path + save_name + "-Solo")
-    get_img_from_string(img, "^\d\d\dWishiwashi-School.png", drawn_save_path + save_name + "-School")
+    if pokemon.name == "Wishiwashi":
+        # Solo form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Solo", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-School", "Sc", computer_filename)
 
     # Silvally Types
-    # Only drawn forms are dream versions
     if pokemon.name == "Silvally":
-        if img["alt"].endswith("Dream.png"):
-            # Get form
-            form = img["alt"].split(" ")[1]
-            form = "-" + form
-            get_img_from_string(img, "^\d\d\dSilvally [a-zA-z]+ Dream.png", drawn_save_path + save_name + form)
+        bulba_code_form = check_for_type(computer_filename)
 
     # Minior
-    get_img_from_string(img, "^\d\d\dMinior.png", drawn_save_path + save_name + "-Meteor")
-    get_img_from_string(img, "^\d\d\dMinior-Core.png", drawn_save_path + save_name + "-Red_Core")
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-    # # Shiny cores all the same color?
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+    # NOTE: Bulba has shiny core form denoted as red, so this will probably have to manually be changed
+    if pokemon.name == "Minior":
+        # Meteor form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Meteor", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Blue_Core", "B", computer_filename)
+        bulba_code_form = check_for_form("-Form-Green_Core", "G", computer_filename)
+        bulba_code_form = check_for_form("-Form-Indigo_Core", "I", computer_filename)
+        bulba_code_form = check_for_form("-Form-Orange_Core", "O", computer_filename)
+        bulba_code_form = check_for_form("-Form-Red_Core", "R", computer_filename)
+        bulba_code_form = check_for_form("-Form-Violet_Core", "V", computer_filename)
+        bulba_code_form = check_for_form("-Form-Yellow_Core", "Y", computer_filename)
 
     # Mimikyu
-    get_img_from_string(img, "^\d\d\dMimikyu.png", drawn_save_path + save_name + "-Disguised")
-    get_img_from_string(img, "^\d\d\dMimikyu Busted Dream.png", drawn_save_path + save_name + "-Busted")
+    if pokemon.name == "Mimikyu":
+        # Disguised form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Disguised", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Busted", "B", computer_filename)
 
     # Solgaleo
-    get_img_from_string(img, "^\d\d\dSolgaleo-RadiantSunPhase.png", drawn_save_path + save_name + "-Radiant_Sun")
+    if pokemon.name == "Solgaleo":
+        bulba_code_form = check_for_form("-Form-Full_Moon", "F", computer_filename)
 
     # Lunala
-    get_img_from_string(img, "^\d\d\dLunala-FullMoonPhase.png", drawn_save_path + save_name + "-Full_Moon")
+    if pokemon.name == "Lunala":
+        bulba_code_form = check_for_form("-Form-Radiant_Sun", "R", computer_filename)
 
     # Necrozma
-    get_img_from_string(img, "^\d\d\dNecrozma-Dawn Wings.png", drawn_save_path + save_name + "-Dawn_Wings")
-    get_img_from_string(img, "^\d\d\dNecrozma-Dusk Mane.png", drawn_save_path + save_name + "-Dusk_Mane")
-    get_img_from_string(img, "^\d\d\dNecrozma-Ultra.png", drawn_save_path + save_name + "-Ultra")
+    if pokemon.name == "Necrozma":
+        bulba_code_form = check_for_form("-Form-Dawn_Wings", "DW", computer_filename)
+        bulba_code_form = check_for_form("-Form-Dusk_Mane", "DM", computer_filename)
+        bulba_code_form = check_for_form("-Form-Ultra", "U", computer_filename)
 
     # Magearna
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
-
+    if pokemon.name == "Magearna":
+        bulba_code_form = check_for_form("-Form-Original_Color", "O", computer_filename)
+    
     # Marshadow
-    get_img_from_string(img, "^\d\d\dMarshadow-Alt.png", drawn_save_path + save_name + "-Zenith")
-
+    # NOTE: Bulba does not have Zenith form
+    #if pokemon.name == "Marshadow":
+    #    bulba_code_form = check_for_form("-Form-Zenith", "Z", computer_filename)
+    
     # Cramorant
-    get_img_from_string(img, "^\d\d\dCramorant-Gorging.png", drawn_save_path + save_name + "-Gorging")
-    get_img_from_string(img, "^\d\d\dCramorant-Gulping.png", drawn_save_path + save_name + "-Gulping")
-
+    if pokemon.name == "Cramorant":
+        bulba_code_form = check_for_form("-Form-Gorging", "Go", computer_filename)
+        bulba_code_form = check_for_form("-Form-Gulping", "Gu", computer_filename)
+    
     # Toxtricity
-    get_img_from_string(img, "^\d\d\dToxtricity-Amped.png", drawn_save_path + save_name + "-Amped")
-    get_img_from_string(img, "^\d\d\dToxtricity-Low Key.png", drawn_save_path + save_name + "-Low_Key")
+    if pokemon.name == "Toxtricity":
+        # Amped form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Amped", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Low_Key", "L", computer_filename)
 
     # Alcremie Creams & Sweets
-    # Default Alcremie is Vanilla Cream-Strawberry Sweet
+    # TODO: Test and see that it works okay (Maybe on existing files I have?)
     if pokemon.name == "Alcremie":
-        # Space after excludes gigantamax img
-        if re.search("^869Alcremie-[a-zA-Z]+ ", img.attrs["alt"]):
-            # Getting largest image for Alcremie
-            img_url = get_largest_png(img)
-            # Splits by directory
-            img_url = img_url.split("/")
-            # Gets last string in sequence (the filename)
-            img_url = img_url[len(img_url) - 1]
-            # Splits by hyphen to get cream and sweet
-            img_url = img_url.split("-")
-            cream = "-" + img_url[2]
-            sweet = "-" + img_url[3].replace(".png 2x", "_Sweet")
-            form = cream + sweet
-            get_img_from_string(img, "^869Alcremie-[a-zA-Z]+ ", drawn_save_path + save_name + form)
+        # Gigantamax version doesn't show cream or sweets, so there's no point to go through them
+        if "-Form-Gigantamax" in computer_filename:
+            return("")
+            
+        for sweet in sweets:
+            if sweet[0] in computer_filename:
+                # Shiny Alcremie only shows sweet, not cream color
+                if "-Shiny" in computer_filename:
+                    bulba_code_form = sweet[1]
+                    break
+                else:
+                    # If regular color, find cream
+                    for cream in creams:
+                        if cream[0] in computer_filename:
+                            bulba_code_form = cream[1] + sweet[1]
 
     # Eiscue
-    # TODO: No default
-    get_img_from_string(img, "^\d\d\dEiscue-Ice.png", drawn_save_path + save_name + "-Ice_Face")
-    get_img_from_string(img, "^\d\d\dEiscue-Noice.png", drawn_save_path + save_name + "-Noice_Face")
-
+    if pokemon.name == "Eiscue":
+        # Ice Face form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Ice_Face", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Noice_Face", "N", computer_filename)
+    
     # Morpeko
-    get_img_from_string(img, "^\d\d\dMorpeko-Full.png", drawn_save_path + save_name + "-Full")
-    get_img_from_string(img, "^\d\d\dMorpeko-Hangry.png", drawn_save_path + save_name + "-Hangry")
+    if pokemon.name == "Morpeko":
+        # Full Belly form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Full_Belly", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Hangry", "H", computer_filename)
 
+    # Zacian
+    if pokemon.name == "Zacian":
+        # Hero form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Hero_of_Many_Battles", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Crowned_Sword", "C", computer_filename)
 
-    # Zacian and Zamazenta
-    get_img_from_string(img, "^\d\d\dZacian.png", drawn_save_path + save_name + "-Crowned_Sword")
-    get_img_from_string(img, "^\d\d\dZacian-Hero.png", drawn_save_path + save_name + "-Hero_of_Many_Battles")
-    get_img_from_string(img, "^\d\d\dZamazenta.png", drawn_save_path + save_name + "-Crowned_Shield")
-    get_img_from_string(img, "^\d\d\dZamazenta-Hero.png", drawn_save_path + save_name + "-Hero_of_Many_Battles")
+    # Zamazenta
+    if pokemon.name == "Zamazenta":
+        # Hero form considered default, so does not have a letter denoter
+        bulba_code_form = check_for_form("-Form-Hero_of_Many_Battles", "", computer_filename)
+        bulba_code_form = check_for_form("-Form-Crowned_Shield", "C", computer_filename)
 
     # Eternatus Eternamax
-    # get_img_from_string(img, "^\d\d\d.png", drawn_save_path + save_name + )
+    if pokemon.name == "Eternatus":
+        bulba_code_form = check_for_form("-Form-Eternamax", "E", computer_filename)
 
     # Urshifu
-    get_img_from_string(img, "^\d\d\dUrshifu-Gigantamax Rapid Strike.png", drawn_save_path + save_name + "Gigantamax-Rapid_Strike")
-    get_img_from_string(img, "^\d\d\dUrshifu-Gigantamax Single Strike.png", drawn_save_path + save_name + "Gigantamax-Single_Strike")
-    get_img_from_string(img, "^\d\d\dUrshifu-Rapid Strike.png", drawn_save_path + save_name + "-Rapid_Strike")
-    get_img_from_string(img, "^\d\d\dUrshifu-Single Strike.png", drawn_save_path + save_name + "-Single_Strike")
-
+    # NOTE: NO game sprites for Urshifu??!
 
     # Zarude
-    get_img_from_string(img, "^\d\d\dZarude-Dada JN anime.png", drawn_save_path + save_name + "-Dada")
+    # NOTE: NO game sprites for Zarude either??!
 
     # Calyrex Ridings
-    get_img_from_string(img, "^\d\d\dCalyrex-Ice Rider.png", drawn_save_path + save_name + "-Ice_Rider")
-    get_img_from_string(img, "^\d\d\dCalyrex-Shadow Rider.png", drawn_save_path + save_name + "-Shadow_Rider")
+    # NOTE: And no game sprites for Calyrex...
+
+    return(bulba_code_form)
 
 # TODO: Make sure none of the exception strings conflict with forms that DO have gender difference in form
 # TODO: Check all possible forms for "missing" genders (no male/female forms, but normal does) so male denoter doesn't get added (see gender code in determine_bulba_name())
