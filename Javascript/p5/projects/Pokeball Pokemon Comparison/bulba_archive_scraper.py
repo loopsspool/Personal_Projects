@@ -1284,38 +1284,6 @@ while True:
         print("Reached end of pokemon archive links.")
         break
 
-def get_GO_images(pokemon, img):
-    # Let's Go Pikachu/Eevee images
-    # NOTE: DOWNLOADS ALL IMAGES, NO CHECK IF THEY'RE ALREADY THERE
-
-    save_name = pokemon.number + " " + pokemon.name
-    if pokemon.name == "Type: Null":
-        save_name = pokemon.number + " Type Null"
-    # Done this way so certain images that just have characters after the pokemon number don't match
-        # Don't have to do this with the others because the hyphen denoters prevent the possibility
-    pokemon_name_len = len(pokemon.name)
-    get_img_from_string(img, "^\d\d\d[a-zA-Z]{" + str(pokemon_name_len) + "}.png", drawn_save_path + save_name)
-    # Drawn Mega
-    if pokemon.has_mega:
-        if pokemon.name == "Charizard" or pokemon.name == "Mewtwo":
-            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega X.png", drawn_save_path + save_name + "-Mega_X")
-            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega Y.png", drawn_save_path + save_name + "-Mega_Y")
-        else:
-            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Mega.png", drawn_save_path + save_name + "-Mega")
-    # Gigantamax
-    if pokemon.has_giganta:
-        get_img_from_string(img, "^\d\d\d[a-zA-Z]-Gigantamax.png", drawn_save_path + save_name + "-Gigantamax")
-    # Regional forms
-    if pokemon.reg_forms != "":
-        if "," in pokemon.reg_forms:
-            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Alola.png", drawn_save_path + save_name + "-Region-Alola")
-            get_img_from_string(img, "^\d\d\d[a-zA-Z]-Galar.png", drawn_save_path + save_name + "-Region-Galar")
-        else:
-            get_img_from_string(img, "^\d\d\d[a-zA-Z]-" + pokemon.reg_forms + ".png", drawn_save_path + save_name + "-Region-" + pokemon.reg_forms)
-    # Other forms
-    if pokemon.has_misc_forms or pokemon.has_type_forms:
-        search_for_drawn_forms(pokemon)
-
 # TODO: Create dict checklist for each of the type of images you want
     # When they're all fulfilled, break so unecessary image processing for each poke isn't occuring
     # If end of page is reached and requirements aren't satisfied (ie Arceus), continue to next page of images
