@@ -572,9 +572,11 @@ def bulba_game_denoter_conversion(filename):
     if "Sword-Shield" in filename:
         return (" 8s")
 
-def check_for_form(plaintext_form, bulba_code_form, computer_filename):
+def check_for_form(plaintext_form, bulba_form_code, curr_bulba_form, computer_filename):
     if plaintext_form in computer_filename:
-        return bulba_code_form
+        return(bulba_form_code)
+    else:
+        return (curr_bulba_form)
 
 def check_for_type(computer_filename):
     for t in types:
@@ -586,7 +588,6 @@ def check_for_type(computer_filename):
             else:
                 return("-" + t)
 
-# TODO: PICK UP HERE!
 uppers = list(string.ascii_uppercase)
 types = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy", "Qmark"]
 # Vanilla Cream is default, so no letter denoter
@@ -595,6 +596,7 @@ creams = [("Caramel_Swirl", "CaS"), ("Lemon_Cream", "LeC"), ("Matcha_Cream", "Ma
 sweets = [("Berry_Sweet", "B"), ("Clover_Sweet", "C"), ("Flower_Sweet", "F"), ("Love_Sweet", "L"), ("Ribbon_Sweet", "R"), ("Star_Sweet", "S"), ("Strawberry_Sweet", "")]
 
 # Converts forms into bulbapedia notation
+# TODO: Continue on all forms below that aren't on bulba
 def form_translation(pokemon, computer_filename):
     bulba_code_form = ""
     # If pokemon has no type or misc forms, return empty string to concatonate onto bulba filename
@@ -604,13 +606,13 @@ def form_translation(pokemon, computer_filename):
 
     # Pikachu Cosplay & Caps
     if pokemon.name == "Pikachu":
-        bulba_code_form = check_for_form("-Form-Cap-Alola", "A", computer_filename)
-        bulba_code_form = check_for_form("-Form-Cap-Hoenn", "H", computer_filename)
-        bulba_code_form = check_for_form("-Form-Cap-Kalos", "K", computer_filename)
-        bulba_code_form = check_for_form("-Form-Cap-Original", "O", computer_filename)
-        bulba_code_form = check_for_form("-Form-Cap-Sinnoh", "S", computer_filename)
-        bulba_code_form = check_for_form("-Form-Cap-Unova", "U", computer_filename)
-        bulba_code_form = check_for_form("-Form-Cap-Partner", "P", computer_filename)
+        bulba_code_form = check_for_form("-Form-Cap-Alola", "A", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Cap-Hoenn", "H", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Cap-Kalos", "K", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Cap-Original", "O", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Cap-Sinnoh", "S", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Cap-Unova", "U", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Cap-Partner", "P", bulba_code_form, computer_filename)
         # NOTE: No world cap sprite
         # NOTE: No Sprites for Cosplay on bulbapedia
         # get_img_from_string(img, "^\d\d\dPikachu-Belle.png", drawn_save_path + save_name + "-Cosplay-Belle")
@@ -621,7 +623,7 @@ def form_translation(pokemon, computer_filename):
 
     # Spiky-eared Pichu
     if pokemon.name == "Pichu":
-        bulba_code_form = check_for_form("-Form-Spiky_Eared", "N", computer_filename)
+        bulba_code_form = check_for_form("-Form-Spiky_Eared", "N", bulba_code_form, computer_filename)
 
     # Unown Characters
     # NOTE: Some gens, character is right after pokemon number but on other gens (see gen 4...) there is a hyphen -- UGH
@@ -642,58 +644,58 @@ def form_translation(pokemon, computer_filename):
 
     # Castform Weathers
     if pokemon.name == "Castform":
-        bulba_code_form = check_for_form("-Form-Rainy", "R", computer_filename)
-        bulba_code_form = check_for_form("-Form-Snowy", "H", computer_filename)
-        bulba_code_form = check_for_form("-Form-Sunny", "S", computer_filename)
+        bulba_code_form = check_for_form("-Form-Rainy", "R", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Snowy", "H", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Sunny", "S", bulba_code_form, computer_filename)
 
     # Primal Kyogre & Groudon
     if pokemon.name == "Kyogre" or pokemon.name == "Groudon":
-        bulba_code_form = check_for_form("-Form-Primal", "P", computer_filename)
+        bulba_code_form = check_for_form("-Form-Primal", "P", bulba_code_form, computer_filename)
 
     # Deoxys
     if pokemon.name == "Deoxys":
-        bulba_code_form = check_for_form("-Form-Attack", "A", computer_filename)
-        bulba_code_form = check_for_form("-Form-Defense", "D", computer_filename)
-        bulba_code_form = check_for_form("-Form-Speed", "S", computer_filename)
+        bulba_code_form = check_for_form("-Form-Attack", "A", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Defense", "D", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Speed", "S", bulba_code_form, computer_filename)
 
     # Burmy & Wormadam Cloaks
     if pokemon.name == "Burmy" or pokemon.name == "Wormadam":
         # Plant Cloak considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Plant_Cloak", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Sandy_Cloak", "G", computer_filename)
-        bulba_code_form = check_for_form("-Form-Trash_Cloak", "S", computer_filename)
+        bulba_code_form = check_for_form("-Form-Plant_Cloak", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Sandy_Cloak", "G", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Trash_Cloak", "S", bulba_code_form, computer_filename)
 
     # Cherrim
     if pokemon.name == "Cherrim":
         # Overcast form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Overcast", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Sunshine", "S", computer_filename)
+        bulba_code_form = check_for_form("-Form-Overcast", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Sunshine", "S", bulba_code_form, computer_filename)
 
     # Shellos & Gastrodon East/West
     if pokemon.name == "Shellos" or pokemon.name == "Gastrodon":
         # West form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-West", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-East", "E", computer_filename)
+        bulba_code_form = check_for_form("-Form-West", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-East", "E", bulba_code_form, computer_filename)
 
     # Rotom Appliances
     if pokemon.name == "Rotom":
-        bulba_code_form = check_for_form("-Form-Fan", "F", computer_filename)
-        bulba_code_form = check_for_form("-Form-Frost", "R", computer_filename)
-        bulba_code_form = check_for_form("-Form-Heat", "O", computer_filename)
-        bulba_code_form = check_for_form("-Form-Mow", "L", computer_filename)
-        bulba_code_form = check_for_form("-Form-Wash", "W", computer_filename)
+        bulba_code_form = check_for_form("-Form-Fan", "F", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Frost", "R", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Heat", "O", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Mow", "L", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Wash", "W", bulba_code_form, computer_filename)
 
     # Giratina
     if pokemon.name == "Giratina":
         # Altered form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Altered", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Origin", "O", computer_filename)
+        bulba_code_form = check_for_form("-Form-Altered", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Origin", "O", bulba_code_form, computer_filename)
 
     # Shaymin
     if pokemon.name == "Shaymin":
         # Land form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Land", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Sky", "S", computer_filename)
+        bulba_code_form = check_for_form("-Form-Land", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Sky", "S", bulba_code_form, computer_filename)
 
     # Arceus Types
     if pokemon.name == "Arceus":
@@ -702,28 +704,28 @@ def form_translation(pokemon, computer_filename):
     # Basculin Stripes
     if pokemon.name == "Basculin":
         # Red Striped form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Red_Striped", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Blue_Striped", "B", computer_filename)
+        bulba_code_form = check_for_form("-Form-Red_Striped", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Blue_Striped", "B", bulba_code_form, computer_filename)
 
     # Darmanitan Modes
     if pokemon.name == "Darmanitan":
         # Standard form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Standard", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Zen", "Z", computer_filename)
+        bulba_code_form = check_for_form("-Form-Standard", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Zen", "Z", bulba_code_form, computer_filename)
 
     # Deerling & Sawsbuck Seasons
     if pokemon.name == "Deerling" or pokemon.name == "Sawsbuck":
         # Spring form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Spring", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Autumn", "A", computer_filename)
-        bulba_code_form = check_for_form("-Form-Summer", "S", computer_filename)
-        bulba_code_form = check_for_form("-Form-Winter", "W", computer_filename)
+        bulba_code_form = check_for_form("-Form-Spring", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Autumn", "A", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Summer", "S", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Winter", "W", bulba_code_form, computer_filename)
 
     # Forces of nature forms
     if pokemon.name == "Tornadus" or pokemon.name == "Thundurus" or pokemon.name == "Landorus":
         # Incarnate form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Incarnate", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Therian", "T", computer_filename)
+        bulba_code_form = check_for_form("-Form-Incarnate", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Therian", "T", bulba_code_form, computer_filename)
 
     # Kyurem Fusions
     # NOTE: Overdrives were mislabelled as defaults, so I did these by hand
@@ -734,13 +736,13 @@ def form_translation(pokemon, computer_filename):
     # Keldeo
     if pokemon.name == "Keldeo":
         # Ordinary form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Ordinary", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Resolute", "R", computer_filename)
+        bulba_code_form = check_for_form("-Form-Ordinary", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Resolute", "R", bulba_code_form, computer_filename)
 
     # Meloetta
     if pokemon.name == "Meloetta":
-        bulba_code_form = check_for_form("-Form-Aria", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Pirouette", "P", computer_filename)
+        bulba_code_form = check_for_form("-Form-Aria", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Pirouette", "P", bulba_code_form, computer_filename)
 
     # Genesect
     if pokemon.name == "Genesect":
@@ -755,106 +757,106 @@ def form_translation(pokemon, computer_filename):
 
     # Ash Greninja
     if pokemon.name == "Greninja":
-        bulba_code_form = check_for_form("-Form-Ash", "A", computer_filename)
+        bulba_code_form = check_for_form("-Form-Ash", "A", bulba_code_form, computer_filename)
 
     # Vivillon Patterns
     if pokemon.name == "Vivillon":
         # Meadow form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Meadow", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Archipelago", "Arc", computer_filename)
-        bulba_code_form = check_for_form("-Form-Continental", "Con", computer_filename)
-        bulba_code_form = check_for_form("-Form-Elegant", "Ele", computer_filename)
-        bulba_code_form = check_for_form("-Form-Garden", "Gar", computer_filename)
-        bulba_code_form = check_for_form("-Form-High_Plains", "Hig", computer_filename)
-        bulba_code_form = check_for_form("-Form-Icy_Snow", "Icy", computer_filename)
-        bulba_code_form = check_for_form("-Form-Jungle", "Jun", computer_filename)
-        bulba_code_form = check_for_form("-Form-Marine", "Mar", computer_filename)
-        bulba_code_form = check_for_form("-Form-Modern", "Mod", computer_filename)
-        bulba_code_form = check_for_form("-Form-Monsoon", "Mon", computer_filename)
-        bulba_code_form = check_for_form("-Form-Ocean", "Oce", computer_filename)
-        bulba_code_form = check_for_form("-Form-Polar", "Pol", computer_filename)
-        bulba_code_form = check_for_form("-Form-River", "Riv", computer_filename)
-        bulba_code_form = check_for_form("-Form-Sandstorm", "San", computer_filename)
-        bulba_code_form = check_for_form("-Form-Savanna", "Sav", computer_filename)
-        bulba_code_form = check_for_form("-Form-Sun", "Sun", computer_filename)
-        bulba_code_form = check_for_form("-Form-Tundra", "Tun", computer_filename)
-        bulba_code_form = check_for_form("-Form-Poke_Ball", "Pok", computer_filename)
-        bulba_code_form = check_for_form("-Form-Fancy", "Fan", computer_filename)
+        bulba_code_form = check_for_form("-Form-Meadow", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Archipelago", "Arc", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Continental", "Con", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Elegant", "Ele", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Garden", "Gar", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-High_Plains", "Hig", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Icy_Snow", "Icy", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Jungle", "Jun", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Marine", "Mar", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Modern", "Mod", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Monsoon", "Mon", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Ocean", "Oce", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Polar", "Pol", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-River", "Riv", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Sandstorm", "San", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Savanna", "Sav", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Sun", "Sun", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Tundra", "Tun", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Poke_Ball", "Pok", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Fancy", "Fan", bulba_code_form, computer_filename)
     
     # Flabebe, Floette, and Florges colors
     if pokemon.name == "Flabebe" or pokemon.name == "Floette" or pokemon.name == "Florges":
         # Red Flower form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Red_Flower", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Blue_Flower", "B", computer_filename)
-        bulba_code_form = check_for_form("-Form-Orange_Flower", "O", computer_filename)
-        bulba_code_form = check_for_form("-Form-White_Flower", "W", computer_filename)
-        bulba_code_form = check_for_form("-Form-Yellow_Flower", "Y", computer_filename)
+        bulba_code_form = check_for_form("-Form-Red_Flower", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Blue_Flower", "B", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Orange_Flower", "O", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-White_Flower", "W", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Yellow_Flower", "Y", bulba_code_form, computer_filename)
 
     # Furfrou Trims
     if pokemon.name == "Furfrou":
-        bulba_code_form = check_for_form("-Form-Dandy_Trim", "Da", computer_filename)
-        bulba_code_form = check_for_form("-Form-Debutante_Trim", "De", computer_filename)
-        bulba_code_form = check_for_form("-Form-Diamond_Trim", "Di", computer_filename)
-        bulba_code_form = check_for_form("-Form-Heart_Trim", "He", computer_filename)
-        bulba_code_form = check_for_form("-Form-Kabuki_Trim", "Ka", computer_filename)
-        bulba_code_form = check_for_form("-Form-La_Reine_Trim", "La", computer_filename)
-        bulba_code_form = check_for_form("-Form-Matron_Trim", "Ma", computer_filename)
-        bulba_code_form = check_for_form("-Form-Pharaoh_Trim", "Ph", computer_filename)
-        bulba_code_form = check_for_form("-Form-Star_Trim", "St", computer_filename)
+        bulba_code_form = check_for_form("-Form-Dandy_Trim", "Da", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Debutante_Trim", "De", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Diamond_Trim", "Di", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Heart_Trim", "He", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Kabuki_Trim", "Ka", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-La_Reine_Trim", "La", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Matron_Trim", "Ma", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Pharaoh_Trim", "Ph", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Star_Trim", "St", bulba_code_form, computer_filename)
 
     # Aegislash
     if pokemon.name == "Aegislash":
         # Shield form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Shield", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Blade", "B", computer_filename)
+        bulba_code_form = check_for_form("-Form-Shield", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Blade", "B", bulba_code_form, computer_filename)
 
     # Pumpkaboo and Gourgeist Sizes
     if pokemon.name == "Pumpkaboo" or pokemon.name == "Gourgeist":
         # Average Size form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-1_Average_Size", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-0_Small_Size", "Sm", computer_filename)
-        bulba_code_form = check_for_form("-Form-2_Large_Size", "La", computer_filename)
-        bulba_code_form = check_for_form("-Form-3_Super_Size", "Su", computer_filename)
+        bulba_code_form = check_for_form("-Form-1_Average_Size", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-0_Small_Size", "Sm", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-2_Large_Size", "La", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-3_Super_Size", "Su", bulba_code_form, computer_filename)
 
     # Xerneas
     if pokemon.name == "Xerneas":
         # Active form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Active", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Neutral", "N", computer_filename)
+        bulba_code_form = check_for_form("-Form-Active", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Neutral", "N", bulba_code_form, computer_filename)
 
     # Zygarde
     if pokemon.name == "Zygarde":
         # 50% form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-50%", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Complete", "C", computer_filename)
-        bulba_code_form = check_for_form("-Form-10%", "T", computer_filename)
+        bulba_code_form = check_for_form("-Form-50%", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Complete", "C", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-10%", "T", bulba_code_form, computer_filename)
 
     # Hoopa
     if pokemon.name == "Hoopa":
         # Confined form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Confined", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Unbound", "U", computer_filename)
+        bulba_code_form = check_for_form("-Form-Confined", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Unbound", "U", bulba_code_form, computer_filename)
 
     # Oricorio
     if pokemon.name == "Oricorio":
         # Confined form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Baile", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Pa'u", "Pa", computer_filename)
-        bulba_code_form = check_for_form("-Form-Pom_Pom", "Po", computer_filename)
-        bulba_code_form = check_for_form("-Form-Sensu", "Se", computer_filename)
+        bulba_code_form = check_for_form("-Form-Baile", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Pa'u", "Pa", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Pom_Pom", "Po", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Sensu", "Se", bulba_code_form, computer_filename)
 
     # Lycanroc
     if pokemon.name == "Lycanroc":
         # Midday form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Midday", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Dusk", "D", computer_filename)
-        bulba_code_form = check_for_form("-Form-Midnight", "Mn", computer_filename)
+        bulba_code_form = check_for_form("-Form-Midday", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Dusk", "D", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Midnight", "Mn", bulba_code_form, computer_filename)
 
     # Wishiwashi
     if pokemon.name == "Wishiwashi":
         # Solo form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Solo", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-School", "Sc", computer_filename)
+        bulba_code_form = check_for_form("-Form-Solo", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-School", "Sc", bulba_code_form, computer_filename)
 
     # Silvally Types
     if pokemon.name == "Silvally":
@@ -864,54 +866,54 @@ def form_translation(pokemon, computer_filename):
     # NOTE: Bulba has shiny core form denoted as red, so this will probably have to manually be changed
     if pokemon.name == "Minior":
         # Meteor form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Meteor", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Blue_Core", "B", computer_filename)
-        bulba_code_form = check_for_form("-Form-Green_Core", "G", computer_filename)
-        bulba_code_form = check_for_form("-Form-Indigo_Core", "I", computer_filename)
-        bulba_code_form = check_for_form("-Form-Orange_Core", "O", computer_filename)
-        bulba_code_form = check_for_form("-Form-Red_Core", "R", computer_filename)
-        bulba_code_form = check_for_form("-Form-Violet_Core", "V", computer_filename)
-        bulba_code_form = check_for_form("-Form-Yellow_Core", "Y", computer_filename)
+        bulba_code_form = check_for_form("-Form-Meteor", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Blue_Core", "B", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Green_Core", "G", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Indigo_Core", "I", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Orange_Core", "O", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Red_Core", "R", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Violet_Core", "V", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Yellow_Core", "Y", bulba_code_form, computer_filename)
 
     # Mimikyu
     if pokemon.name == "Mimikyu":
         # Disguised form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Disguised", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Busted", "B", computer_filename)
+        bulba_code_form = check_for_form("-Form-Disguised", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Busted", "B", bulba_code_form, computer_filename)
 
     # Solgaleo
     if pokemon.name == "Solgaleo":
-        bulba_code_form = check_for_form("-Form-Full_Moon", "F", computer_filename)
+        bulba_code_form = check_for_form("-Form-Full_Moon", "F", bulba_code_form, computer_filename)
 
     # Lunala
     if pokemon.name == "Lunala":
-        bulba_code_form = check_for_form("-Form-Radiant_Sun", "R", computer_filename)
+        bulba_code_form = check_for_form("-Form-Radiant_Sun", "R", bulba_code_form, computer_filename)
 
     # Necrozma
     if pokemon.name == "Necrozma":
-        bulba_code_form = check_for_form("-Form-Dawn_Wings", "DW", computer_filename)
-        bulba_code_form = check_for_form("-Form-Dusk_Mane", "DM", computer_filename)
-        bulba_code_form = check_for_form("-Form-Ultra", "U", computer_filename)
+        bulba_code_form = check_for_form("-Form-Dawn_Wings", "DW", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Dusk_Mane", "DM", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Ultra", "U", bulba_code_form, computer_filename)
 
     # Magearna
     if pokemon.name == "Magearna":
-        bulba_code_form = check_for_form("-Form-Original_Color", "O", computer_filename)
+        bulba_code_form = check_for_form("-Form-Original_Color", "O", bulba_code_form, computer_filename)
     
     # Marshadow
     # NOTE: Bulba does not have Zenith form
     #if pokemon.name == "Marshadow":
-    #    bulba_code_form = check_for_form("-Form-Zenith", "Z", computer_filename)
+    #    bulba_code_form = check_for_form("-Form-Zenith", "Z", bulba_code_form, computer_filename)
     
     # Cramorant
     if pokemon.name == "Cramorant":
-        bulba_code_form = check_for_form("-Form-Gorging", "Go", computer_filename)
-        bulba_code_form = check_for_form("-Form-Gulping", "Gu", computer_filename)
+        bulba_code_form = check_for_form("-Form-Gorging", "Go", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Gulping", "Gu", bulba_code_form, computer_filename)
     
     # Toxtricity
     if pokemon.name == "Toxtricity":
         # Amped form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Amped", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Low_Key", "L", computer_filename)
+        bulba_code_form = check_for_form("-Form-Amped", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Low_Key", "L", bulba_code_form, computer_filename)
 
     # Alcremie Creams & Sweets
     # TODO: Test and see that it works okay (Maybe on existing files I have?)
@@ -935,30 +937,30 @@ def form_translation(pokemon, computer_filename):
     # Eiscue
     if pokemon.name == "Eiscue":
         # Ice Face form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Ice_Face", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Noice_Face", "N", computer_filename)
+        bulba_code_form = check_for_form("-Form-Ice_Face", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Noice_Face", "N", bulba_code_form, computer_filename)
     
     # Morpeko
     if pokemon.name == "Morpeko":
         # Full Belly form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Full_Belly", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Hangry", "H", computer_filename)
+        bulba_code_form = check_for_form("-Form-Full_Belly", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Hangry", "H", bulba_code_form, computer_filename)
 
     # Zacian
     if pokemon.name == "Zacian":
         # Hero form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Hero_of_Many_Battles", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Crowned_Sword", "C", computer_filename)
+        bulba_code_form = check_for_form("-Form-Hero_of_Many_Battles", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Crowned_Sword", "C", bulba_code_form, computer_filename)
 
     # Zamazenta
     if pokemon.name == "Zamazenta":
         # Hero form considered default, so does not have a letter denoter
-        bulba_code_form = check_for_form("-Form-Hero_of_Many_Battles", "", computer_filename)
-        bulba_code_form = check_for_form("-Form-Crowned_Shield", "C", computer_filename)
+        bulba_code_form = check_for_form("-Form-Hero_of_Many_Battles", "", bulba_code_form, computer_filename)
+        bulba_code_form = check_for_form("-Form-Crowned_Shield", "C", bulba_code_form, computer_filename)
 
     # Eternatus Eternamax
     if pokemon.name == "Eternatus":
-        bulba_code_form = check_for_form("-Form-Eternamax", "E", computer_filename)
+        bulba_code_form = check_for_form("-Form-Eternamax", "E", bulba_code_form, computer_filename)
 
     # Urshifu
     # NOTE: NO game sprites for Urshifu??!
@@ -971,8 +973,6 @@ def form_translation(pokemon, computer_filename):
 
     return(bulba_code_form)
 
-# TODO: Make sure none of the exception strings conflict with forms that DO have gender difference in form
-# TODO: Check all possible forms for "missing" genders (no male/female forms, but normal does) so male denoter doesn't get added (see gender code in determine_bulba_name())
 exception_strings = []
 # Mega
 exception_strings.append("M")
@@ -981,6 +981,8 @@ exception_strings.append("Gi")
 # Regions
 exception_strings.extend(["A", "G"])
 # Pikachu caps
+# NOTE: To be honest this shouldn't even be needed since the first check is for a -f in the filename, which the cap variants don't have
+    # But what the hell, err on the side of caution
 exception_strings.extend(["025A", "025H", "025K", "025O", "025S", "025U", "025P"])
 
 # Checks if there's a string in the bulba filename (usually from a form)
@@ -1024,6 +1026,7 @@ def determine_bulba_name(computer_filename, pokemon):
     # Then Forms
         # MUST COME AFTER REGION
             # See Darmanitan (555)
+    print(computer_filename)
     bulba_name += form_translation(pokemon, computer_filename)
 
     # Then Gigantamax
@@ -1064,6 +1067,7 @@ class Pokemon:
         self.has_misc_forms = has_misc_forms
         self.is_in_gen8 = is_in_gen8
         self.missing_imgs = []
+        self.missing_back_imgs = []
         self.missing_gen1_thru_gen4_back_imgs = []
 
 # Gets column numbers from spreadsheet
@@ -1121,25 +1125,6 @@ for row in range(2, pokemon_files_sheet.max_row):
         tags = ""
     filename = cell_value(row, filename_col, pokemon_files_sheet)
 
-    # If it's a back image from a pokemon between gen1 and gen4
-        # Put all game images into missing
-            # This is so another script can go through these images and determine if there were differences in the sprites between games
-                # If there were, each file will be named differently
-                # Otherwise, they will all be lumped into a single gen# back img
-    # Placed here so it will occur for every row, not just the rows where there are back pictures actually missing from my files
-    if "-Back" in tags and poke_obj.number <= 493:
-        # This tells what generation between these three to start at
-            # Since if a poke was introduced in generation 2, it will have sprites in gen3 and gen4 so should loop through those as well
-                # But if introduced in gen3, it will not have gen2 sprites, so add 1 to the index starter
-        gen_index_starter = get_back_gen_index_starter(poke_obj.number)
-        for gen in range(gen_index_starter, len(gen_1_thru_4_games)):
-            for game in gen_1_thru_4_games[gen]:
-                back_gen = get_back_gen(game, poke_num, tags)
-                gen_insert_index = filename.find(poke_name) + len(poke_name)
-                filename_w_gen = filename[:gen_insert_index] + " " + back_gen + filename[gen_insert_index:] + "-" + game
-                bulba_name = determine_bulba_name(filename_w_gen, poke_obj)
-                poke_obj.missing_gen1_thru_gen4_back_imgs.append((bulba_name, filename_w_gen))
-
     # This is to track generations and skip if it's a back sprite below gen 5
         # Those sprites are being pulled seperately in the row only loop above
             # To be sifted through to see if they're different by game for the given pokemon
@@ -1157,36 +1142,70 @@ for row in range(2, pokemon_files_sheet.max_row):
             continue
 
         col_name = get_col_name(col, pokemon_files_sheet)
-        if is_empty(row, col, pokemon_files_sheet):
+
+        # If it's a back image from a pokemon between gen1 and gen4
+            # Put all game images into special missing array
+                # This is so another script can go through these images and determine if there were differences in the sprites between games
+                    # If there were, each file will be named differently
+                    # Otherwise, they will all be lumped into a single gen# back img
+        is_back_below_gen5 = is_below_gen5 and "-Back" in filename
+        if is_empty(row, col, pokemon_files_sheet) or is_back_below_gen5:
             gen_insert_index = filename.find(poke_name) + len(poke_name)
-            # TODO: Check and see wtf this if if else is doing, if the else is accurate (should middle if be elif?)
-            # If pokemon is in gen4 or under all of it's back sprites have already been downloaded to a seperate location
-            if "-Back" in tags and is_below_gen5:
-                continue
+            gen_and_game = combine_gen_and_game(col_name, poke_num, tags)
+            
+            # Back sprites have to be seperated due to:
+                # Below gen 5 all back sprites are being downloaded to a seperate folder to be sifted through
             if "-Back" in tags:
-                back_gen = get_back_gen(col_name, poke_num, tags)
-                filename_w_gen = filename[:gen_insert_index] + " " + back_gen + filename[gen_insert_index:]
-                
+                # Adding space because initially there was no space in spreadsheet
+                    # This was for sorting purposes because back sprites start with hyphen immediately after gen
+                        # But front sprites follow with a space so they come first in file order
+                # This variable is necessary because bulba uses games to denote which back sprites are from where
+                    # In my filenaming convention (gen4 and below excluded due to actual sprite differences between games)
+                        # For backs I JUST use gen
+                            # But to scrape the image from bulba, I still need the game denoter, which this gets me
+                back_filename_w_game_and_gen_for_bulba = filename[:gen_insert_index] + " " + gen_and_game + filename[gen_insert_index:]
+                bulba_name = determine_bulba_name(back_filename_w_game_and_gen_for_bulba, poke_obj)
+                actual_filename =""
+                gen = ""
+                game = ""
+                if "Gen6" in gen_and_game:
+                    # This is because all Gen6 are shared with gen7
+                        # So denoter is Gen6-7
+                    gen = gen_and_game[:6]
+                    # Extra character to skip over space after gen
+                    game = gen_and_game[7:]
+                else:
+                    gen = gen_and_game[:4]
+                    # Extra character to skip over space after gen
+                    game = gen_and_game[5:]
+
+                # filename[:3] gets pokemon number
+                actual_filename = filename[:3] + " " + poke_name + " " + gen + filename[gen_insert_index:]
+                if is_below_gen5:
+                    actual_filename += "-" + game
+                    poke_obj.missing_gen1_thru_gen4_back_imgs.append((bulba_name, actual_filename))
+                else:
+                    poke_obj.missing_back_imgs.append((bulba_name, actual_filename))
+                print(actual_filename, "     changed to     ", bulba_name)
             else:
-                print(col_name, "\n", poke_num, "\n", tags, "\n")
-                gen_and_game = combine_gen_and_game(col_name, poke_num, tags)
-                print(type(gen_and_game))
                 # Going +1 after the insert index because there's a space for non-back sprites
-                    # This is to simulate in the spreadsheet the space between generation and games in the  filenames
-                        # This determines sorting order, so is fairly important
-                            # Since the spreadsheet doesn't acknowledge games or gens in the "Filename" column (because each game gets it's own column)
-                                # The space must be included to sort the spreadsheet to match filenames
-                                    # And thus, must be accounted for here
+                # This is to simulate in the spreadsheet the space between generation and games in the filenames
+                    # This determines sorting order, so is fairly important
+                        # Since the spreadsheet doesn't acknowledge games or gens in the "Filename" column (because each game gets it's own column)
+                            # The space must be included to sort the spreadsheet to match filenames
+                                # And thus, must be accounted for here
                 gen_insert_index += 1
                 filename_w_gen = filename[:gen_insert_index] + gen_and_game + filename[gen_insert_index:]
-            
-            bulba_name = determine_bulba_name(filename_w_gen, poke_obj)
+                bulba_name = determine_bulba_name(filename_w_gen, poke_obj)
+                poke_obj.missing_imgs.append((bulba_name, filename_w_gen))
+                
+                print(filename_w_gen, "     changed to     ", bulba_name)
+    # print(poke_obj.name)
+    # for img in poke_obj.missing_imgs:
+    #     print(img)
+    # print("\n\n")
 
-            poke_obj.missing_imgs.append((bulba_name, filename_w_gen))
-    print(poke_obj.name)
-    for img in poke_obj.missing_imgs:
-        print(img)
-    print("\n\n")
+print("Done!")
 
 # Origin page (list of pokes by national pokedex)
 starter_url = "https://archives.bulbagarden.net"
@@ -1301,6 +1320,12 @@ for i in range(len(pokemon_img_urls)):
             # See: https://www.reddit.com/r/TheSilphRoad/comments/65q7us/reminder_pokemon_go_pokemon_models_are_from/
 
         # TODO: Make sure pokemon like flabebe with apostrophe over letter work okay
+
+        # TODO: Animated currently resorts to the default bulba code for a sprite
+            # Do some sort of animated check on all these
+            # Because we don't want duplicates or a static where an animated should be and vice versa
+
+        # TODO: READ ALL TODOS BEFORE YOU RUN THIS -- SOME OF THEM ARE VERY IMPORTANT!!!
 
         get_drawn_images(pokemon, img)
         # NOTE: If running this script in the future note that LGPE & Go functions don't check if images are present or not
