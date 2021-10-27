@@ -10,6 +10,7 @@ from openpyxl import load_workbook
 import string # To access letters easily without having to type them myself in an array
 
 def search_for_drawn_forms(pokemon):
+    # TODO: Add Reshiram & Zekrom Overdrives (denoted as -Activated)
     # Custom type forms
     # Pikachu Cosplay & Caps
     get_img_from_string(img, "^\d\d\dPikachu-Alola.png", drawn_save_path + save_name + "-Cap-Alola")
@@ -598,6 +599,7 @@ sweets = [("Berry_Sweet", "B"), ("Clover_Sweet", "C"), ("Flower_Sweet", "F"), ("
 # Converts forms into bulbapedia notation
 # TODO: Continue on all forms below that aren't on bulba
 def form_translation(pokemon, computer_filename):
+    # NOTE: Probably should've done this in like a dict, then just checked keys then tuple arrays... Oops
     bulba_code_form = ""
     # If pokemon has no type or misc forms, return empty string to concatonate onto bulba filename
         # This is running before any web scraping, so I don't need to intentionally slow the script down
@@ -973,6 +975,31 @@ def form_translation(pokemon, computer_filename):
 
     return(bulba_code_form)
 
+def bulba_doesnt_have_this_form(filename):
+    no_bulba_forms = []
+
+    # Pikachu World Cap
+    no_bulba_forms.append("-Form-Cap-World")
+    # Cosplay Pikachu
+    no_bulba_forms.append("-Form-Cosplay")
+    # Overdrive Reshiram, Zekrom, and Kyurem
+    no_bulba_forms.append("Overdrive")
+    # Marshadow Zenith
+    no_bulba_forms.append("-Form-Zenith")
+    # Urshifu Forms
+    no_bulba_forms.extend(["-Form-Rapid_Strike", "-Form-Single_Strike"])
+    # Dada Zarude
+    no_bulba_forms.append("-Form-Dada")
+    # Calyrex Riders
+    no_bulba_forms.extend(["-Form-Shadow_Rider", "-Form-Ice_Rider"])
+
+    for form in no_bulba_forms:
+        if form in filename:
+            return True
+
+    return False
+    
+
 exception_strings = []
 # Mega
 exception_strings.append("M")
@@ -1026,7 +1053,6 @@ def determine_bulba_name(computer_filename, pokemon):
     # Then Forms
         # MUST COME AFTER REGION
             # See Darmanitan (555)
-    print(computer_filename)
     bulba_name += form_translation(pokemon, computer_filename)
 
     # Then Gigantamax
@@ -1124,6 +1150,9 @@ for row in range(2, pokemon_files_sheet.max_row):
     if tags == None:
         tags = ""
     filename = cell_value(row, filename_col, pokemon_files_sheet)
+
+    if bulba_doesnt_have_this_form(filename):
+        continue
 
     # This is to track generations and skip if it's a back sprite below gen 5
         # Those sprites are being pulled seperately in the row only loop above
