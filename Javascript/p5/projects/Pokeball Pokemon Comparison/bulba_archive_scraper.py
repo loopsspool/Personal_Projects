@@ -9,6 +9,8 @@ import openpyxl     # For reading excel workbook
 from openpyxl import load_workbook
 import string # To access letters easily without having to type them myself in an array
 
+# TODO: Tidy up this damn file... smh
+
 def search_for_drawn_forms(pokemon):
     # TODO: Add Reshiram & Zekrom Overdrives (denoted as -Activated)
     # Custom type forms
@@ -66,12 +68,12 @@ def search_for_drawn_forms(pokemon):
     get_img_from_string(img, "^\d\d\dWormadam-Trash.png", drawn_save_path + save_name + "-Trash")
 
     # Cherrim
-    # TODO: No default image, only overcast and sunny
+    # NOTE: No default image, only overcast and sunny
     get_img_from_string(img, "^\d\d\dCherrim-Overcast.png", drawn_save_path + save_name + "-Overcast")
     get_img_from_string(img, "^\d\d\dCherrim-Sunny.png", drawn_save_path + save_name + "-Sunshine")
 
     # Shellos & Gastrodon East/West
-    # TODO: No default image
+    # NOTE: No default image
     get_img_from_string(img, "^\d\d\dShellos-East.png", drawn_save_path + save_name + "-East")
     get_img_from_string(img, "^\d\d\dShellos-West.png", drawn_save_path + save_name + "-West")
     get_img_from_string(img, "^\d\d\dGastrodon-East.png", drawn_save_path + save_name + "-East")
@@ -85,12 +87,12 @@ def search_for_drawn_forms(pokemon):
     get_img_from_string(img, "^\d\d\dRotom-Wash.png", drawn_save_path + save_name + "-Wash")
 
     # Giratina
-    # TODO: No default image
+    # NOTE: No default image
     get_img_from_string(img, "^\d\d\dGiratina-Altered.png", drawn_save_path + save_name + "-Altered")
     get_img_from_string(img, "^\d\d\dGiratina-Origin.png", drawn_save_path + save_name + "-Origin")
 
     # Shaymin
-    # TODO: No default image
+    # NOTE: No default image
     get_img_from_string(img, "^\d\d\dShaymin-Land.png", drawn_save_path + save_name + "-Land")
     get_img_from_string(img, "^\d\d\dShaymin-Sky.png", drawn_save_path + save_name + "-Sky")
 
@@ -114,7 +116,7 @@ def search_for_drawn_forms(pokemon):
     get_img_from_string(img, "^\d\d\dDarmanitan-Galar-Zen.png", drawn_save_path + save_name + "-Region-Galar-Zen")
 
     # Deerling & Sawsbuck Seasons
-    # TODO: No default image
+    # NOTE: No default image
     get_img_from_string(img, "^\d\d\dDeerling-Autumn.png", drawn_save_path + save_name + "-Autumn")
     get_img_from_string(img, "^\d\d\dDeerling-Spring.png", drawn_save_path + save_name + "-Spring")
     get_img_from_string(img, "^\d\d\dDeerling-Summer.png", drawn_save_path + save_name + "-Summer")
@@ -251,7 +253,7 @@ def search_for_drawn_forms(pokemon):
 
 
     # Oricorio
-    # TODO: No default
+    # NOTE: No default
     get_img_from_string(img, "^\d\d\dOricorio-Baile.png", drawn_save_path + save_name + "-Baile")
     get_img_from_string(img, "^\d\d\dOricorio-Pa'u.png", drawn_save_path + save_name + "-Pa'u")
     get_img_from_string(img, "^\d\d\dOricorio-Pom-Pom.png", drawn_save_path + save_name + "-Pom_Pom")
@@ -263,7 +265,7 @@ def search_for_drawn_forms(pokemon):
     get_img_from_string(img, "^\d\d\dLycanroc-Midnight.png", drawn_save_path + save_name + "-Midnight")
 
     # Wishiwashi
-    # TODO: No default
+    # NOTE: No default
     get_img_from_string(img, "^\d\d\dWishiwashi-Solo.png", drawn_save_path + save_name + "-Solo")
     get_img_from_string(img, "^\d\d\dWishiwashi-School.png", drawn_save_path + save_name + "-School")
 
@@ -338,7 +340,7 @@ def search_for_drawn_forms(pokemon):
             get_img_from_string(img, "^869Alcremie-[a-zA-Z]+ ", drawn_save_path + save_name + form)
 
     # Eiscue
-    # TODO: No default
+    # NOTE: No default
     get_img_from_string(img, "^\d\d\dEiscue-Ice.png", drawn_save_path + save_name + "-Ice_Face")
     get_img_from_string(img, "^\d\d\dEiscue-Noice.png", drawn_save_path + save_name + "-Noice_Face")
 
@@ -597,7 +599,6 @@ creams = [("Caramel_Swirl", "CaS"), ("Lemon_Cream", "LeC"), ("Matcha_Cream", "Ma
 sweets = [("Berry_Sweet", "B"), ("Clover_Sweet", "C"), ("Flower_Sweet", "F"), ("Love_Sweet", "L"), ("Ribbon_Sweet", "R"), ("Star_Sweet", "S"), ("Strawberry_Sweet", "")]
 
 # Converts forms into bulbapedia notation
-# TODO: Continue on all forms below that aren't on bulba
 def form_translation(pokemon, computer_filename):
     # NOTE: Probably should've done this in like a dict, then just checked keys then tuple arrays... Oops
     bulba_code_form = ""
@@ -1338,13 +1339,8 @@ for i in range(len(pokemon_img_urls)):
     for img in pokemon_imgs:
         #print(img.attrs['alt'], "\n\n")
 
-        # TODO: Download Let's Go sprites (LGPE?)
-            # Denoted as Spr 7p ###
-        # TODO: And Pokemon Go sprites
-            # Found here https://archives.bulbagarden.net/wiki/Category:Pok%C3%A9mon_GO_models
-            # Denoted as GO###form
-            # Download to GO folder
-        # TODO: Download box sprites too? For list images
+        
+        # TODO: Download box sprites too? For list images MS8 (last digit is gen)
         # TODO: Possibly more animations?
             # See: https://www.reddit.com/r/TheSilphRoad/comments/65q7us/reminder_pokemon_go_pokemon_models_are_from/
 
