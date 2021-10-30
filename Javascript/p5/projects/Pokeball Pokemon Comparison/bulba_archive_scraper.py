@@ -11,6 +11,12 @@ import string # To access letters easily without having to type them myself in a
 
 # TODO: Tidy up this damn file... smh
 
+# This is to mask the fact I'm webscraping
+    # To use, call
+        # filename, headers = opener.retrieve(get_largest_png(img), gen8_menu_sprite_save_path + save_name)
+opener = urllib.request.URLopener()
+opener.addheader('User-Agent', 'Mozilla/5.0')
+
 def search_for_drawn_forms(pokemon):
     # TODO: Add Reshiram & Zekrom Overdrives (denoted as -Activated)
     # Custom type forms
@@ -405,6 +411,47 @@ def get_drawn_images(pokemon, img):
     if pokemon.has_misc_forms or pokemon.has_type_forms:
         search_for_drawn_forms(pokemon)
 
+def get_menu_sprites():
+    print("Getting Menu Sprites...")
+    # session = requests.Session()
+    # response = session.get(url, headers={'user-agent': 'Mozilla/5.0'})
+
+    ms_end_urls = ["Generation_VI_menu_sprites", "Generation_VIII_menu_sprites"]
+    for end_url in ms_end_urls:
+        ms_page = requests.get("https://archives.bulbagarden.net/wiki/Category:" + end_url, headers={'User-Agent': 'Mozilla/5.0'})
+        curr_ms_page_soup = BeautifulSoup(ms_page.content, 'html.parser')
+        theres_a_next_page = True
+        while (theres_a_next_page):
+            pokemon_imgs = curr_ms_page_soup.find_all('img')
+            # Downloading certain images
+            for img in pokemon_imgs:
+                # If image doesn't match pokemon number + menu sprite + gen formula, don't bother
+                if not re.search("\d\d\dMS\d", img.attrs['alt']):
+                    continue
+                poke_num = img.attrs['alt'][:3]
+                poke_name = pokedex[int(poke_num) - 1].name
+                # The zfill adds leading zeros
+                save_name = str(poke_num).zfill(3) + ' ' + poke_name + '.png'
+                if end_url == "Generation_VI_menu_sprites" and not os.path.exists(gen6_menu_sprite_save_path + save_name):
+                    print("DNE")
+                    # TODO: ALL DOWNLOADS MUST BE DONE IN THE SAME FASHION AS THE BELOW
+                        # Otherwise bulba has a check on if the site is being web scraped and it will block the download
+                    #filename, headers = opener.retrieve(get_largest_png(img), gen6_menu_sprite_save_path + save_name)
+                if end_url == "Generation_VIII_menu_sprites" and not os.path.exists(gen8_menu_sprite_save_path + save_name):
+                    print("DNE")
+                    #filename, headers = opener.retrieve(get_largest_png(img), gen8_menu_sprite_save_path + save_name)
+            
+            try:
+                next_page_url = curr_ms_page_soup.find('a', string='next page').get('href')
+                next_page = requests.get("https://archives.bulbagarden.net/" + next_page_url)
+                next_page_soup = BeautifulSoup(next_page.content, 'html.parser')
+                curr_ms_page_soup = next_page_soup
+                theres_a_next_page = True
+                print("Reading next page of menu sprite archive links...")
+            # Unless the end of the next pages is reached
+            except:
+                theres_a_next_page = False
+                print("Reached end of menu sprite archive links.")
 
 # SPREADSHEET DATA
 pokemon_info = load_workbook(filename = 'C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xlsx', data_only=True)
@@ -1216,7 +1263,7 @@ for row in range(2, pokemon_files_sheet.max_row):
                     poke_obj.missing_gen1_thru_gen4_back_imgs.append((bulba_name, actual_filename))
                 else:
                     poke_obj.missing_back_imgs.append((bulba_name, actual_filename))
-                print(actual_filename, "     changed to     ", bulba_name)
+                #print(actual_filename, "     changed to     ", bulba_name)
             else:
                 # Going +1 after the insert index because there's a space for non-back sprites
                 # This is to simulate in the spreadsheet the space between generation and games in the filenames
@@ -1229,7 +1276,7 @@ for row in range(2, pokemon_files_sheet.max_row):
                 bulba_name = determine_bulba_name(filename_w_gen, poke_obj)
                 poke_obj.missing_imgs.append((bulba_name, filename_w_gen))
                 
-                print(filename_w_gen, "     changed to     ", bulba_name)
+                #print(filename_w_gen, "     changed to     ", bulba_name)
     # print(poke_obj.name)
     # for img in poke_obj.missing_imgs:
     #     print(img)
@@ -1245,11 +1292,14 @@ save_path_starter = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\
 drawn_save_path = save_path_starter + "\\Drawn\\"
 game_save_path = save_path_starter + "\\Game Sprites\\"
 gen1_thru_4_backs_save_path = game_save_path + "\\missing_back_imgs_to_be_filtered\\"
-pokemon_go_save_path = save_path_starter + "\\Pokemon Go Sprites\\"
+gen6_menu_sprite_save_path = save_path_starter + "\\Menu Sprites\\Gen6\\"
+gen8_menu_sprite_save_path = save_path_starter + "\\Menu Sprites\\Gen8\\"
+
+get_menu_sprites()
 
 pokemon_img_urls = []
 curr_page_soup = pokemon_starter_page_soup
-print("Starting reading of pokemon archive links...")
+print("Starting reading of pokemon game sprite archive links...")
 
 page_index = 0
 # Loops through pages of archives of pokemon images
@@ -1288,7 +1338,7 @@ while True:
     # When they're all fulfilled, break so unecessary image processing for each poke isn't occuring
     # If end of page is reached and requirements aren't satisfied (ie Arceus), continue to next page of images
 #print(pokemon_img_urls)
-print("Processing images...")
+print("Processing game sprite images...")
 for i in range(len(pokemon_img_urls)):
     # Getting relevant pokemon data
     pokemon = pokedex[i]
@@ -1321,10 +1371,6 @@ for i in range(len(pokemon_img_urls)):
         # TODO: READ ALL TODOS BEFORE YOU RUN THIS -- SOME OF THEM ARE VERY IMPORTANT!!!
 
         get_drawn_images(pokemon, img)
-        # NOTE: If running this script in the future note that LGPE & Go functions don't check if images are present or not
-            # They download everything
-        #get_LGPE_images(pokemon, img)
-        #get_GO_images(pokemon, img)
 
         # TODO: Download gen1 to gen4 back sprites into a seperate folder
             # To run a different filtering script on those images (see below)
