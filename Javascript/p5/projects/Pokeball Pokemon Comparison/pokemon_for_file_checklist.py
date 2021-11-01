@@ -7,6 +7,12 @@ import os   # To check for files
     # Spiky-eared pichu for all gen 4
     # Female backs that only have differences in the front
 
+# TODO: Back sprites for LGPE are showing because game isn't in filename
+    # Since filename only contains Gen7, the SM-USUM photos trigger the "x" in the LGPE column
+    # This should be fixed when more games are determined to have different sprites
+        # But this can't be the case because then all back sprites would trigger the LGPE column
+            # But it's only alolan forms mostly
+
 # SPREADSHEET DATA
 pokemon_info = xlrd.open_workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xls')
 form_sheet = pokemon_info.sheet_by_name("Form Rows")
@@ -66,8 +72,7 @@ poke_nums_available_in_LGPE = []
 for i in range(1, 152):
     # Converts int number to string with leading zeroes
     poke_nums_available_in_LGPE.append(str(i).zfill(3))
-poke_nums_available_in_LGPE.append("808")
-poke_nums_available_in_LGPE.append("809")
+poke_nums_available_in_LGPE.extend(["808", "809"])
 
 def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     ###################     UNIVERSAL UNOBTAINABILITY     ###################
@@ -122,11 +127,13 @@ def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     # Pikachu Hat before Gen7
     # TODO: Check LGPE portion, maybe overridden by SM-USUM?
     if "-Form-Cap" in filename and (file_gen < "Gen7" or game == "LGPE"):
+        if game == "LGPE":
+            print("CAP BLOCK      ", filename)
         return True
     # Can't be shiny either
     if "-Form-Cap" in filename and "Shiny" in filename:
         return True
-    # And World Cap only in Sword-Shiel
+    # And World Cap only in Sword-Shield
     if "-Form-Cap-World" in filename and file_gen < "Gen8":
         return True
     # Unown punctuation before gen 3
@@ -156,6 +163,9 @@ def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     # 10% and complete Zygarde forms only available in SM
     if ("10%" in filename or "Complete" in filename) and file_gen < "Gen7":
         return True
+    # Meltan & Melmetal only available in LGPE and above
+    if ("Meltan" in filename or "Melmetal" in filename) and game == "SM-USUM":
+        return True
     
     # Checking if pokemon is available in gen8
     if file_gen == "Gen8":
@@ -178,6 +188,7 @@ def prevent_overriding(filename, game):
         # Allowing Alola Regions to show
         if "Region-Alola" in filename:
             return True
+        # TODO: Don't write these to potential wrong continue
         # Allowing gen 7 pokemon to show as available
         if gen_finder(filename[:4]) == "Gen7":
             return True
@@ -262,6 +273,22 @@ for i in range(len(games)):
 # if i == len(games) - 1:
 #     file_check_worksheet.write(0, 20, "Drawn")
 
+# This is to hardcode the game name in for sprites that have different backs between games within the same generation
+# Returns filename or array of filenames to be added to the list of filechecks
+# NOTE: This temporarily removes Crystal back differences on spreadsheet until all info is gathered on gen1-4 back sprites
+def check_for_game_difference(filename):
+    # SM-USUM (3DS) sprites differ from LGPE (Switch) models
+    # Regional variants not introduced until Gen7, so can't share with XY-ORAS (those sprites denoted as Gen6-7)
+    # This is the only check needed since in LGPE you can only get the first 151 pokemon + 808 and 809
+    if "-Region-Alola" in filename:
+        return ([filename + "-SM-USUM", filename + "-LGPE"])
+
+    # NOTE: Be sure to add a back check in the conditional when adding different games
+    
+    # If no game back differences, simply return the original filename as an array so extend will work
+    return ([filename])
+
+
 ##########################  POKEMON FILENAMES   ##########################
 print("Creating potential pokemon filenames...")
 # To adjust for there only being a single shiny look when in default form these pokemon have multiple forms
@@ -331,14 +358,21 @@ for i in range(len(form_pokedex)):
         # Filename (excluding gen & game)
             # Important to sort by so excel sheet has same ordering as file names
         filename = str(form_pokedex[i].number) + " " + form_pokedex[i].name
+        # Just initializing here. Used to extend array of filenames to search for
+        filename_arr = []
         # Back tags have no space in filename after gen (backs don't have game denotions), but fronts have spaces between gen and game
             # Adding this space simulates this crucial sorting system in the excel file without adding the gen and game (since those are going into columns)
         if "Back" in tags_and_variation:
             filename += tags_and_variation
         else:
             filename += " " + tags_and_variation
+
+        filename_arr = check_for_game_difference(filename)
+
+        if "Region-Alola" in filename:
+            print(filename_arr)
         # Adding too filenames array for file checking process later
-        filenames.append(filename)
+        filenames.extend(filename_arr)
         file_check_worksheet.write(row_i, 3, filename)
 
         # Move onto next row
@@ -388,8 +422,11 @@ for i in range(len(filenames)):
 
     col = -1
     # TODO: Back sprites for LGPE are showing because game isn't in filename
-        # Since filename only contains Gen7, the SM-USUM photos trigger the "x" in the LGPE column
-        # This should be fixed when more games are determined to have different sprites
+        # Since filename only contains Gen7, the alolan form SM-USUM photos trigger the "x" in the LGPE column
+            # This is because regional variants could ONLY be in gen7, not gen6-7
+        # This should be fixed IMMEDIATELY (write a universal fix for all games--may come in handy for below gen4 back sprites)
+            # By adding a tag after the filename denoting game (Like how you did with Crystal)
+                # OTHERWISE when downloading the LGPE forms, it will override the SM-USUM images with the LGPE ones
     if "Back" in f:
         for gen in back_gen_denotions:
             # Adds generation to checking file string
@@ -409,25 +446,27 @@ for i in range(len(filenames)):
                     potential_wrong_continues.append(curr_file)
                     file_check_worksheet.write(row, col, "u", unobtainable_format)
                     continue
-                # Checking for Crystal Backs
-                crystal_back_check = False
-                if game == "Crystal":
-                    crystal_back_check = True
+                # Checking for backs that differ between games witin generation
+                per_game_back_check = False
+                # The game name would only be listed in a back filename if it differed from other games
+                    # Otherwise the back filename would just have the generation denoter
+                if game in curr_file:
+                    per_game_back_check = True
                     # Adding Crystal into file checker name
-                    curr_file = curr_file[:curr_file.find("Back") + 4] + "-Crystal" + curr_file[curr_file.find("Back") + 4:]
+                    curr_file = curr_file[:curr_file.find("Back") + 4] + "-" + game + curr_file[curr_file.find("Back") + 4:]
                 # Writing to the appropriate cell
                 if curr_file in game_sprite_files:
                     file_check_worksheet.write(row, col, "x", check_format)
                 else:
-                    if crystal_back_check:
-                        # If the files not there, I'm assuming the pokemon back sprite didn't get changed
-                            # Hence "un"(changed)
-                            # Will use Gold/Silver back sprites
-                                # So not counting as missing
-                        file_check_worksheet.write(row, col, "un", missing_crystal_back_format)
-                    else:
-                        file_check_worksheet.write(row, col, "", missing_format)
-                        missing_count += 1
+                    # if crystal_back_check:
+                    #     # If the files not there, I'm assuming the pokemon back sprite didn't get changed
+                    #         # Hence "un"(changed)
+                    #         # Will use Gold/Silver back sprites
+                    #             # So not counting as missing
+                    #     file_check_worksheet.write(row, col, "un", missing_crystal_back_format)
+                    # else:
+                    file_check_worksheet.write(row, col, "", missing_format)
+                    missing_count += 1
 
             # print(curr_file)
     else:
