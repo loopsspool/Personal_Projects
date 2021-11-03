@@ -94,8 +94,8 @@ def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
         # No animated sprites in these games
         # Gen before game checked because stuff like "Gold" is in "Golduck"s name, etc
         no_animation_games = ["Gold", "Silver", "FireRed-LeafGreen", "Ruby-Sapphire"]
-        for game in no_animation_games:
-            s = file_gen + " " + game
+        for g in no_animation_games:
+            s = file_gen + " " + g
             if s in filename:
                 return True
     # If searching for a fairy type before gen6
@@ -129,8 +129,6 @@ def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
         return True
     # Pikachu cap in LGPE
     if "-Form-Cap" in filename and game == "LGPE":
-        if game == "LGPE":
-            print("CAP BLOCK      ", filename)
         return True
     # Can't be shiny either
     if "-Form-Cap" in filename and "Shiny" in filename:
@@ -430,18 +428,6 @@ for i in range(len(filenames)):
         f = f[:insert_index] + f[(insert_index + 1):]
 
     col = -1
-
-    # TODO: Replace the below with this to simplify once confirmed fix of LGPE stuff
-    # identifier = ""
-    # game_iter = ""
-    # if "Back" in f:
-    #     identifier = back_gen_denotions
-    #     # TODO: Put an if back in f statement inside the id loop of this
-    #         # Since dependent on id
-    #     #game_iter = game_finder_from_gen(gen)
-    # else:
-    #     identifier = game_denotions
-    #     game_iter = games
 
     if "Back" in f:
         for gen in back_gen_denotions:
