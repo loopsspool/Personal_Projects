@@ -7,12 +7,6 @@ import os   # To check for files
     # Spiky-eared pichu for all gen 4
     # Female backs that only have differences in the front
 
-# TODO: Back sprites for LGPE are showing because game isn't in filename
-    # Since filename only contains Gen7, the SM-USUM photos trigger the "x" in the LGPE column
-    # This should be fixed when more games are determined to have different sprites
-        # But this can't be the case because then all back sprites would trigger the LGPE column
-            # But it's only alolan forms mostly
-
 # SPREADSHEET DATA
 pokemon_info = xlrd.open_workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xls')
 form_sheet = pokemon_info.sheet_by_name("Form Rows")
@@ -180,15 +174,13 @@ def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     
 def prevent_overriding(filename, game):
     # The unobtainability check was blocking all Alolan Regions in the spreadsheeet
-        # This was due to SM-USUM being contained in the gen6-7 file denotion (bc they share sprites)
+        # This was due to SM-USUM being contained in the gen6-7 array (bc they share sprites)
             # And the Region tag for gen 6 was flagged unobtainable
-        # Because SM-USUM was still in the game title, the unobtainability went to that column
-            # AFTER it was cleared for being obtainable when SM-USUM was ran perviously (bc reverse chronological order)
+            # This all AFTER it was cleared for being obtainable when SM-USUM was ran perviously as gen7 array (bc reverse chronological order)
     if "Gen6-7" in filename and game == "SM-USUM":
         # Allowing Alola Regions to show
         if "Region-Alola" in filename:
             return True
-        # TODO: Don't write these to potential wrong continue
         # Allowing gen 7 pokemon to show as available
         if gen_finder(filename[:4]) == "Gen7":
             return True
@@ -269,9 +261,6 @@ for i in range(len(games)):
     game_cols[games[i]] = i + 4
     # i + 4 to write to the next column after filename
     file_check_worksheet.write(0, i + 4, games[i])
-# TODO: Add drawn column somewhere
-# if i == len(games) - 1:
-#     file_check_worksheet.write(0, 20, "Drawn")
 
 
 ##########################  POKEMON FILENAMES   ##########################
@@ -362,12 +351,8 @@ for i in range(len(form_pokedex)):
 ##########################  CHECKING FOR FILES   ##########################
 print("Checking filenames against actual image files...")
 # TODO: Incorporate alts
-# TODO: Incorporate drawn images
-# TODO: If pokemon is fully unobtainable delete row? (ie shiny cosplay/cap pikachus)
-# TODO: Some gender differences, like Zubat (females have smaller fangs) aren't visible from back sprites, so male & female back sprites are the same
-# TODO: After bulba scrape and filter of back sprites
-    # Checking off of games in same generation must be rid of
-        # Since same-gen games can have different back sprites now
+# TODO: Incorporate drawn images (on a different sheet?)
+
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 game_sprite_files = os.listdir(game_sprite_path)
 for i in range(len(game_sprite_files)):
@@ -395,7 +380,7 @@ def check_for_game_difference(filename, game):
     if "-Region-Alola" in filename and (game == "SM-USUM" or game == "LGPE"):
         return (filename + "-" + game)
 
-    # NOTE: Be sure to add a back check in the conditional when adding different games
+    # TODO: Be sure to add a back check in the conditional when adding different games
     
     # If no game back differences, simply return the original filename
     return (filename)
@@ -439,7 +424,8 @@ for i in range(len(filenames)):
             for game in games_in_gen:
                 will_override = prevent_overriding(curr_file, game)
                 if will_override:
-                    potential_wrong_continues.append(curr_file)
+                    # NOTE: Most overrides were intentional, but still making note. Only use for debugging if neeeded (which shouldn't be)
+                    #potential_wrong_continues.append(curr_file)
                     continue
                 col = game_cols[game]
                 # Unobtainability checker
@@ -460,7 +446,8 @@ for i in range(len(filenames)):
                 if game in filegame:
                     will_override = prevent_overriding(curr_file, game)
                     if will_override:
-                        potential_wrong_continues.append(curr_file)
+                        # NOTE: Most overrides were intentional, but still making note. Only use for debugging if neeeded (which shouldn't be)
+                        #potential_wrong_continues.append(curr_file)
                         continue
                     col = game_cols[game]
                     # Unobtainability checker
@@ -477,14 +464,13 @@ for i in range(len(filenames)):
 
 print("Missing:", missing_count, "images")
 
-# TODO: This seems to take a while?
-for f in potential_wrong_continues:
-    # Excluding cosplay because the files ARE there, but they include SM-USUM in the name
-        # Instead of creating a XY-ORAS only tag and rewriting code
-        # The exclusion happens here. They are not continued for XY-ORAS, only SM-USUM for non-overwriting purposes of the unobtainability
-    if f in game_sprite_files and not "-Form-Cosplay" in f:
-        # TODO: This returns mostly gen7 pokes since LGPE (gen7 game) only has gen1 pokes and 808 & 809
-        print("WRONG CONTINUE FOR:\n", f)
+# NOTE: Most overrides were intentional, but still making note. Only use for debugging if neeeded (which shouldn't be)
+# for f in potential_wrong_continues:
+#     # Excluding cosplay because the files ARE there, but they include SM-USUM in the name
+#         # Instead of creating a XY-ORAS only tag and rewriting code
+#         # The exclusion happens here. They are not continued for XY-ORAS, only SM-USUM for non-overwriting purposes of the unobtainability
+#     if f in game_sprite_files and not "-Form-Cosplay" in f:
+#         print("WRONG CONTINUE FOR:\n", f)
 
 file_check_workbook.close()
 print("Done!")
