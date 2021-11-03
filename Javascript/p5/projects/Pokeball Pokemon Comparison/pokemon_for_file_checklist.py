@@ -2,11 +2,6 @@ import xlrd     # For reading excel workbook
 import xlsxwriter   # For writing new form rows
 import os   # To check for files
 
-# TODO: Nitpick fixes
-    # Deoxys forms game exlusive in gen 3
-    # Spiky-eared pichu for all gen 4
-    # Female backs that only have differences in the front
-
 # SPREADSHEET DATA
 pokemon_info = xlrd.open_workbook('C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Pokemon Info.xls')
 form_sheet = pokemon_info.sheet_by_name("Form Rows")
@@ -104,7 +99,11 @@ def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     # If filename is searching for megas outside of gen 6
     if "-Mega" in filename and file_gen != "Gen6":
         return True
+    # If looking for Galar variants before gen 8
+    if "-Region-Galar" in filename and file_gen < "Gen8":
+        return True
     # If filename is searching for regional variants before gen 7
+        # By default this will catch Region-Alola
     if "-Region" in filename and file_gen < "Gen7":
         return True
     # If filename is searching for gigantamax variants before gen 8
@@ -352,6 +351,10 @@ for i in range(len(form_pokedex)):
 print("Checking filenames against actual image files...")
 # TODO: Incorporate alts
 # TODO: Incorporate drawn images (on a different sheet?)
+# TODO: Nitpick fixes
+    # Deoxys forms game exlusive in gen 3
+    # Spiky-eared pichu for all gen 4
+    # Female backs that only have differences in the front
 
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 game_sprite_files = os.listdir(game_sprite_path)
