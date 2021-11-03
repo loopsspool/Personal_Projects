@@ -374,9 +374,9 @@ unobtainable_format = file_check_workbook.add_format({'align': 'center', 'bg_col
 missing_crystal_back_format = file_check_workbook.add_format({'align': 'center', 'bg_color': '#fcba03'})
 
 # This is to hardcode the game name in for sprites that have different backs between games within the same generation
-# Returns filename or array of filenames to be added to the list of filechecks
+    # Only for backs because front sprites have game in filename
 # NOTE: This temporarily removes Crystal back differences on spreadsheet until all info is gathered on gen1-4 back sprites
-def check_for_game_difference(filename, game):
+def check_for_back_game_difference(filename, game):
     # SM-USUM (3DS) sprites differ from LGPE (Switch) models
     # Regional variants not introduced until Gen7, so can't share with XY-ORAS (those sprites denoted as Gen6-7)
     # This is the only check needed since in LGPE you can only get the first 151 pokemon + 808 and 809
@@ -391,8 +391,10 @@ def check_for_game_difference(filename, game):
 def check_for_file(curr_file, game, row, col):
     global missing_count
 
-    # Checking for sprites that differ between games witin generation
-    curr_file = check_for_game_difference(curr_file, game)
+    # Checking for back sprites that differ between games witin generation
+    # Only for backs because front sprites have game in filename
+    if "Back" in curr_file:
+        curr_file = check_for_back_game_difference(curr_file, game)
     
     if curr_file in game_sprite_files:
         file_check_worksheet.write(row, col, "x", check_format)
