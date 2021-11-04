@@ -18,7 +18,6 @@ opener = urllib.request.URLopener()
 opener.addheader('User-Agent', 'Mozilla/5.0')
 
 def search_for_drawn_forms(pokemon):
-    # TODO: Add Reshiram & Zekrom Overdrives (denoted as -Activated)
     # Custom type forms
     # Pikachu Cosplay & Caps
     get_img_from_string(img, "^\d\d\dPikachu-Alola.png", drawn_save_path + save_name + "-Cap-Alola")
@@ -378,6 +377,11 @@ def search_for_drawn_forms(pokemon):
     get_img_from_string(img, "^\d\d\dCalyrex-Ice Rider.png", drawn_save_path + save_name + "-Ice_Rider")
     get_img_from_string(img, "^\d\d\dCalyrex-Shadow Rider.png", drawn_save_path + save_name + "-Shadow_Rider")
 
+    # Zekrom Overdrive
+    get_img_from_string(img, "^\d\d\dZekrom-Activated.png", drawn_save_path + save_name + "-Overdrive")
+    # Reshiram Overdrive
+    get_img_from_string(img, "^\d\d\dReshiram-Activated.png", drawn_save_path + save_name + "-Overdrive")
+
 
 def get_drawn_images(pokemon, img):
     # DRAWN IMAGES
@@ -504,7 +508,7 @@ def get_img_from_string(img, s, save_path):
         save_img = get_largest_png(img)
         print(img.attrs['alt'])
         print(s, " --- ", save_path)
-        # urllib.request.urlretrieve(save_img, save_path)
+        #filename, headers = opener.retrieve(save_img, save_path)
 
 # Determines if a pokemon can only be obtained in SM-USUM (so exclude XY-ORAS in filename)
 def sm_usum_exclusivity_test(poke_num, tags):
@@ -966,7 +970,6 @@ def form_translation(pokemon, computer_filename):
         bulba_code_form = check_for_form("-Form-Low_Key", "L", bulba_code_form, computer_filename)
 
     # Alcremie Creams & Sweets
-    # TODO: Test and see that it works okay (Maybe on existing files I have?)
     if pokemon.name == "Alcremie":
         # Gigantamax version doesn't show cream or sweets, so there's no point to go through them
         if "-Form-Gigantamax" in computer_filename:
@@ -983,6 +986,7 @@ def form_translation(pokemon, computer_filename):
                     for cream in creams:
                         if cream[0] in computer_filename:
                             bulba_code_form = cream[1] + sweet[1]
+                            break
 
     # Eiscue
     if pokemon.name == "Eiscue":
@@ -1309,8 +1313,6 @@ while True:
     #     break
 
     # Grabbing each individual pokemons archived image url
-    # TODO: I don't think this next line needs to be in a for loop... It's only getting one div
-        # When fixing using find(), not find_all()
     for list_div in curr_page_soup.find_all('div', {'class': 'mw-category-group'}):
         for poke in list_div.find_all('li'):
             # Skipping specific artwork I don't want
@@ -1358,8 +1360,7 @@ for i in range(len(pokemon_img_urls)):
         #print(img.attrs['alt'], "\n\n")
 
         
-        # TODO: Download box sprites too? For list images MS8 (last digit is gen)
-        # TODO: Possibly more animations?
+        # NOTE: Possibly more animations?
             # See: https://www.reddit.com/r/TheSilphRoad/comments/65q7us/reminder_pokemon_go_pokemon_models_are_from/
 
         # TODO: Make sure pokemon like flabebe with apostrophe over letter work okay
@@ -1373,19 +1374,9 @@ for i in range(len(pokemon_img_urls)):
         get_drawn_images(pokemon, img)
 
         # TODO: Download gen1 to gen4 back sprites into a seperate folder
-            # To run a different filtering script on those images (see below)
-                # back sprites differ by game, but changes on pokemon whether unique or recycled...
-                    # Run an identical check on other images from the generation to determine if they're the same
-                        # If they are all the same it can be a generational denoter
-                        # If they aren't, they'll have to be on a per game basis
-                    # open("image1.jpg","rb").read() == open("image2.jpg","rb").read()
-                        # The best thing to do here may be to send all the back sprites to another folder, then do processing on them there
-                            # This program works one image at a time and would be time-consuming to save the image, compare it to the next one or two, then delete it, etc
-                            # So just download ALL gen 1-4 back sprites, put them in this folder, and determine where the similarities and differences lie
 
         # TODO: If filename doesn't exist and its in bw2 (5b) or xy (6x)
             # Try 5b2 and 6o, respectively
-
     
 
 # TODO: For Diamond/Pearl, PLatinum, and HGSS check if it's animated
