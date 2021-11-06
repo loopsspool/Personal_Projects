@@ -11,6 +11,8 @@ import string # To access letters easily without having to type them myself in a
 
 # TODO: Tidy up this damn file... smh
 
+# NOTE: ALL DOWNLOADS MUST BE DONE IN THE FASHION BELOW
+    # Otherwise bulba has a check on if the site is being web scraped and it will block the download
 # This is to mask the fact I'm webscraping
     # To use, call
         # filename, headers = opener.retrieve(get_largest_png(img), gen8_menu_sprite_save_path + save_name)
@@ -440,8 +442,6 @@ def get_menu_sprites():
                 save_name = str(poke_num).zfill(3) + ' ' + poke_name + file_ext
                 if end_url == "Generation_VI_menu_sprites" and not os.path.exists(gen6_menu_sprite_save_path + save_name):
                     print("DNE")
-                    # TODO: ALL DOWNLOADS MUST BE DONE IN THE SAME FASHION AS THE BELOW
-                        # Otherwise bulba has a check on if the site is being web scraped and it will block the download
                     #filename, headers = opener.retrieve(get_largest_png(img), gen6_menu_sprite_save_path + save_name)
                 if end_url == "Generation_VIII_menu_sprites" and not os.path.exists(gen8_menu_sprite_save_path + save_name):
                     print("DNE")
@@ -619,10 +619,12 @@ def bulba_game_denoter_conversion(filename):
         return (" 4h")
     if "Platinum" in filename:
         return (" 4p")
-    # TODO: If this doesn't exist, try 5b2
+    # 5b2 is converted to 5b if the filename contains 5b2
+        # aka Gen5 Black2/White2 (in bulba) is converted to 5b where it will be deemed BW-B2W2 (in my files)
     if "BW-B2W2" in filename:
         return (" 5b")
-    # TODO: If this doesn't exist, try 6o
+    # 6o is converted to 6x if the filename contains 6o
+        # aka Gen6 ORAS (in bulba) is converted to 6x where it will be deemed XY-ORAS-SM-USUM (in my files)
     if "XY-ORAS" in filename:
         return (" 6x")
     if "SM-USUM" in filename:
@@ -687,7 +689,6 @@ def form_translation(pokemon, computer_filename):
 
     # Unown Characters
     # NOTE: Some gens, character is right after pokemon number but on other gens (see gen 4...) there is a hyphen -- UGH
-        # TODO: Because of this... Ought to have some sort of checker that can see what pokemon(/forms) were/werent downloaded
     if pokemon.name == "Unown":
         # Regular letters
         for letter in uppers:
@@ -789,9 +790,6 @@ def form_translation(pokemon, computer_filename):
 
     # Kyurem Fusions
     # NOTE: Overdrives were mislabelled as defaults, so I did these by hand
-    # TODO: Rename Kyurem in misc folder in sprite images and transfer them to regular folder
-        # Then run excel sheet again so it won't try to grab overdrive images
-        # TODO: First try to change to gifs from animated pngs so animated not showing in certain browsers isn't an issue
     
     # Keldeo
     if pokemon.name == "Keldeo":
@@ -1033,24 +1031,22 @@ def form_translation(pokemon, computer_filename):
 
     return(bulba_code_form)
 
+ no_bulba_forms = []
+# Pikachu World Cap
+no_bulba_forms.append("-Form-Cap-World")
+# Cosplay Pikachu
+no_bulba_forms.append("-Form-Cosplay")
+# Overdrive Reshiram, Zekrom, and Kyurem
+no_bulba_forms.append("Overdrive")
+# Marshadow Zenith
+no_bulba_forms.append("-Form-Zenith")
+# Urshifu Forms
+no_bulba_forms.extend(["-Form-Rapid_Strike", "-Form-Single_Strike"])
+# Dada Zarude
+no_bulba_forms.append("-Form-Dada")
+# Calyrex Riders
+no_bulba_forms.extend(["-Form-Shadow_Rider", "-Form-Ice_Rider"])
 def bulba_doesnt_have_this_form(filename):
-    no_bulba_forms = []
-
-    # Pikachu World Cap
-    no_bulba_forms.append("-Form-Cap-World")
-    # Cosplay Pikachu
-    no_bulba_forms.append("-Form-Cosplay")
-    # Overdrive Reshiram, Zekrom, and Kyurem
-    no_bulba_forms.append("Overdrive")
-    # Marshadow Zenith
-    no_bulba_forms.append("-Form-Zenith")
-    # Urshifu Forms
-    no_bulba_forms.extend(["-Form-Rapid_Strike", "-Form-Single_Strike"])
-    # Dada Zarude
-    no_bulba_forms.append("-Form-Dada")
-    # Calyrex Riders
-    no_bulba_forms.extend(["-Form-Shadow_Rider", "-Form-Ice_Rider"])
-
     for form in no_bulba_forms:
         if form in filename:
             return True
@@ -1340,20 +1336,15 @@ while True:
         print("Reached end of pokemon archive links.")
         break
 
-# If the file isn't in the dictionary
-def potentially_adapt_game_in_filename(filename, db):
-    if filename in db:
-        return (filename)
-    if not included:
-        if " 5b " in filename:
-            return 
+# If the file contains lateral generation changes (black to black2, xy to oras) change the filename to accomodate my script
+def potentially_adapt_game_in_filename(filename):
+    if " 5b2 " in filename:
+        return (filename.replace(" 5b2 ", " 5b "))
+    if " 6o " in filename:
+        return (filename.replace(" 6o ", " 6x "))
 
-
-imgs_still_missing = 0
-# TODO: Create dict checklist for each of the type of images you want
-    # When they're all fulfilled, break so unecessary image processing for each poke isn't occuring
-    # If end of page is reached and requirements aren't satisfied (ie Arceus), continue to next page of images
-#print(pokemon_img_urls)
+imgs_downloaded = 0
+imgs_still_missing = []
 print("Processing game sprite images...")
 for i in range(len(pokemon_img_urls)):
     # Getting relevant pokemon data
@@ -1361,14 +1352,23 @@ for i in range(len(pokemon_img_urls)):
     # Converting to dicts so I can search if an image name is in the dict using keyword in
     missing_imgs = dict(pokemon.missing_imgs)
     missing_gen1_thru_gen4_back_imgs = dict(pokemon.missing_gen1_thru_gen4_back_imgs)
-    print(pokemon.name)
+    print(pokemon.name, " has ", len(missing_imgs) + len(missing_gen1_thru_gen4_back_imgs), " missing images...")
+    # Fixing a bulba error here the adds a hyphen between unown number and form in gen4
+    if pokemon.name == "Unown":
+        for old_k, v in missing_imgs.items():
+            if "Gen4" in v:
+                new_k = old_k.replace(" 201", " 201-")
+                missing_imgs[new_k] = missing_imgs.pop(old_k)
+        for old_k, v in missing_gen1_thru_gen4_back_imgs.items():
+            if "Gen4" in v:
+                new_k = old_k.replace(" 201", " 201-")
+                missing_imgs[new_k] = missing_gen1_thru_gen4_back_imgs.pop(old_k)
 
     # For only doing certain pokemon
     # if pokemon.name != "Alcremie":
     #     continue
     # print("Got here")
 
-    # TODO: Test all this
     # Getting pokemon archived image page information
     curr_page = requests.get(starter_url + pokemon_img_urls[i])
     curr_page_soup = BeautifulSoup(curr_page.content, 'html.parser')
@@ -1395,32 +1395,69 @@ for i in range(len(pokemon_img_urls)):
             img_text_wo_file_ext = img_text[:len(img_text)-4]
             file_ext = img_text[len(img_text) - 4:]
             save_name = missing_imgs[img_text_wo_file_ext] + file_ext
-            # TODO: Change 5b to 5b2 and 6x to 6o if needed to grab those sprites
-                # I am confused... see potentially_adapt_game_in_filename()
-            # This tests for the file in missing images
-            in_missing_imgs = img_text_wo_file_ext in missing_imgs
+            # Change 5b to 5b2 and 6x to 6o if needed to grab those sprites
+            img_text_wo_file_ext = potentially_adapt_game_in_filename(img_text_wo_file_ext)
             
 
+            # All missing images
             if img_text_wo_file_ext in missing_imgs:
                 if "-Animated" in save_name:
                     if check_if_animated(get_largest_png(img)):
                         # filename, headers = opener.retrieve(get_largest_png(img), game_save_path + "animated_pngs_for_gifs\\pngs\\" + save_name)
                         # Removing missing image from list
                         dummy = missing_imgs.pop(img_text, None)
+                        imgs_downloaded += 1
+                        continue
                     else:
                         print(save_name, " was not animated... Skipped")
                         continue
-                    
+                else:
+                    # Making sure its NOT animated
+                    if not check_if_animated(get_largest_png(img)):
+                        # filename, headers = opener.retrieve(get_largest_png(img), game_save_path + "initial_downloads_for_border_removal\\" + save_name)
+                        # Removing missing image from list
+                        dummy = missing_imgs.pop(img_text, None)
+                        imgs_downloaded += 1
+                        continue
+                    else:
+                        # If it is animated, still download it with an obvious denoter to convert it to a static
+                        # filename, headers = opener.retrieve(get_largest_png(img), game_save_path + "initial_downloads_for_border_removal\\" + "TO_BE_CONVERTED_TO_STILL_" + save_name)
+                        # Removing missing image from list
+                        dummy = missing_imgs.pop(img_text, None)
+                        imgs_downloaded += 1
+                        continue
+                
+            # ONLY Gen1 thru Gen4 back sprites to test for difference
+            if img_text_wo_file_ext in missing_gen1_thru_gen4_back_imgs:
+                if "-Animated" in save_name:
+                    if check_if_animated(get_largest_png(img)):
+                        # filename, headers = opener.retrieve(get_largest_png(img), game_save_path + "back_imgs_to_be_filtered\\animated\\" + save_name)
+                        # Removing missing image from list
+                        dummy = missing_gen1_thru_gen4_back_imgs.pop(img_text, None)
+                        imgs_downloaded += 1
+                        continue
+                    else:
+                        print(save_name, " was not animated... Skipped")
+                        continue
+                else:
+                    # Making sure its NOT animated
+                    if not check_if_animated(get_largest_png(img)):
+                        # filename, headers = opener.retrieve(get_largest_png(img), game_save_path + "back_imgs_to_be_filtered\\static\\" + save_name)
+                        # Removing missing image from list
+                        dummy = missing_gen1_thru_gen4_back_imgs.pop(img_text, None)
+                        imgs_downloaded += 1
+                        continue
+                    else:
+                        # If it is animated, still download it with an obvious denoter to convert it to a still
+                        # filename, headers = opener.retrieve(get_largest_png(img), game_save_path + "back_imgs_to_be_filtered\\static\\" + "TO_BE_CONVERTED_TO_STILL_" + save_name)
+                        # Removing missing image from list
+                        dummy = missing_gen1_thru_gen4_back_imgs.pop(img_text, None)
+                        imgs_downloaded += 1
+                        continue
+
 
             # TODO: READ ALL TODOS BEFORE YOU RUN THIS -- SOME OF THEM ARE VERY IMPORTANT!!!
             # TODO: Before running, uncomment all filename, headers = opener.retrieve(get_largest_png(img), gen8_menu_sprite_save_path + save_name)
-
-            
-            # TODO: Download gen1 to gen4 back sprites into a seperate folder
-
-            # TODO: If filename doesn't exist and its in bw2 (5b) or xy (6x)
-                # Try 5b2 and 6o, respectively
-
 
         # Moving on to the next page
         try:
@@ -1437,19 +1474,13 @@ for i in range(len(pokemon_img_urls)):
             break
 
     # To see how many images I am still missing
-    imgs_still_missing += len(missing_gen1_thru_gen4_back_imgs) + len(missing_imgs)
+    for k,v in missing_imgs.items():
+        imgs_still_missing.append(v)
+    for k,v in missing_gen1_thru_gen4_back_imgs.items():
+        imgs_still_missing.append(v)
+
+for i in imgs_still_missing:
+    print(i)
+print (imgs_downloaded,  " images downloaded")
+print (len(imgs_still_missing),  " images still missing (see above)")
     
-
-# TODO: For Diamond/Pearl, PLatinum, and HGSS check if it's animated
-    # If not, open page and see if there's a file history denoted "animated" or "APNG"
-        # Or "This image is animated" or anipng
-# page = requests.get("https://archives.bulbagarden.net/wiki/File:Spr_4h_006_s.png")
-# page_soup = BeautifulSoup(page.content, 'html.parser')
-
-# # Get Largest Image possible
-# # Inside page
-# img_link = "https:" + get_largest_png(page_soup.find(class_ = "fullImageLink").img)
-# is_animated = check_if_animated(img_link)
-
-
-    #print(img.attrs['alt'])
