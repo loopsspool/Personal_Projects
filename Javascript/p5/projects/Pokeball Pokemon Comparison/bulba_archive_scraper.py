@@ -1272,9 +1272,9 @@ for row in range(2, pokemon_files_sheet.max_row):
                 actual_filename = filename[:3] + " " + poke_name + " " + gen + filename[gen_insert_index:]
                 if is_below_gen5:
                     actual_filename += "-" + game
-                    poke_obj.missing_gen1_thru_gen4_back_imgs.append((bulba_name, actual_filename))
+                    poke_obj.missing_gen1_thru_gen4_back_imgs.append((actual_filename, bulba_name))
                 else:
-                    poke_obj.missing_imgs.append((bulba_name, actual_filename))
+                    poke_obj.missing_imgs.append((actual_filename, bulba_name))
                 #print(actual_filename, "     changed to     ", bulba_name)
             else:
                 # Going +1 after the insert index because there's a space for non-back sprites
@@ -1286,7 +1286,7 @@ for row in range(2, pokemon_files_sheet.max_row):
                 gen_insert_index += 1
                 filename_w_gen = filename[:gen_insert_index] + gen_and_game + filename[gen_insert_index:]
                 bulba_name = determine_bulba_name(filename_w_gen, poke_obj)
-                poke_obj.missing_imgs.append((bulba_name, filename_w_gen))
+                poke_obj.missing_imgs.append((filename_w_gen, bulba_name))
                 
                 #print(filename_w_gen, "     changed to     ", bulba_name)
     # print(poke_obj.name)
@@ -1358,23 +1358,19 @@ for i in range(len(pokemon_img_urls)):
     # Getting relevant pokemon data
     pokemon = pokedex[i]
     # Converting to dicts so I can search if an image name is in the dict using keyword in
-    missing_imgs = dict(pokemon.missing_imgs)
-    missing_gen1_thru_gen4_back_imgs = dict(pokemon.missing_gen1_thru_gen4_back_imgs)
-    for item in pokemon.missing_imgs:
-        print(item)
-    for old_k, v in missing_imgs.items():
-        print(v)
+    missing_imgs = pokemon.missing_imgs
+    missing_gen1_thru_gen4_back_imgs = pokemon.missing_gen1_thru_gen4_back_imgs
+    for img in pokemon.missing_imgs:
+        print(img)
     print(pokemon.name, " has ", len(missing_imgs) + len(missing_gen1_thru_gen4_back_imgs), " missing images...")
     # Fixing a bulba error here the adds a hyphen between unown number and form in gen4
     if pokemon.name == "Unown":
-        for old_k, v in missing_imgs.items():
-            if "Gen4" in v:
-                new_k = old_k.replace(" 201", " 201-")
-                missing_imgs[new_k] = missing_imgs.pop(old_k)
-        for old_k, v in missing_gen1_thru_gen4_back_imgs.items():
-            if "Gen4" in v:
-                new_k = old_k.replace(" 201", " 201-")
-                missing_imgs[new_k] = missing_gen1_thru_gen4_back_imgs.pop(old_k)
+        for img in missing_imgs:
+            if "Gen4" in img[0]:
+                img[1] = img[1].replace(" 201", " 201-")
+        for img in missing_gen1_thru_gen4_back_imgs:
+            if "Gen4" in img[0]:
+                img[1] = img[1].replace(" 201", " 201-")
 
     # For only doing certain pokemon
     if pokemon.name != "Squirtle":
@@ -1412,10 +1408,26 @@ for i in range(len(pokemon_img_urls)):
             img_text_wo_file_ext = potentially_adapt_game_in_filename(img_text_wo_file_ext)
             
             print(img_text_wo_file_ext)
+            # TODO: Instead of converting the missing imgs lists to dicts, keep them lists
+                # instead of using in to check for a file in a dict, iterate through the list
+                    # And append matches as indices to another list
+                        # Use the length of this to determine how many times a for loop should go through and attempt the downloads
+                            # Using the indices for the filename and pop
+                                # Pop (or remove) will need to happen AFTER loop has gone through so removing the first index doesn't affect the next one
+                # This all only needs to happen for missing_imgs, as gen1_thru_4_backs don't have animations (back anis introduced in gen5)
+            # This is an unfortunate workaround that needs to happen
+                # The problem is, animated and stills use the same bulba_code_name
+                    # If the image is animated then I want to download the animated image, and a second one to take the first frame from
+            img_match_indices = []
+            for i, img in enumerate(missing_imgs):
+                if img[1] == img_text_wo_file_ext:
+                    img_match_indices.append(i)
             # All missing images
-            if img_text_wo_file_ext in missing_imgs:
+            for i in range(len(img_match_indices)):
                 print("missing")
-                save_name = missing_imgs[img_text_wo_file_ext] + file_ext
+                save_name = missing_imgs[img_match_indices[i]][0]
+                print(missing_imgs[img_match_indices[i]])
+                #save_name = missing_imgs[img_text_wo_file_ext] + file_ext
                 largest_img = get_largest_png(thumb)
                 if "-Animated" in save_name:
                     if check_if_animated(largest_img):
@@ -1450,6 +1462,7 @@ for i in range(len(pokemon_img_urls)):
                             imgs_downloaded += 1
                         continue
                 
+            # TODO: You can probably take out the animated portion of this since DOUBLE CHECK gen1 thru 4 back sprites can't have animations
             # ONLY Gen1 thru Gen4 back sprites to test for difference
             if img_text_wo_file_ext in missing_gen1_thru_gen4_back_imgs:
                 save_name = missing_gen1_thru_gen4_back_imgs[img_text_wo_file_ext] + file_ext
