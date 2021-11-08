@@ -1300,10 +1300,6 @@ pokemon_starter_page = requests.get("https://archives.bulbagarden.net/wiki/Categ
 pokemon_starter_page_soup = BeautifulSoup(pokemon_starter_page.content, 'html.parser')
 save_path_starter = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon"
 drawn_save_path = save_path_starter + "\\Drawn\\"
-game_save_path = save_path_starter + "\\Game Sprites\\"
-gen1_thru_4_backs_save_path = game_save_path + "\\missing_back_imgs_to_be_filtered\\"
-gen6_menu_sprite_save_path = save_path_starter + "\\Menu Sprites\\Gen6\\"
-gen8_menu_sprite_save_path = save_path_starter + "\\Menu Sprites\\Gen8\\"
 
 #get_menu_sprites()
 
@@ -1351,6 +1347,16 @@ def potentially_adapt_game_in_filename(filename):
         return (filename.replace(" 6o ", " 6x "))
     return(filename)
 
+game_save_path = save_path_starter + "\\Game Sprites\\"
+gen1_thru_4_backs_save_path = game_save_path + "\\missing_back_imgs_to_be_filtered\\"
+gen6_menu_sprite_save_path = save_path_starter + "\\Menu Sprites\\Gen6\\"
+gen8_menu_sprite_save_path = save_path_starter + "\\Menu Sprites\\Gen8\\"
+def ani_check_and_download(img, filename):
+    dl_destination = ""
+    if "-Back" in filename and ("Gen1" in filename or "Gen2" in filename or "Gen3" in filename or "Gen4" in filename):
+        dl_destination = gen1_thru_4_backs_save_path
+
+global imgs_downloaded
 imgs_downloaded = 0
 imgs_still_missing = []
 print("Processing game sprite images...")
@@ -1385,119 +1391,137 @@ for i in range(len(pokemon_img_urls)):
     theres_a_next_page = True
     theres_more_imgs = True
     while (theres_a_next_page and theres_more_imgs):
+        # Thumbs here refers to thumbnails FYI
         thumbs = curr_page_soup.find_all('div', 'thumb')
-        
-        # Downloading certain images
+        thumb_text = []
+        thumb_text_wo_file_ext = []
+        missing_imgs_that_exist = []
+
+        # Getting just the caption for each of the thumbnails
         for thumb in thumbs:
-            img_text = thumb.img['alt']
-            # Only run drawn images if it starts with 3 digits and then pokemon name
-            if re.search("^\d\d\d[a-zA-Z]", img_text) != None:
-                get_drawn_images(pokemon, thumb)
-            # Skipping image if it's not a sprite image
-            if not img_text.startswith("Spr"):
-                continue
-            # Goes to next pokemon if there's no more images to gather
-            if len(missing_imgs) == 0 and len(missing_gen1_thru_gen4_back_imgs) == 0:
-                # Necessary to break out of while loop
-                theres_more_imgs = False
-                break
-            
-            img_text_wo_file_ext = img_text[:len(img_text)-4]
-            file_ext = img_text[len(img_text) - 4:]
+            caption = thumb.img['alt']
             # Change 5b to 5b2 and 6x to 6o if needed to grab those sprites
-            img_text_wo_file_ext = potentially_adapt_game_in_filename(img_text_wo_file_ext)
+            caption = potentially_adapt_game_in_filename(caption)
+            thumb_text.append(caption)
+            thumb_text_wo_file_ext.append(caption[:len(caption)-4])
+
+        # Getting missing images
+        for missing in missing_imgs:
+            if missing[1] in thumb_text_wo_file_ext:
+                thumb_index = thumb_text_wo_file_ext.index(missing[1])
+                largest_img = get_largest_png(thumbs[thumb_index])
+                missing_imgs_that_exist.append((largest_img, missing[0]))
+        
+        # Getting missing back images
+        for missing_back in missing_gen1_thru_gen4_back_imgs:
+            if missing_back[1] in thumb_text_wo_file_ext:
+                thumb_index = thumb_text_wo_file_ext.index(missing_back[1])
+                largest_img = get_largest_png(thumbs[thumb_index])
+                missing_imgs_that_exist.append((largest_img, missing_back[0]))
+
+        # Getting Drawn
+        for i, caption in enumerate(thumb_text):
+            if re.search("^\d\d\d[a-zA-Z]", caption) != None:
+                get_drawn_images(pokemon, thumbs[i])
+
+        for existing_img in missing_imgs_that_exist:
+            ani_check_and_download(existing_img[0], existing_img[1])
+        print(missing_imgs_that_exist)
+
+
+        if len(missing_imgs) == 0 and len(missing_gen1_thru_gen4_back_imgs) == 0:
+            # Necessary to break out of while loop
+            theres_more_imgs = False
+            break
+
+        # # TODO: For speeds sake, why dont we look through thumbs for the missing images instead of the other way around?
+        # for thumb in thumbs:
+        #     img_text = thumb.img['alt']
+        #     # Only run drawn images if it starts with 3 digits and then pokemon name
+        #     if re.search("^\d\d\d[a-zA-Z]", img_text) != None:
+        #         get_drawn_images(pokemon, thumb)
+        #     # Skipping image if it's not a sprite image
+        #     if not img_text.startswith("Spr"):
+        #         continue
+        #     # Goes to next pokemon if there's no more images to gather
             
-            print(img_text_wo_file_ext)
-            # TODO: Instead of converting the missing imgs lists to dicts, keep them lists
-                # instead of using in to check for a file in a dict, iterate through the list
-                    # And append matches as indices to another list
-                        # Use the length of this to determine how many times a for loop should go through and attempt the downloads
-                            # Using the indices for the filename and pop
-                                # Pop (or remove) will need to happen AFTER loop has gone through so removing the first index doesn't affect the next one
-                # This all only needs to happen for missing_imgs, as gen1_thru_4_backs don't have animations (back anis introduced in gen5)
-            # This is an unfortunate workaround that needs to happen
-                # The problem is, animated and stills use the same bulba_code_name
-                    # If the image is animated then I want to download the animated image, and a second one to take the first frame from
-            img_match_indices = []
-            for i, img in enumerate(missing_imgs):
-                if img[1] == img_text_wo_file_ext:
-                    img_match_indices.append(i)
-            # All missing images
-            for i in range(len(img_match_indices)):
-                print("missing")
-                save_name = missing_imgs[img_match_indices[i]][0]
-                print(missing_imgs[img_match_indices[i]])
-                #save_name = missing_imgs[img_text_wo_file_ext] + file_ext
-                largest_img = get_largest_png(thumb)
-                if "-Animated" in save_name:
-                    if check_if_animated(largest_img):
-                        if not os.path.exists(game_save_path + "animated_pngs_for_gifs\\pngs\\" + save_name):
-                            print("Downloading ", save_name)
-                            filename, headers = opener.retrieve(largest_img, game_save_path + "animated_pngs_for_gifs\\pngs\\" + save_name)
-                            # Removing missing image from list
-                            dummy = missing_imgs.pop(img_text, None)
-                            imgs_downloaded += 1
-                        continue
-                    else:
-                        print(img_text_wo_file_ext, " was not animated... Skipped")
-                        continue
-                else:
-                    # Making sure its NOT animated
-                    if not check_if_animated(largest_img):
-                        print("not animated")
-                        if not os.path.exists(game_save_path + "initial_downloads_for_border_removal\\" + save_name):
-                            print("Downloading ", save_name)
-                            filename, headers = opener.retrieve(largest_img, game_save_path + "initial_downloads_for_border_removal\\" + save_name)
-                            # Removing missing image from list
-                            dummy = missing_imgs.pop(img_text, None)
-                            imgs_downloaded += 1
-                        continue
-                    else:
-                        if not os.path.exists(game_save_path + "initial_downloads_for_border_removal\\" + "TO_BE_CONVERTED_TO_STILL_" + save_name):
-                            print("Downloading ", save_name)
-                            # If it is animated, still download it with an obvious denoter to convert it to a static
-                            filename, headers = opener.retrieve(largest_img, game_save_path + "initial_downloads_for_border_removal\\" + "TO_BE_CONVERTED_TO_STILL_" + save_name)
-                            # Removing missing image from list
-                            dummy = missing_imgs.pop(img_text, None)
-                            imgs_downloaded += 1
-                        continue
+            
+        #     img_text_wo_file_ext = img_text[:len(img_text)-4]
+        #     file_ext = img_text[len(img_text) - 4:]
+            
+        #     img_text_wo_file_ext = potentially_adapt_game_in_filename(img_text_wo_file_ext)
+        #     largest_img = get_largest_png(thumb)
+            
+        #     print(img_text_wo_file_ext)
+
+        #     # This is an unfortunate workaround that needs to happen
+        #         # The problem is, animated and stills use the same bulba_code_name
+        #             # If the image is animated then I want to download the animated image, and a second one to take the first frame from
+        #     img_match_indices = []
+        #     for i, img in enumerate(missing_imgs):
+        #         if img[1] == img_text_wo_file_ext:
+        #             # False is an indicator if the image has been downloaded or not
+        #             img_match_indices.append((i, False))
+        #     # All missing images
+        #     for index in img_match_indices:
+        #         print("missing")
+        #         save_name = missing_imgs[index[0]][0] + file_ext
+        #         print(missing_imgs[index[0]])
+        #         #save_name = missing_imgs[img_text_wo_file_ext] + file_ext
                 
-            # TODO: You can probably take out the animated portion of this since DOUBLE CHECK gen1 thru 4 back sprites can't have animations
-            # ONLY Gen1 thru Gen4 back sprites to test for difference
-            if img_text_wo_file_ext in missing_gen1_thru_gen4_back_imgs:
-                save_name = missing_gen1_thru_gen4_back_imgs[img_text_wo_file_ext] + file_ext
-                largest_img = get_largest_png(thumb)
-                if "-Animated" in save_name:
-                    if check_if_animated(largest_img):
-                        if not os.path.exists(game_save_path + "back_imgs_to_be_filtered\\animated\\" + save_name):
-                            print("Downloading ", save_name)
-                            filename, headers = opener.retrieve(largest_img, game_save_path + "back_imgs_to_be_filtered\\animated\\" + save_name)
-                            # Removing missing image from list
-                            dummy = missing_gen1_thru_gen4_back_imgs.pop(img_text, None)
-                            imgs_downloaded += 1
-                        continue
-                    else:
-                        print(img_text_wo_file_ext, " was not animated... Skipped")
-                        continue
-                else:
-                    # Making sure its NOT animated
-                    if not check_if_animated(largest_img):
-                        if not os.path.exists(game_save_path + "back_imgs_to_be_filtered\\static\\" + save_name):
-                            print("Downloading ", save_name)
-                            filename, headers = opener.retrieve(largest_img, game_save_path + "back_imgs_to_be_filtered\\static\\" + save_name)
-                            # Removing missing image from list
-                            dummy = missing_gen1_thru_gen4_back_imgs.pop(img_text, None)
-                            imgs_downloaded += 1
-                        continue
-                    else:
-                        if not os.path.exists(game_save_path + "back_imgs_to_be_filtered\\static\\" + "TO_BE_CONVERTED_TO_STILL_" + save_name):
-                            print("Downloading ", save_name)
-                            # If it is animated, still download it with an obvious denoter to convert it to a still
-                            filename, headers = opener.retrieve(largest_img, game_save_path + "back_imgs_to_be_filtered\\static\\" + "TO_BE_CONVERTED_TO_STILL_" + save_name)
-                            # Removing missing image from list
-                            dummy = missing_gen1_thru_gen4_back_imgs.pop(img_text, None)
-                            imgs_downloaded += 1
-                        continue
+        #         if "-Animated" in save_name:
+        #             if check_if_animated(largest_img):
+        #                 if not os.path.exists(game_save_path + "animated_pngs_for_gifs\\pngs\\" + save_name):
+        #                     print("Downloading ", save_name)
+        #                     filename, headers = opener.retrieve(largest_img, game_save_path + "animated_pngs_for_gifs\\pngs\\" + save_name)
+        #                     # Setting downloaded boolean
+        #                     index = (index[0], True)
+        #                     imgs_downloaded += 1
+        #                 continue
+        #             else:
+        #                 print(img_text_wo_file_ext, " was not animated... Skipped")
+        #                 continue
+        #         else:
+        #             # Making sure its NOT animated
+        #             if not check_if_animated(largest_img):
+        #                 print("not animated")
+        #                 if not os.path.exists(game_save_path + "initial_downloads_for_border_removal\\" + save_name):
+        #                     print("Downloading ", save_name)
+        #                     filename, headers = opener.retrieve(largest_img, game_save_path + "initial_downloads_for_border_removal\\" + save_name)
+        #                     # Setting downloaded boolean
+        #                     index = (index[0], True)
+        #                     imgs_downloaded += 1
+        #                 continue
+        #             else:
+        #                 if not os.path.exists(game_save_path + "initial_downloads_for_border_removal\\" + "TO_BE_CONVERTED_TO_STILL_" + save_name):
+        #                     print("Downloading ", save_name)
+        #                     # If it is animated, still download it with an obvious denoter to convert it to a static
+        #                     filename, headers = opener.retrieve(largest_img, game_save_path + "initial_downloads_for_border_removal\\" + "TO_BE_CONVERTED_TO_STILL_" + save_name)
+        #                     # Setting downloaded boolean
+        #                     index = (index[0], True)
+        #                     imgs_downloaded += 1
+        #                 continue
+        #     # This must come after the for loop because deleting elements will affect the index number that has already been stored
+        #     if img_match_indices != []:
+        #         for index in img_match_indices:
+        #             # Downloaded indicator
+        #             if index[1] == True:
+        #                 del missing_imgs[index[0]]
+                
+        #     # ONLY Gen1 thru Gen4 back sprites to test for difference
+        #     for i, missing_back in enumerate(missing_gen1_thru_gen4_back_imgs):
+        #         if img_text_wo_file_ext == missing_back[1]:
+        #             save_name = missing_back[0] + file_ext
+                    
+        #             # Does not need an animated check since animated back sprites weren't added until gen5
+        #             if not os.path.exists(game_save_path + "back_imgs_to_be_filtered\\static\\" + save_name):
+        #                 print("Downloading ", save_name)
+        #                 filename, headers = opener.retrieve(largest_img, game_save_path + "back_imgs_to_be_filtered\\static\\" + save_name)
+        #                 # Removing missing image from list
+        #                     # Can delete here because only one image will match so deleting won't screw up indexing
+        #                 del missing_gen1_thru_gen4_back_imgs[i]
+        #                 imgs_downloaded += 1
+        #             break
 
 
             # TODO: Before running, uncomment all filename, headers = opener.retrieve(get_largest_png(img), gen8_menu_sprite_save_path + save_name)
