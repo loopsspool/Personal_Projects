@@ -20,7 +20,7 @@ import time
 opener = urllib.request.URLopener()
 opener.addheader('User-Agent', 'Mozilla/5.0')
 
-def search_for_drawn_forms(pokemon, thumb):
+def search_for_drawn_forms(pokemon, save_name, thumb):
     # Custom type forms
     # Pikachu Cosplay & Caps
     get_img_from_string(thumb, "^\d\d\dPikachu-Alola.png", drawn_save_path + save_name + "-Cap-Alola")
@@ -417,7 +417,7 @@ def get_drawn_images(pokemon, thumb):
             get_img_from_string(thumb, "^\d\d\d[a-zA-Z]-" + pokemon.reg_forms + ".png", drawn_save_path + save_name + "-Region-" + pokemon.reg_forms)
     # Other forms
     if pokemon.has_misc_forms or pokemon.has_type_forms:
-        search_for_drawn_forms(pokemon, thumb)
+        search_for_drawn_forms(pokemon, save_name, thumb)
 
 def get_menu_sprites():
     print("Getting Menu Sprites...")
@@ -1134,7 +1134,7 @@ def determine_bulba_name(computer_filename, pokemon):
 pokemon_after_limit = 15
 # This is so when I get kicked from the server I only have to write once where to pick up
 def only_get_on_and_after():
-    return ("Bulbasaur")
+    return ("Raticate")
     
 # Pokemon object
 class Pokemon:
@@ -1372,54 +1372,54 @@ def ani_check_and_download(img, filename):
     if "-Back" in filename and ("Gen1" in filename or "Gen2" in filename or "Gen3" in filename or "Gen4" in filename):
         dl_destination = gen1_thru_4_backs_save_path
 
-    # NOTE: To speed up, this get_largest_png call can be put after the check if the file already exists
-        # Difficulty is the download destination depends on the animated check, which should have the largest image
-        # I didn't bother because this program is rarely going to have to skip images... It's whole purpose is downloading images I'm missing
-            # Biggest thing it'll be skipping is animated photos that aren't animated, which won't be in the filepath anyways
-    img = get_largest_png(img)
-    file_ext = img[len(img)-4:]
+    file_ext = img.img['alt'][-4:]
     save_name = filename + file_ext
     if "-Animated" in save_name:
         dl_destination = game_save_path + "animated_pngs_for_gifs\\pngs\\"
-        if check_if_animated(img):
-            if not os.path.exists(dl_destination + save_name):
+        if not os.path.exists(dl_destination + save_name):
+            # NOTE: Keep this AFTER exist check, makes it run way quicker for skipping images
+            img = get_largest_png(img)
+            if check_if_animated(img):
                 print("Downloading ", save_name)
                 filename, headers = opener.retrieve(img, dl_destination + save_name)
                 print(save_name, img)
                 # Returning downloaded boolean
                 return True
             else:
-                print(save_name, " already exists")
+                print(save_name, " was not animated... Skipped")
                 return False
         else:
-            print(save_name, " was not animated... Skipped")
+            print(save_name, " already exists")
             return False
     else:
         # Don't override the gen1 thru 4 save path if that's present
         if not dl_destination == gen1_thru_4_backs_save_path:
             dl_destination = game_save_path + "initial_downloads_for_border_removal\\"
         # Making sure its NOT animated
-        if not check_if_animated(img):
-            if not os.path.exists(dl_destination + save_name):
+        if not os.path.exists(dl_destination + save_name):
+            # NOTE: Keep this AFTER exist check, makes it run way quicker for skipping images
+            img = get_largest_png(img)
+            if not check_if_animated(img):
                 print("Downloading ", save_name)
                 filename, headers = opener.retrieve(img, dl_destination + save_name)
                 print(save_name, img)
                 # Returning downloaded boolean
                 return True
             else:
-                print(save_name, " already exists")
-                return False
+                if not os.path.exists(dl_destination + "TO_BE_CONVERTED_TO_STILL_" + save_name):
+                    print("Downloading ", save_name)
+                    # If it is animated, still download it with an obvious denoter to convert it to a static
+                    filename, headers = opener.retrieve(img, dl_destination + "TO_BE_CONVERTED_TO_STILL_" + save_name)
+                    print(save_name, img)
+                    # Returning downloaded boolean
+                    return True
+                else:
+                    print(save_name, " already exists")
+                    return False
         else:
-            if not os.path.exists(dl_destination + "TO_BE_CONVERTED_TO_STILL_" + save_name):
-                print("Downloading ", save_name)
-                # If it is animated, still download it with an obvious denoter to convert it to a static
-                filename, headers = opener.retrieve(img, dl_destination + "TO_BE_CONVERTED_TO_STILL_" + save_name)
-                print(save_name, img)
-                # Returning downloaded boolean
-                return True
-            else:
-                print(save_name, " already exists")
-                return False
+            print(save_name, " already exists")
+            return False
+        
     
 # TODO: Before running, uncomment all filename, headers = opener.retrieve(get_largest_png(img), gen8_menu_sprite_save_path + save_name)
 global imgs_downloaded
@@ -1486,11 +1486,13 @@ for i in range(len(pokemon_img_urls)):
                 break
             theres_more_imgs = False
         if not theres_more_imgs:
+            print("No sprite files on this page. Moving to next pokemon...")
             break
 
         # Breaking the while loop if the pokemon already has all it's images
         if len(missing_imgs) == 0 and len(missing_gen1_thru_gen4_back_imgs) == 0:
             theres_more_imgs = False
+            print("No missing images for this pokemon. Continuing to next pokemon...")
             break
 
         # Getting missing images
