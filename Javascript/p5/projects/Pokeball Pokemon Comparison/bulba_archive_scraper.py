@@ -1130,6 +1130,8 @@ def determine_bulba_name(computer_filename, pokemon):
 
     return (bulba_name)
 
+# This is amount of pokemon to get info from after the starter pokemon
+pokemon_after_limit = 15
 # This is so when I get kicked from the server I only have to write once where to pick up
 def only_get_on_and_after():
     return ("Bulbasaur")
@@ -1194,6 +1196,7 @@ gen4_games = ["Platinum", "HGSS", "Diamond-Pearl"]
 gen_1_thru_4_games = [gen1_games, gen2_games, gen3_games, gen4_games]
 
 pokemon_not_reached_yet = True
+pokemon_after = 0
 # TODO: This function is stupid slow
 for row in range(2, pokemon_files_sheet.max_row):
     poke_num = int(cell_value(row, poke_num_col, pokemon_files_sheet))
@@ -1211,10 +1214,15 @@ for row in range(2, pokemon_files_sheet.max_row):
 
     # For only going after certain pokemon
         # If the server kicks me, this'll pick up my place
-    if poke_name != only_get_on_and_after() and pokemon_not_reached_yet:
+    if poke_name != only_get_on_and_after() and (pokemon_not_reached_yet or pokemon_after >= pokemon_after_limit):
         continue
     else:
         pokemon_not_reached_yet = False
+        # This is to speed up the file each time I have to run it because of a server boot
+        # Only goes n number after the starter poke
+        # Checking if the previous pokemon name was different than the last
+        if poke_name != cell_value(row-1, poke_name_col, pokemon_files_sheet):
+            pokemon_after += 1
 
     if bulba_doesnt_have_this_form(filename):
         continue
@@ -1418,6 +1426,7 @@ global imgs_downloaded
 imgs_downloaded = 0
 imgs_still_missing = []
 pokemon_not_reached_yet = True
+pokemon_after = 0
 print("Processing game sprite images...")
 for i in range(len(pokemon_img_urls)):
     # Getting relevant pokemon data
@@ -1436,10 +1445,13 @@ for i in range(len(pokemon_img_urls)):
 
     # For only going after certain pokemon
         # If the server kicks me, this'll pick up my place
-    if pokemon.name != only_get_on_and_after() and pokemon_not_reached_yet:
+    if pokemon.name != only_get_on_and_after() and (pokemon_not_reached_yet or pokemon_after >= pokemon_after_limit):
         continue
     else:
         pokemon_not_reached_yet = False
+        # This is to speed up the file each time I have to run it because of a server boot
+        # Only goes n number after the starter poke
+        pokemon_after += 1
 
     # Getting pokemon archived image page information
     curr_page = requests.get(starter_url + pokemon_img_urls[i])
