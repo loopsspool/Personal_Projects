@@ -387,7 +387,6 @@ def search_for_drawn_forms(pokemon, thumb):
     get_img_from_string(thumb, "^\d\d\dReshiram-Activated.png", drawn_save_path + save_name + "-Overdrive")
 
 
-# TODO: Drawn images is pulling a thumbnail image, significantly smaller than the fulll-sized photo... Maybe go into page for each and get full-size?
 def get_drawn_images(pokemon, thumb):
     # DRAWN IMAGES
     # Drawn standard
@@ -422,8 +421,6 @@ def get_drawn_images(pokemon, thumb):
 
 def get_menu_sprites():
     print("Getting Menu Sprites...")
-    # session = requests.Session()
-    # response = session.get(url, headers={'user-agent': 'Mozilla/5.0'})
 
     ms_end_urls = ["Generation_VI_menu_sprites", "Generation_VIII_menu_sprites"]
     for end_url in ms_end_urls:
@@ -1133,6 +1130,9 @@ def determine_bulba_name(computer_filename, pokemon):
 
     return (bulba_name)
 
+# This is so when I get kicked from the server I only have to write once where to pick up
+def only_get_on_and_after():
+    return ("Bulbasaur")
     
 # Pokemon object
 class Pokemon:
@@ -1193,6 +1193,7 @@ gen3_games = ["Ruby-Sapphire", "FireRed-LeafGreen", "Emerald"]
 gen4_games = ["Platinum", "HGSS", "Diamond-Pearl"]
 gen_1_thru_4_games = [gen1_games, gen2_games, gen3_games, gen4_games]
 
+pokemon_not_reached_yet = True
 # TODO: This function is stupid slow
 for row in range(2, pokemon_files_sheet.max_row):
     poke_num = int(cell_value(row, poke_num_col, pokemon_files_sheet))
@@ -1202,14 +1203,18 @@ for row in range(2, pokemon_files_sheet.max_row):
     for pokemon in pokedex:
         if pokemon.name == poke_name:
             poke_obj = pokemon
+            break
     tags = cell_value(row, tags_col, pokemon_files_sheet)
     if tags == None:
         tags = ""
     filename = cell_value(row, filename_col, pokemon_files_sheet)
 
-    # For only going up to select pokemon for testing
-    if poke_name != "Squirtle":
+    # For only going after certain pokemon
+        # If the server kicks me, this'll pick up my place
+    if poke_name != only_get_on_and_after() and pokemon_not_reached_yet:
         continue
+    else:
+        pokemon_not_reached_yet = False
 
     if bulba_doesnt_have_this_form(filename):
         continue
@@ -1218,19 +1223,27 @@ for row in range(2, pokemon_files_sheet.max_row):
         # Those sprites are being pulled seperately in the row only loop above
             # To be sifted through to see if they're different by game for the given pokemon
     is_below_gen5 = False
+    # This is to download anything from Sword and Shield
+        # Realized after bulba has higher quality gen8 models than wikidex
+    is_swsh = False
     # Only doing filename_col up because those are where the actual checks need to be made (missing for certain games)
         # And +1 at the end to be inclusive
     for col in range(filename_col + 1, pokemon_files_sheet.max_column + 1):
+        col_name = get_col_name(col, pokemon_files_sheet)
+
         # Triggers at Platinum because exxcel file is reverse chronological, so Plat is first gen 4 game hit
             # Every loop iteration after is_below_gen5 will be true
-        if cell_value(1, col, pokemon_files_sheet) == "Platinum":
+        if col_name == "Platinum":
             is_below_gen5 = True
+
+        if col_name == "Sword-Shield":
+            is_swsh = True
+        else:
+            is_swsh = False
         
         # If pokemon image is unavailable, continue
         if cell_value(row, col, pokemon_files_sheet) == "u":
             continue
-
-        col_name = get_col_name(col, pokemon_files_sheet)
 
         # If it's a back image from a pokemon between gen1 and gen4
             # Put all game images into special missing array
@@ -1238,7 +1251,7 @@ for row in range(2, pokemon_files_sheet.max_row):
                     # If there were, each file will be named differently
                     # Otherwise, they will all be lumped into a single gen# back img
         is_back_below_gen5 = is_below_gen5 and "-Back" in filename
-        if is_empty(row, col, pokemon_files_sheet) or is_back_below_gen5:
+        if is_empty(row, col, pokemon_files_sheet) or is_back_below_gen5 or is_swsh:
             gen_insert_index = filename.find(poke_name) + len(poke_name)
             gen_and_game = combine_gen_and_game(col_name, poke_num, tags)
             
@@ -1287,12 +1300,7 @@ for row in range(2, pokemon_files_sheet.max_row):
                 filename_w_gen = filename[:gen_insert_index] + gen_and_game + filename[gen_insert_index:]
                 bulba_name = determine_bulba_name(filename_w_gen, poke_obj)
                 poke_obj.missing_imgs.append((filename_w_gen, bulba_name))
-                
-                #print(filename_w_gen, "     changed to     ", bulba_name)
-    # print(poke_obj.name)
-    # for img in poke_obj.missing_imgs:
-    #     print(img)
-    # print("\n\n")
+
 
 # Origin page (list of pokes by national pokedex)
 starter_url = "https://archives.bulbagarden.net"
@@ -1325,7 +1333,6 @@ while True:
                 continue
             pokemon_img_urls.append(poke.a.get('href'))
 
-    # TODO: Remove this before running
     # Only gets first page of pokemon archive links
     #break
 
@@ -1360,7 +1367,7 @@ def ani_check_and_download(img, filename):
     # NOTE: To speed up, this get_largest_png call can be put after the check if the file already exists
         # Difficulty is the download destination depends on the animated check, which should have the largest image
         # I didn't bother because this program is rarely going to have to skip images... It's whole purpose is downloading images I'm missing
-            # Biggest thing it'll be skipping is animated photos that aren't animated
+            # Biggest thing it'll be skipping is animated photos that aren't animated, which won't be in the filepath anyways
     img = get_largest_png(img)
     file_ext = img[len(img)-4:]
     save_name = filename + file_ext
@@ -1410,6 +1417,7 @@ def ani_check_and_download(img, filename):
 global imgs_downloaded
 imgs_downloaded = 0
 imgs_still_missing = []
+pokemon_not_reached_yet = True
 print("Processing game sprite images...")
 for i in range(len(pokemon_img_urls)):
     # Getting relevant pokemon data
@@ -1426,10 +1434,12 @@ for i in range(len(pokemon_img_urls)):
             if "Gen4" in img[0]:
                 img[1] = img[1].replace(" 201", " 201-")
 
-    # For only doing certain pokemon
-    if pokemon.name != "Squirtle":
+    # For only going after certain pokemon
+        # If the server kicks me, this'll pick up my place
+    if pokemon.name != only_get_on_and_after() and pokemon_not_reached_yet:
         continue
-        #break
+    else:
+        pokemon_not_reached_yet = False
 
     # Getting pokemon archived image page information
     curr_page = requests.get(starter_url + pokemon_img_urls[i])
@@ -1464,6 +1474,11 @@ for i in range(len(pokemon_img_urls)):
                 break
             theres_more_imgs = False
         if not theres_more_imgs:
+            break
+
+        # Breaking the while loop if the pokemon already has all it's images
+        if len(missing_imgs) == 0 and len(missing_gen1_thru_gen4_back_imgs) == 0:
+            theres_more_imgs = False
             break
 
         # Getting missing images
