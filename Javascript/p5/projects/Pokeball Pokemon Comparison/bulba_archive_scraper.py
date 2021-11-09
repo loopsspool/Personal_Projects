@@ -1351,12 +1351,17 @@ def potentially_adapt_game_in_filename(filename):
     return(filename)
 
 
-gen1_thru_4_backs_save_path = game_save_path + "\\missing_back_imgs_to_be_filtered\\static\\"
+gen1_thru_4_backs_save_path = game_save_path + "\\back_imgs_to_be_filtered\\static\\"
 def ani_check_and_download(img, filename):
     dl_destination = ""
     if "-Back" in filename and ("Gen1" in filename or "Gen2" in filename or "Gen3" in filename or "Gen4" in filename):
         dl_destination = gen1_thru_4_backs_save_path
 
+    # NOTE: To speed up, this get_largest_png call can be put after the check if the file already exists
+        # Difficulty is the download destination depends on the animated check, which should have the largest image
+        # I didn't bother because this program is rarely going to have to skip images... It's whole purpose is downloading images I'm missing
+            # Biggest thing it'll be skipping is animated photos that aren't animated
+    img = get_largest_png(img)
     file_ext = img[len(img)-4:]
     save_name = filename + file_ext
     if "-Animated" in save_name:
@@ -1365,6 +1370,7 @@ def ani_check_and_download(img, filename):
             if not os.path.exists(dl_destination + save_name):
                 print("Downloading ", save_name)
                 filename, headers = opener.retrieve(img, dl_destination + save_name)
+                print(save_name, img)
                 # Returning downloaded boolean
                 return True
             else:
@@ -1378,10 +1384,11 @@ def ani_check_and_download(img, filename):
         if not dl_destination == gen1_thru_4_backs_save_path:
             dl_destination = game_save_path + "initial_downloads_for_border_removal\\"
         # Making sure its NOT animated
-        if not check_if_animated(largest_img):
+        if not check_if_animated(img):
             if not os.path.exists(dl_destination + save_name):
                 print("Downloading ", save_name)
-                filename, headers = opener.retrieve(largest_img, dl_destination + save_name)
+                filename, headers = opener.retrieve(img, dl_destination + save_name)
+                print(save_name, img)
                 # Returning downloaded boolean
                 return True
             else:
@@ -1391,7 +1398,8 @@ def ani_check_and_download(img, filename):
             if not os.path.exists(dl_destination + "TO_BE_CONVERTED_TO_STILL_" + save_name):
                 print("Downloading ", save_name)
                 # If it is animated, still download it with an obvious denoter to convert it to a static
-                filename, headers = opener.retrieve(largest_img, dl_destination + "TO_BE_CONVERTED_TO_STILL_" + save_name)
+                filename, headers = opener.retrieve(img, dl_destination + "TO_BE_CONVERTED_TO_STILL_" + save_name)
+                print(save_name, img)
                 # Returning downloaded boolean
                 return True
             else:
@@ -1406,11 +1414,8 @@ print("Processing game sprite images...")
 for i in range(len(pokemon_img_urls)):
     # Getting relevant pokemon data
     pokemon = pokedex[i]
-    # Converting to dicts so I can search if an image name is in the dict using keyword in
     missing_imgs = pokemon.missing_imgs
     missing_gen1_thru_gen4_back_imgs = pokemon.missing_gen1_thru_gen4_back_imgs
-    for img in pokemon.missing_imgs:
-        print(img)
     print(pokemon.name, " has ", len(missing_imgs) + len(missing_gen1_thru_gen4_back_imgs), " missing images...")
     # Fixing a bulba error here the adds a hyphen between unown number and form in gen4
     if pokemon.name == "Unown":
@@ -1425,7 +1430,6 @@ for i in range(len(pokemon_img_urls)):
     if pokemon.name != "Squirtle":
         continue
         #break
-    # print("Got here")
 
     # Getting pokemon archived image page information
     curr_page = requests.get(starter_url + pokemon_img_urls[i])
@@ -1453,42 +1457,44 @@ for i in range(len(pokemon_img_urls)):
             print("Captions array length not equal to image array length")
             break
 
+        # Breaking the while loop if there's no sprite images on the page
+        for txt in thumb_text_wo_file_ext:
+            if txt.startswith("Spr"):
+                theres_more_imgs = True
+                break
+            theres_more_imgs = False
+        if not theres_more_imgs:
+            break
+
         # Getting missing images
         for missing in missing_imgs:
             if missing[1] in thumb_text_wo_file_ext:
                 thumb_index = thumb_text_wo_file_ext.index(missing[1])
-                largest_img = get_largest_png(thumbs[thumb_index])
-                missing_imgs_that_exist.append((largest_img, missing[0]))
+                missing_imgs_that_exist.append((thumbs[thumb_index], missing[0]))
             else:
-                imgs_still_missing.append(missing)
+                if not missing in imgs_still_missing:
+                    imgs_still_missing.append(missing)
         
         # Getting missing back images
         for missing_back in missing_gen1_thru_gen4_back_imgs:
             if missing_back[1] in thumb_text_wo_file_ext:
                 thumb_index = thumb_text_wo_file_ext.index(missing_back[1])
-                largest_img = get_largest_png(thumbs[thumb_index])
-                missing_imgs_that_exist.append((largest_img, missing_back[0]))
+                missing_imgs_that_exist.append((thumbs[thumb_index], missing_back[0]))
             else:
-                imgs_still_missing.append(missing_back)
+                if not missing in imgs_still_missing:
+                    imgs_still_missing.append(missing_back)
 
         # Getting Drawn images
         for i, caption in enumerate(thumb_text):
             if re.search("^\d\d\d[a-zA-Z]", caption) != None:
                 get_drawn_images(pokemon, thumbs[i])
 
-        print(missing_imgs_that_exist)
         for existing_img in missing_imgs_that_exist:
             downloaded = ani_check_and_download(existing_img[0], existing_img[1])
             if downloaded:
                 imgs_downloaded += 1
             if not downloaded:
                 imgs_still_missing.append(existing_img[1])
-
-        # TODO: Check to see how much time this adds per page to see if it's worth the time to program this functionality in
-        if len(missing_imgs) == 0 and len(missing_gen1_thru_gen4_back_imgs) == 0:
-            # Necessary to break out of while loop
-            theres_more_imgs = False
-            break
 
         # Moving on to the next page
         try:
