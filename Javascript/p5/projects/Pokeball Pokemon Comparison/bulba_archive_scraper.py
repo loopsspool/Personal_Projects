@@ -172,7 +172,7 @@ def search_for_drawn_forms(pokemon, save_name, thumb):
             if form == "S":
                 form = "Shock_Drive"
             form = "-" + form
-            get_img_from_string(thumb, "^\d\d\dGenesect [a-zA-z] Dream.png", drawn_save_path + save_name + form)
+            get_img_from_string(thumb, "^\d\d\dGenesect [a-zA-z]+ Dream.png", drawn_save_path + save_name + form)
 
     # Ash Greninja
     get_img_from_string(thumb, "^\d\d\dGreninja-Ash.png", drawn_save_path + save_name + "-Ash")
@@ -386,7 +386,7 @@ def search_for_drawn_forms(pokemon, save_name, thumb):
     # Reshiram Overdrive
     get_img_from_string(thumb, "^\d\d\dReshiram-Activated.png", drawn_save_path + save_name + "-Overdrive")
 
-
+# TODO: Regional drawn forms not downloading, see persian, ninetails
 def get_drawn_images(pokemon, thumb):
     # DRAWN IMAGES
     # Drawn standard
@@ -401,20 +401,20 @@ def get_drawn_images(pokemon, thumb):
     # Drawn Mega
     if pokemon.has_mega:
         if pokemon.name == "Charizard" or pokemon.name == "Mewtwo":
-            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]-Mega X.png", drawn_save_path + save_name + "-Mega_X")
-            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]-Mega Y.png", drawn_save_path + save_name + "-Mega_Y")
+            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]+-Mega X.png", drawn_save_path + save_name + "-Mega_X")
+            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]+-Mega Y.png", drawn_save_path + save_name + "-Mega_Y")
         else:
-            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]-Mega.png", drawn_save_path + save_name + "-Mega")
+            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]+-Mega.png", drawn_save_path + save_name + "-Mega")
     # Gigantamax
     if pokemon.has_giganta:
-        get_img_from_string(thumb, "^\d\d\d[a-zA-Z]-Gigantamax.png", drawn_save_path + save_name + "-Gigantamax")
+        get_img_from_string(thumb, "^\d\d\d[a-zA-Z]+-Gigantamax.png", drawn_save_path + save_name + "-Gigantamax")
     # Regional forms
     if pokemon.reg_forms != "":
         if "," in pokemon.reg_forms:
-            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]-Alola.png", drawn_save_path + save_name + "-Region-Alola")
-            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]-Galar.png", drawn_save_path + save_name + "-Region-Galar")
+            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]+-Alola.png", drawn_save_path + save_name + "-Region-Alola")
+            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]+-Galar.png", drawn_save_path + save_name + "-Region-Galar")
         else:
-            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]-" + pokemon.reg_forms + ".png", drawn_save_path + save_name + "-Region-" + pokemon.reg_forms)
+            get_img_from_string(thumb, "^\d\d\d[a-zA-Z]+-" + pokemon.reg_forms + ".png", drawn_save_path + save_name + "-Region-" + pokemon.reg_forms)
     # Other forms
     if pokemon.has_misc_forms or pokemon.has_type_forms:
         search_for_drawn_forms(pokemon, save_name, thumb)
@@ -1134,7 +1134,7 @@ def determine_bulba_name(computer_filename, pokemon):
 pokemon_after_limit = 15
 # This is so when I get kicked from the server I only have to write once where to pick up
 def only_get_on_and_after():
-    return ("Raticate")
+    return ("Grimer")
     
 # Pokemon object
 class Pokemon:
@@ -1227,6 +1227,7 @@ for row in range(2, pokemon_files_sheet.max_row):
     if bulba_doesnt_have_this_form(filename):
         continue
 
+    # TODO: Should I skip gen1?
     # This is to track generations and skip if it's a back sprite below gen 5
         # Those sprites are being pulled seperately in the row only loop above
             # To be sifted through to see if they're different by game for the given pokemon
@@ -1372,6 +1373,8 @@ def ani_check_and_download(img, filename):
     if "-Back" in filename and ("Gen1" in filename or "Gen2" in filename or "Gen3" in filename or "Gen4" in filename):
         dl_destination = gen1_thru_4_backs_save_path
 
+    # TODO: Put the opener retrieve inside of a lock loop... that's why you get errors most often
+        # Trying to access the image too much in a short window (see stackoverflow)
     file_ext = img.img['alt'][-4:]
     save_name = filename + file_ext
     if "-Animated" in save_name:
