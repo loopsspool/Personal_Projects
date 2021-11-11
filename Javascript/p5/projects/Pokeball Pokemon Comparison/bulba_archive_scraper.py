@@ -1131,10 +1131,10 @@ def determine_bulba_name(computer_filename, pokemon):
     return (bulba_name)
 
 # This is amount of pokemon to get info from after the starter pokemon
-pokemon_after_limit = 15
+pokemon_after_limit = 200
 # This is so when I get kicked from the server I only have to write once where to pick up
 def only_get_on_and_after():
-    return ("Grimer")
+    return ("Tympole")
     
 # Pokemon object
 class Pokemon:
@@ -1441,10 +1441,10 @@ for i in range(len(pokemon_img_urls)):
     if pokemon.name == "Unown":
         for img in missing_imgs:
             if "Gen4" in img[0]:
-                img[1] = img[1].replace(" 201", " 201-")
+                img = (img[0], img[1].replace(" 201", " 201-"))
         for img in missing_gen1_thru_gen4_back_imgs:
             if "Gen4" in img[0]:
-                img[1] = img[1].replace(" 201", " 201-")
+                img = (img[0], img[1].replace(" 201", " 201-"))
 
     # For only going after certain pokemon
         # If the server kicks me, this'll pick up my place
@@ -1492,6 +1492,12 @@ for i in range(len(pokemon_img_urls)):
             print("No sprite files on this page. Moving to next pokemon...")
             break
 
+        # Getting Drawn images
+        # Keep this here before the break for missing sprites so I can still get the drawn form even if there's no missing sprites
+        for i, caption in enumerate(thumb_text):
+            if re.search("^\d\d\d[a-zA-Z]", caption) != None:
+                get_drawn_images(pokemon, thumbs[i])
+
         # Breaking the while loop if the pokemon already has all it's images
         if len(missing_imgs) == 0 and len(missing_gen1_thru_gen4_back_imgs) == 0:
             theres_more_imgs = False
@@ -1515,11 +1521,6 @@ for i in range(len(pokemon_img_urls)):
             else:
                 if not missing in imgs_still_missing:
                     imgs_still_missing.append(missing_back)
-
-        # Getting Drawn images
-        for i, caption in enumerate(thumb_text):
-            if re.search("^\d\d\d[a-zA-Z]", caption) != None:
-                get_drawn_images(pokemon, thumbs[i])
 
         for existing_img in missing_imgs_that_exist:
             downloaded = ani_check_and_download(existing_img[0], existing_img[1])
