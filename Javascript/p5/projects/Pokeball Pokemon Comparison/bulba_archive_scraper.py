@@ -11,6 +11,7 @@ import string # To access letters easily without having to type them myself in a
 import time
 
 # TODO: Tidy up this damn file... smh
+# TODO: Should probably also have a quick way to download drawn regional variants since they're likely to introduce more at some point
 
 # NOTE: ALL DOWNLOADS MUST BE DONE IN THE FASHION BELOW
     # Otherwise bulba has a check on if the site is being web scraped and it will block the download
@@ -40,7 +41,6 @@ def search_for_drawn_forms(pokemon, save_name, thumb):
     # Spiky-eared Pichu
     get_img_from_string(thumb, "Spiky-eared Pichu DP 1", drawn_save_path + save_name + "-Spiky_Eared")
 
-    thumbs[42].img["alt"]
     # Unown Characters
     if pokemon.name == "Unown":
         # Only drawn forms are dream versions
@@ -343,8 +343,8 @@ def search_for_drawn_forms(pokemon, save_name, thumb):
             img_url = img_url[len(img_url) - 1]
             # Splits by hyphen to get cream and sweet
             img_url = img_url.split("-")
-            cream = "-" + img_url[2]
-            sweet = "-" + img_url[3].replace(".png", "_Sweet")
+            cream = "-" + img_url[1]
+            sweet = "-" + img_url[2].replace(".png", "_Sweet")
             form = cream + sweet
             get_img_from_string(thumb, "^869Alcremie-[a-zA-Z]+ ", drawn_save_path + save_name + form)
 
@@ -386,7 +386,8 @@ def search_for_drawn_forms(pokemon, save_name, thumb):
     # Reshiram Overdrive
     get_img_from_string(thumb, "^\d\d\dReshiram-Activated.png", drawn_save_path + save_name + "-Overdrive")
 
-# TODO: Regional drawn forms not downloading, see persian, ninetails
+# TODO: Pokemon with hyphen, spaces, or numbers not downloading bc of regex
+    # Just add a special character/whitespace 0 or more occurances flag
 def get_drawn_images(pokemon, thumb):
     # DRAWN IMAGES
     # Drawn standard
@@ -1130,11 +1131,15 @@ def determine_bulba_name(computer_filename, pokemon):
 
     return (bulba_name)
 
+# TODO: This could be put in a text file, with all missing images too
+    # So I don't even have to write this after each crash
+        # Each new pokemon would rewrite the line of the file where it picked up
+        # And delete missing images that the script downloaded
 # This is amount of pokemon to get info from after the starter pokemon
 pokemon_after_limit = 200
 # This is so when I get kicked from the server I only have to write once where to pick up
 def only_get_on_and_after():
-    return ("Tympole")
+    return ("Eternatus")
     
 # Pokemon object
 class Pokemon:
@@ -1430,8 +1435,10 @@ imgs_downloaded = 0
 imgs_still_missing = []
 pokemon_not_reached_yet = True
 pokemon_after = 0
+number = 0
 print("Processing game sprite images...")
 for i in range(len(pokemon_img_urls)):
+    number += 1
     # Getting relevant pokemon data
     pokemon = pokedex[i]
     missing_imgs = pokemon.missing_imgs
@@ -1494,9 +1501,15 @@ for i in range(len(pokemon_img_urls)):
 
         # Getting Drawn images
         # Keep this here before the break for missing sprites so I can still get the drawn form even if there's no missing sprites
+        w_break = False
         for i, caption in enumerate(thumb_text):
             if re.search("^\d\d\d[a-zA-Z]", caption) != None:
                 get_drawn_images(pokemon, thumbs[i])
+            if caption.startswith("Spr"):
+                w_break = True
+                break
+        if w_break:
+            break
 
         # Breaking the while loop if the pokemon already has all it's images
         if len(missing_imgs) == 0 and len(missing_gen1_thru_gen4_back_imgs) == 0:
