@@ -8,6 +8,8 @@ apng_files = os.listdir(apng_path)
 gif_files = os.listdir(gif_path)
 
 for apng in apng_files:
+    if apng == "Converted to gif":
+        continue
     if apng not in gif_files:
         filename = apng[:-4]
         filename += ".gif"
