@@ -49,12 +49,12 @@ def game_finder_from_gen(gen):
     if gen == 7:
         return(["LGPE", "SM-USUM"])
     if gen == 8:
-        return(["Sword-Shield"])
+        return(["BDSP", "Sword-Shield"])
 
-is_available_in_gen_8 = {}
+is_available_in_swsh = {}
 for i in range(1, len(info_sheet.col(4))):
     # Pokemon name = is available in gen 8
-    is_available_in_gen_8[cell_value(info_sheet, i, 4)] = (cell_value(info_sheet, i, 15) == "x")
+    is_available_in_swsh[cell_value(info_sheet, i, 4)] = (cell_value(info_sheet, i, 15) == "x")
 
 # This is just to avoid using logic for finding what pokes are available in Lets Go lol
 poke_nums_available_in_LGPE = []
@@ -63,113 +63,117 @@ for i in range(1, 152):
     poke_nums_available_in_LGPE.append(str(i).zfill(3))
 poke_nums_available_in_LGPE.extend(["808", "809"])
 
+# Decided to do tuples here so it's easier to troubleshoot why something was considered unobtainable
+    # As oppsed to a bunch of print statements and seeing where it didn't print anymore bc of return
 def unobtainable_checker(filename, file_gen, poke_gen, poke_num, game):
     ###################     UNIVERSAL UNOBTAINABILITY     ###################
     # If filename is searching gens before pokemon was introduced
     if poke_gen > file_gen:
-        return True
+        return tuple((True, "Pokemon introduced after this gen"))
     # If pokemon isn't gen 1 or Meltan(808) or Melmetal(809) in Let's Go games
     if game == "LGPE":
         if not poke_num in poke_nums_available_in_LGPE:
-            return True
+            return tuple((True, "Not in Let's Go"))
+    # If any pokemon other than the original 493 in BDSP
+    if game == "BDSP" and int(poke_num) > 493:
+        return tuple((True, "Not in BDSP pokedex"))
     # If filename is searching for animations in games where there weren't any
     if "-Animated" in filename:
         # Animated Back sprites before gen 5
         if "-Back" in filename and file_gen < "Gen5":
-            return True
+            return tuple((True, "No animated back sprites before Gen 5"))
         # No animated sprites in gen 1
         if file_gen == "Gen1":
-            return True
+            return tuple((True, "No animated sprites in Gen 1"))
         # No animated sprites in these games
         # Gen before game checked because stuff like "Gold" is in "Golduck"s name, etc
         no_animation_games = ["Gold", "Silver", "FireRed-LeafGreen", "Ruby-Sapphire"]
         for g in no_animation_games:
             s = file_gen + " " + g
             if s in filename:
-                return True
+                return tuple((True, "No animated sprites in GS, FRLG, or RS"))
     # If searching for a fairy type before gen6
     if "-Form-Fairy" in filename and file_gen < "Gen6":
-        return True
+        return tuple((True, "No fairy types before Gen 6"))
     # If filename is searching for shinies in gen1
     if "-Shiny" in filename and file_gen == "Gen1":
-        return True
+        return tuple((True, "No shinies in Gen 1"))
     # If filename is searching for females before gen4
     if "-f" in filename and file_gen < "Gen4":
-        return True
+        return tuple((True, "No female forms before Gen 4"))
     # If filename is searching for megas outside of gen 6
     if "-Mega" in filename and file_gen != "Gen6":
-        return True
+        return tuple((True, "No mega forms outside Gen 6"))
     # If looking for Galar variants before gen 8
     if "-Region-Galar" in filename and file_gen < "Gen8":
-        return True
+        return tuple((True, "No Galar forms before Gen 8"))
     # If filename is searching for regional variants before gen 7
         # By default this will catch Region-Alola
     if "-Region" in filename and file_gen < "Gen7":
-        return True
-    # If filename is searching for gigantamax variants before gen 8
-    if "-Gigantamax" in filename and file_gen < "Gen8":
-        return True
+        return tuple((True, "No regional forms before Gen 7"))
+    if "-Gigantamax" in filename and game != "Sword-Shield":
+        return tuple((True, "No gigantamax outside of SwSh"))
 
     ###################     INDIVIDUAL POKEMON     ###################
     # Pikachu Cosplay outside of Gen6
     if "-Form-Cosplay" in filename and file_gen != "Gen6":
-        return True
+        return tuple((True, "No pikachu cosplay outside Gen 6"))
     # Can't be shiny either
     if "-Form-Cosplay" in filename and "Shiny" in filename:
-        return True
+        return tuple((True, "No shiny pikachu cosplay"))
     # Pikachu Hat before Gen7
     if "-Form-Cap" in filename and file_gen < "Gen7":
-        return True
+        return tuple((True, "No pikachu cap below Gen 7"))
     # Pikachu cap in LGPE
-    if "-Form-Cap" in filename and game == "LGPE":
-        return True
+    if "-Form-Cap" in filename and (game == "LGPE" or game == "BDSP"):
+        return tuple((True, "No pikachu cap in LGPE or BDSP"))
     # Can't be shiny either
     if "-Form-Cap" in filename and "Shiny" in filename:
-        return True
+        return tuple((True, "No shiny pikachu cap"))
     # And World Cap only in Sword-Shield
     if "-Form-Cap-World" in filename and file_gen < "Gen8":
-        return True
+        return tuple((True, "No pikachu world cap below Gen 8"))
     # Unown punctuation before gen 3
     if "201" in filename and ("!" in filename or "Qmark" in filename) and file_gen < "Gen3":
-        return True
+        return tuple((True, "No Unown ! or ? below Gen 3"))
     # Spiky-Eared Pichu outside of gen 4
     if "-Form-Spiky_Eared" in filename and file_gen != "Gen4":
-        return True
+        return tuple((True, "No spiky-eared Pichu outside Gen 4"))
     # Primal Kyogre & Groudon outside of gen 6 & 7
     if "-Primal" in filename and file_gen != "Gen6" and file_gen != "Gen7":
-        return True
+        return tuple((True, "No Primal Groudon or Kyogre outside Gens 6 & 7"))
     # Rotom Forms only available from Platinum on
     if "Rotom" in filename and "Form" in filename and "Diamond-Pearl" in filename:
-        return True
+        return tuple((True, "No Rotom forms before Platinum"))
     # Origin Giratina form only available from Platinum on
     if "Giratina" in filename and "-Form-Origin" in filename and "Diamond-Pearl" in filename:
-        return True
+        return tuple((True, "No Giratina forms before Platinum"))
     # Sky Form Shaymin form only available from Platinum on
     if "Shaymin" in filename and "-Form-Sky" in filename and "Diamond-Pearl" in filename:
-        return True
+        return tuple((True, "No Shaymin forms before Platinum"))
     # ??? Form for Arceus not available after gen4
     if "Arceus" in filename and "Qmark" in filename and file_gen > "Gen4":
-        return True
+        return tuple((True, "??? Type Arceus only available in Gen4"))
     # Ash-Greninja only in SM-USUM
     if "-Form-Ash" in filename and file_gen < "Gen7":
-        return True
+        return tuple((True, "Ash Greninja not available before Gen 7"))
     # 10% and complete Zygarde forms only available in SM
     if ("10%" in filename or "Complete" in filename) and file_gen < "Gen7":
-        return True
+        return tuple((True, "Zygarde 10 percent and Complete forms not available before Gen 7"))
     # Meltan & Melmetal only available in LGPE and above
     if ("Meltan" in filename or "Melmetal" in filename) and game == "SM-USUM":
-        return True
+        return tuple((True, "Meltan and Melmetal only available from LGPE on"))
     
-    # Checking if pokemon is available in gen8
-    if file_gen == "Gen8":
-        for poke, avail in is_available_in_gen_8.items():
+    # Checking if pokemon is available in SwSh
+    if game == "Sword-Shield":
+        for poke, avail in is_available_in_swsh.items():
             # Adding a space after for pokes like Porygon, whose evolutions contain the name Porygon also
             poke_check = poke + " "
             if poke_check in filename:
                 if avail == False:
-                    return True
+                    return tuple((True, "Pokemon not in SwSh pokeDex"))
 
-    return False
+    return tuple((False, "Pokemon is obtainable"))
     
 def prevent_overriding(filename, game):
     # The unobtainability check was blocking all Alolan Regions in the spreadsheeet
@@ -253,7 +257,7 @@ file_check_worksheet.write(0, 2, "Tags")
 file_check_worksheet.write(0, 3, "Filename")
 # Games sorted by reverse chronological order for file sorting synchronization between excel and files
     # Also starting with newest game first so excel file doesn't look barren upon opening
-games = ["Sword-Shield", "LGPE", "SM-USUM", "XY-ORAS", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FireRed-LeafGreen", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
+games = ["BDSP", "Sword-Shield", "LGPE", "SM-USUM", "XY-ORAS", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FireRed-LeafGreen", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
 game_cols = {}
 for i in range(len(games)):
     # Saving game columns
@@ -355,6 +359,9 @@ print("Checking filenames against actual image files...")
     # Deoxys forms game exlusive in gen 3
     # Spiky-eared pichu for all gen 4
     # Female backs that only have differences in the front
+# TODO: 201 Unown in FRLG uses RS sprites
+# TODO: If platinum animated is missing, but diamond and pearl are there, check off platinum
+# TODO: Total missing is incorrect! Refer to missing_imgs_info.py for accurate total
 
 game_sprite_path = "C:\\Users\\ejone\\OneDrive\\Desktop\\Code\\Javascript\\p5\\projects\\Pokeball Pokemon Comparison\\Images\\Pokemon\\Game Sprites\\"
 game_sprite_files = os.listdir(game_sprite_path)
@@ -363,7 +370,7 @@ for i in range(len(game_sprite_files)):
     game_sprite_files[i] = game_sprite_files[i][:len(game_sprite_files[i])-4]
 
 # games = ["Sword-Shield", "SM-USUM", "XY-ORAS", "BW-B2W2", "Platinum", "HGSS", "Diamond-Pearl", "Ruby-Sapphire", "FireRed-LeafGreen", "Emerald", "Silver", "Gold", "Crystal", "Yellow", "Red-Green", "Red-Blue"]
-game_denotions = ["Gen8 Sword-Shield", "Gen7 LGPE", "Gen7 SM-USUM", "Gen6-7 XY-ORAS-SM-USUM", "Gen5 BW-B2W2", "Gen4 Platinum", "Gen4 HGSS", "Gen4 Diamond-Pearl", "Gen3 Ruby-Sapphire", "Gen3 FireRed-LeafGreen", "Gen3 Emerald", "Gen2 Silver", "Gen2 Gold", "Gen2 Crystal", "Gen1 Yellow", "Gen1 Red-Green", "Gen1 Red-Blue"]
+game_denotions = ["Gen8 BDSP", "Gen8 Sword-Shield", "Gen7 LGPE", "Gen7 SM-USUM", "Gen6-7 XY-ORAS-SM-USUM", "Gen5 BW-B2W2", "Gen4 Platinum", "Gen4 HGSS", "Gen4 Diamond-Pearl", "Gen3 Ruby-Sapphire", "Gen3 FireRed-LeafGreen", "Gen3 Emerald", "Gen2 Silver", "Gen2 Gold", "Gen2 Crystal", "Gen1 Yellow", "Gen1 Red-Green", "Gen1 Red-Blue"]
 back_gen_denotions = ["Gen8", "Gen7", "Gen6-7", "Gen5", "Gen4", "Gen3", "Gen2", "Gen1"]
 
 # Centers "x" in cell and makes fill color green
@@ -435,7 +442,7 @@ for i in range(len(filenames)):
                 col = game_cols[game]
                 # Unobtainability checker
                 is_unobtainable = unobtainable_checker(curr_file, gen[:4], poke_gen, poke_num, game)
-                if is_unobtainable:
+                if is_unobtainable[0]:
                     potential_wrong_continues.append(curr_file)
                     file_check_worksheet.write(row, col, "u", unobtainable_format)
                     continue
@@ -457,7 +464,7 @@ for i in range(len(filenames)):
                     col = game_cols[game]
                     # Unobtainability checker
                     is_unobtainable = unobtainable_checker(curr_file, filegame[:4], poke_gen, poke_num, game)
-                    if is_unobtainable:
+                    if is_unobtainable[0]:
                         potential_wrong_continues.append(curr_file)
                         file_check_worksheet.write(row, col, "u", unobtainable_format)
                         continue
@@ -467,6 +474,7 @@ for i in range(len(filenames)):
             # print(curr_file)
     row += 1
 
+# TODO: Missing count is wrong
 print("Missing:", missing_count, "images")
 
 # NOTE: Most overrides were intentional, but still making note. Only use for debugging if neeeded (which shouldn't be)
